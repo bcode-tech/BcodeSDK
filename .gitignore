@@ -1,0 +1,10 @@
+# The `npm run build` command writes to this folder
+# You can also choose to include those into git to have
+# a better reference for changes
+
+dist
+
+# This is the usual stuff that gets excluded
+
+.DS_Store
+node_modules
