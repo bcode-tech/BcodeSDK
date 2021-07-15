@@ -9,7 +9,10 @@ import { ERROR_TYPE } from "./common/constants";
 
 import config from "../config.json";
 
-type Configuration = { env?: "LOCAL" | "DEV" | "PROD" };
+type Configuration = {
+  env?: "LOCAL" | "DEV" | "PROD";
+  network: "MUMBAI" | "LOCAL";
+};
 
 type SdkOptions = {
   apiKey: string;
@@ -23,16 +26,20 @@ export default class PablockSDK {
   provider?: any;
   authToken?: string;
   env: string;
+  network: string;
 
   constructor(sdkOptions: SdkOptions) {
     this.apiKey = sdkOptions.apiKey;
+
     this.env = sdkOptions.config?.env || "LOCAL";
+
+    this.network = sdkOptions.config?.network || "MUMBAI";
 
     if (sdkOptions.privateKey) {
       this.wallet = new ethers.Wallet(sdkOptions.privateKey);
 
       this.provider = new ethers.providers.JsonRpcProvider(
-        config[`RPC_PROVIDER_${this.env}`]
+        config[`RPC_PROVIDER_${this.network}`]
       );
     } else {
       this.wallet = ethers.Wallet.createRandom();
@@ -42,7 +49,7 @@ export default class PablockSDK {
   async init() {
     try {
       let { status, data } = await axios.get(
-        `${config[`ENDPOINT_${this.env}`]}generateJWT/${this.apiKey}`
+        `${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}`
       );
 
       if (status === 200) {
@@ -109,12 +116,12 @@ export default class PablockSDK {
       deadline,
       v,
       r,
-      s,
-      { gasLimit: 300000, gasPrice: 1000000000 }
+      s
     );
 
     let { status, data } = await axios.post(
-      `${config[`ENDPOINT_${this.env}`]}/sendToken`,
+      // `${config[`ENDPOINT_${this.env}`]}/sendToken`,
+      "http://127.0.0.1:8082/sendPermit",
       { tx, contractAddress, address: this.wallet.address },
       {
         headers: {

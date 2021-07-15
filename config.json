@@ -1,5 +1,8 @@
 {
-  "ENDPOINT_LOCAL": "http://127.0.0.1:8082/",
-  "ENDPOINT_DEV": "http://127.0.0.1:8082/",
-  "ENDPOINT_PROD": "http://127.0.0.1:8082/"
+  "ENDPOINT_LOCAL": "http://127.0.0.1:8082",
+  "ENDPOINT_DEV": "http://127.0.0.1:8082",
+  "ENDPOINT_PROD": "http://127.0.0.1:8082",
+
+  "RPC_PROVIDER_LOCAL": "http://127.0.0.1:7545",
+  "RPC_PROVIDER_MUMBAI": "https://polygon-mumbai.infura.io/v3/98084ec8ac4d49e181f0ffc83562f6f6"
 }

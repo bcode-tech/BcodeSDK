@@ -557,35 +557,35 @@ const ERROR_TYPE = {
   API_KEY_NOT_AUTHENTICATED: "API Key not authenticated"
 };
 
-var ENDPOINT_LOCAL="http://127.0.0.1:8082/";var ENDPOINT_DEV="http://127.0.0.1:8082/";var ENDPOINT_PROD="http://127.0.0.1:8082/";var config = {ENDPOINT_LOCAL:ENDPOINT_LOCAL,ENDPOINT_DEV:ENDPOINT_DEV,ENDPOINT_PROD:ENDPOINT_PROD};
+var ENDPOINT_LOCAL="http://127.0.0.1:8082";var ENDPOINT_DEV="http://127.0.0.1:8082";var ENDPOINT_PROD="http://127.0.0.1:8082";var RPC_PROVIDER_LOCAL="http://127.0.0.1:7545";var RPC_PROVIDER_MUMBAI="https://polygon-mumbai.infura.io/v3/98084ec8ac4d49e181f0ffc83562f6f6";var config = {ENDPOINT_LOCAL:ENDPOINT_LOCAL,ENDPOINT_DEV:ENDPOINT_DEV,ENDPOINT_PROD:ENDPOINT_PROD,RPC_PROVIDER_LOCAL:RPC_PROVIDER_LOCAL,RPC_PROVIDER_MUMBAI:RPC_PROVIDER_MUMBAI};
 
 class PablockSDK {
   constructor(sdkOptions) {
-    console.log(config["ENDPOINT_DEV"]);
     this.apiKey = sdkOptions.apiKey;
     this.env = sdkOptions.config?.env || "LOCAL";
+    this.network = sdkOptions.config?.network || "MUMBAI";
     if (sdkOptions.privateKey) {
       this.wallet = new ethers.Wallet(sdkOptions.privateKey);
-      this.provider = new ethers.providers.JsonRpcProvider(config[`RPC_PROVIDER_${this.env}`]);
+      this.provider = new ethers.providers.JsonRpcProvider(config[`RPC_PROVIDER_${this.network}`]);
     } else {
       this.wallet = ethers.Wallet.createRandom();
     }
   }
   async init() {
     try {
-      let { status, data } = await axios.get(`${config[`ENDPOINT_${this.env}`]}generateJWT/${this.apiKey}`);
+      let { status, data } = await axios.get(`${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}`);
       if (status === 200) {
         this.authToken = data.authToken;
       } else {
         throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
       }
     } catch (error) {
-      console.log(error);
       throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
     }
   }
   getAuthToken() {
     console.log("AUTH TOKEN ==>", this.authToken);
+    return this.authToken;
   }
   getApiKey() {
     console.log("API KEY ==>", this.apiKey);
@@ -600,12 +600,14 @@ class PablockSDK {
     const nonce = parseInt((await customERC20.nonces(approve.owner)).toString());
     const digest = getPermitDigest(await customERC20.name(), customERC20.address, parseInt(await customERC20.getChainId()), approve, nonce, deadline);
     const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
-    const tx = await customERC20.populateTransaction.permit(approve.owner, approve.spender, approve.value, deadline, v, r, s, { gasLimit: 3e5, gasPrice: 1e9 });
-    let { status, data } = await axios.post(`${config2[`ENDPOINT_${this.env}`]}/sendToken`, { tx, contractAddress, address: this.wallet.address }, {
+    const tx = await customERC20.populateTransaction.permit(approve.owner, approve.spender, approve.value, deadline, v, r, s);
+    console.log("CONFIG ==>", config2);
+    let { status, data } = await axios.post("http://127.0.0.1:8082/sendPermit", { tx, contractAddress, address: this.wallet.address }, {
       headers: {
         Authorization: `Bearer ${this.authToken}`
       }
     });
+    console.log(data);
     return data;
   }
   async requestToken(contractAddress, to, amount) {

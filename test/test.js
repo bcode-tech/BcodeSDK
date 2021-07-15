@@ -1,13 +1,17 @@
+const { ethers } = require("ethers");
 const PablockSDK = require("../build");
 
-(async () => {
-  const sdk = new PablockSDK({
-    apiKey: "xdx",
-    privateKey:
-      "0xfc0846a4e1d827c9c7a1fd8f255074d01bb019760a2065e0756b578dde00ecf1",
-  });
+const axios = require("axios");
 
-  await sdk.init();
+(async () => {
+  // const sdk = new PablockSDK({
+  //   apiKey: "xdx",
+  //   privateKey:
+  //     "0xfc0846a4e1d827c9c7a1fd8f255074d01bb019760a2065e0756b578dde00ecf1",
+  //   config: { network: "LOCAL" },
+  // });
+
+  // await sdk.init();
 
   // await sdk.sendToken(
   //   "0x0932a1D86dea2e3C235a192c918bf3f14B12303b",
@@ -21,4 +25,14 @@ const PablockSDK = require("../build");
   //   "0x5d1305A4EEE866c6b3C3Cf25ad70392b6459f2cD",
   //   10
   // );
+
+  const { data } = await axios.get("http://127.0.0.1:8082/generateJWT/prova");
+
+  const response = await axios.get(
+    "http://127.0.0.1:8082/generateSubJWT",
+    // { id: "pincopallino", apiKey: "prova" },
+    { headers: { Authorization: `Bearer ${data.authToken}` } }
+  );
+
+  console.log(response);
 })();
