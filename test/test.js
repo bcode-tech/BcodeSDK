@@ -4,14 +4,14 @@ const PablockSDK = require("../build");
 const axios = require("axios");
 
 (async () => {
-  // const sdk = new PablockSDK({
-  //   apiKey: "xdx",
-  //   privateKey:
-  //     "0xfc0846a4e1d827c9c7a1fd8f255074d01bb019760a2065e0756b578dde00ecf1",
-  //   config: { network: "LOCAL" },
-  // });
+  const sdk = new PablockSDK({
+    apiKey: "xdx",
+    privateKey:
+      "0xfc0846a4e1d827c9c7a1fd8f255074d01bb019760a2065e0756b578dde00ecf1",
+    config: { network: "LOCAL" },
+  });
 
-  // await sdk.init();
+  await sdk.init();
 
   // await sdk.sendToken(
   //   "0x0932a1D86dea2e3C235a192c918bf3f14B12303b",
@@ -26,13 +26,13 @@ const axios = require("axios");
   //   10
   // );
 
-  const { data } = await axios.get("http://127.0.0.1:8082/generateJWT/prova");
+  // const { data } = await axios.get("http://127.0.0.1:8082/generateJWT/prova");
 
-  const response = await axios.get(
-    "http://127.0.0.1:8082/generateSubJWT",
-    // { id: "pincopallino", apiKey: "prova" },
-    { headers: { Authorization: `Bearer ${data.authToken}` } }
-  );
+  // const response = await axios.get(
+  //   "http://127.0.0.1:8082/generateSubJWT",
+  //   // { id: "pincopallino", apiKey: "prova" },
+  //   { headers: { Authorization: `Bearer ${data.authToken}` } }
+  // );
 
-  console.log(response);
+  // console.log(response);
 })();
