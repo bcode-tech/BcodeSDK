@@ -1,5 +1,0 @@
-{
-  "ENDPOINT_LOCAL": "http://127.0.0.1:8082/",
-  "ENDPOINT_DEV": "http://127.0.0.1:8082/",
-  "ENDPOINT_PROD": "http://127.0.0.1:8082/"
-}

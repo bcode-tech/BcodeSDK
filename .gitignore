@@ -1,7 +1,7 @@
 # The `npm run build` command writes to this folder
 # You can also choose to include those into git to have
 # a better reference for changes
-
+build
 dist
 
 # This is the usual stuff that gets excluded

@@ -1,15 +1,26 @@
+//Libraries
 import axios from "axios";
 import { ethers, Wallet } from "ethers";
 
-import { abi } from "./common/abis/customERC20.js";
-
+//Utils
 import { sign, getPermitDigest } from "./common/utils";
 
+//Constants
 import { ERROR_TYPE } from "./common/constants";
 
-import config from "../config.json";
+//Abis
+import CustomERC20 from "./common/abis/CustomERC20";
+import PablockToken from "./common/abis/PablockToken";
 
-type Configuration = { env?: "LOCAL" | "DEV" | "PROD" };
+//Config
+import config from "../config";
+
+// const config = process.env || [];
+
+type Configuration = {
+  env?: "LOCAL" | "MUMBAI" | "POLYGON";
+  // network: "LOCAL" | "MUMBAI" | "POLYGON";
+};
 
 type SdkOptions = {
   apiKey: string;
@@ -17,16 +28,27 @@ type SdkOptions = {
   config?: Configuration;
 };
 
-export default class PablockSDK {
+export class PablockSDK {
   apiKey: string;
   wallet?: Wallet;
   provider?: any;
   authToken?: string;
   env: string;
+  // network: string;
 
   constructor(sdkOptions: SdkOptions) {
-    this.apiKey = sdkOptions.apiKey;
-    this.env = sdkOptions.config?.env || "LOCAL";
+    if (sdkOptions.apiKey) {
+      this.apiKey = sdkOptions.apiKey;
+    } else {
+      console.error("[Error] API key is required, please insert one!");
+      process.exit(1);
+    }
+
+    this.env = sdkOptions.config?.env || "MUMBAI";
+
+    // this.network = sdkOptions.config?.network || "MUMBAI";
+
+    this.provider = null;
 
     if (sdkOptions.privateKey) {
       this.wallet = new ethers.Wallet(sdkOptions.privateKey);
@@ -42,7 +64,7 @@ export default class PablockSDK {
   async init() {
     try {
       let { status, data } = await axios.get(
-        `${config[`ENDPOINT_${this.env}`]}generateJWT/${this.apiKey}`
+        `${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}`
       );
 
       if (status === 200) {
@@ -62,24 +84,32 @@ export default class PablockSDK {
 
   getApiKey() {
     console.log("API KEY ==>", this.apiKey);
+    return this.apiKey;
+  }
+
+  async getPablockTokenBalance(address: string = this.wallet!.address) {
+    const pablockToken = new ethers.Contract(
+      config[`PABLOCK_TOKEN_ADDRESS_${this.env}`],
+      PablockToken.abi,
+      this.provider
+    );
   }
 
   async sendToken(
     contractAddress: string,
     spender: string,
     value: number,
-    deadline: number,
-    config?: Object
+    deadline: number
   ) {
     const customERC20 = new ethers.Contract(
       contractAddress,
-      abi,
+      CustomERC20.abi,
       // this.wallet.connect(this.provider)
       this.provider
     );
 
     const approve = {
-      owner: this.wallet.address,
+      owner: this.wallet!.address,
       spender,
       value,
     };
@@ -99,7 +129,7 @@ export default class PablockSDK {
 
     const { v, r, s } = sign(
       digest,
-      Buffer.from(this.wallet.privateKey.substring(2), "hex")
+      Buffer.from(this.wallet!.privateKey.substring(2), "hex")
     );
 
     const tx = await customERC20.populateTransaction.permit(
@@ -109,13 +139,13 @@ export default class PablockSDK {
       deadline,
       v,
       r,
-      s,
-      { gasLimit: 300000, gasPrice: 1000000000 }
+      s
     );
 
     let { status, data } = await axios.post(
-      `${config[`ENDPOINT_${this.env}`]}/sendToken`,
-      { tx, contractAddress, address: this.wallet.address },
+      // `${config[`ENDPOINT_${this.env}`]}/sendToken`,
+      "http://127.0.0.1:8082/sendPermit",
+      { tx, contractAddress, address: this.wallet?.address },
       {
         headers: {
           Authorization: `Bearer ${this.authToken}`,

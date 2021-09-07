@@ -12,19 +12,21 @@ const PERMIT_TYPEHASH = keccak256(
   )
 );
 
-export const sign = (digest, privateKey) => {
+export const sign = (digest: string, privateKey: Buffer) => {
   return ecsign(Buffer.from(digest.slice(2), "hex"), privateKey);
 };
+
+type Approve = { owner: string; spender: string; value: number };
 
 // Returns the EIP712 hash which should be signed by the user
 // in order to make a call to `permit`
 export function getPermitDigest(
-  name,
-  address,
-  chainId,
-  approve,
-  nonce,
-  deadline
+  name: string,
+  address: string,
+  chainId: number,
+  approve: Approve,
+  nonce: number,
+  deadline: number
 ) {
   const DOMAIN_SEPARATOR = getDomainSeparator(name, address, chainId);
   return keccak256(
@@ -53,7 +55,11 @@ export function getPermitDigest(
 }
 
 // Gets the EIP712 domain separator
-export function getDomainSeparator(name, contractAddress, chainId) {
+export function getDomainSeparator(
+  name: string,
+  contractAddress: string,
+  chainId: number
+) {
   return keccak256(
     defaultAbiCoder.encode(
       ["bytes32", "bytes32", "bytes32", "uint256", "address"],
