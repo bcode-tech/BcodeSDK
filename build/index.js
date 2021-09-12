@@ -27998,20 +27998,6 @@
             },
             {
                 inputs: [],
-                name: "symbol",
-                outputs: [
-                    {
-                        internalType: "string",
-                        name: "",
-                        type: "string",
-                    },
-                ],
-                stateMutability: "view",
-                type: "function",
-                constant: true,
-            },
-            {
-                inputs: [],
                 name: "totalSupply",
                 outputs: [
                     {
@@ -28179,6 +28165,26 @@
                 type: "function",
             },
             {
+                inputs: [
+                    {
+                        internalType: "address",
+                        name: "_contract",
+                        type: "address",
+                    },
+                ],
+                name: "getContractStatus",
+                outputs: [
+                    {
+                        internalType: "bool",
+                        name: "",
+                        type: "bool",
+                    },
+                ],
+                stateMutability: "view",
+                type: "function",
+                constant: true,
+            },
+            {
                 inputs: [],
                 name: "getVersion",
                 outputs: [
@@ -28208,7 +28214,10 @@
     var PablockSDK = /** @class */ (function () {
         // network: string;
         function PablockSDK(sdkOptions) {
-            var _a;
+            var _this = this;
+            var _a, _b;
+            this.env = ((_a = sdkOptions.config) === null || _a === void 0 ? void 0 : _a.env) || "MUMBAI";
+            console.log("[Debug] Working environment: " + this.env);
             if (sdkOptions.apiKey) {
                 this.apiKey = sdkOptions.apiKey;
             }
@@ -28216,16 +28225,32 @@
                 console.error("[Error] API key is required, please insert one!");
                 process.exit(1);
             }
-            this.env = ((_a = sdkOptions.config) === null || _a === void 0 ? void 0 : _a.env) || "MUMBAI";
             // this.network = sdkOptions.config?.network || "MUMBAI";
-            this.provider = null;
+            this.provider = new JsonRpcProvider(config["RPC_PROVIDER_" + this.env]);
             if (sdkOptions.privateKey) {
                 this.wallet = new Wallet(sdkOptions.privateKey);
-                this.provider = new JsonRpcProvider(config["RPC_PROVIDER_" + this.env]);
             }
             else {
                 this.wallet = Wallet.createRandom();
             }
+            if (!((_b = sdkOptions.config) === null || _b === void 0 ? void 0 : _b.debugMode)) {
+                console.log = function () { };
+            }
+            var test = function () { return __awaiter$b(_this, void 0, void 0, function () {
+                var pablockToken, _a, _b;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0:
+                            pablockToken = new Contract(config["PABLOCK_TOKEN_ADDRESS_" + this.env], PablockToken.abi, this.provider);
+                            _b = (_a = console).log;
+                            return [4 /*yield*/, pablockToken.balanceOf(this.wallet.address)];
+                        case 1:
+                            _b.apply(_a, [(_c.sent()).toString()]);
+                            return [2 /*return*/];
+                    }
+                });
+            }); };
+            test();
         }
         PablockSDK.prototype.init = function () {
             return __awaiter$b(this, void 0, void 0, function () {
@@ -28263,9 +28288,16 @@
         PablockSDK.prototype.getPablockTokenBalance = function (address) {
             if (address === void 0) { address = this.wallet.address; }
             return __awaiter$b(this, void 0, void 0, function () {
+                var pablockToken, balance;
                 return __generator(this, function (_a) {
-                    new Contract(config["PABLOCK_TOKEN_ADDRESS_" + this.env], PablockToken.abi, this.provider);
-                    return [2 /*return*/];
+                    switch (_a.label) {
+                        case 0:
+                            pablockToken = new Contract(config["PABLOCK_TOKEN_ADDRESS_" + this.env], PablockToken.abi, this.provider);
+                            return [4 /*yield*/, pablockToken.balanceOf(address)];
+                        case 1:
+                            balance = (_a.sent()).toString();
+                            return [2 /*return*/, balance];
+                    }
                 });
             });
         };
@@ -28316,7 +28348,7 @@
                 });
             });
         };
-        PablockSDK.prototype.requestToken = function (contractAddress, to, amount) {
+        PablockSDK.prototype.requestToken = function (to, amount, contractAddress) {
             return __awaiter$b(this, void 0, void 0, function () {
                 var _a, data;
                 return __generator(this, function (_b) {
@@ -28328,6 +28360,24 @@
                             })];
                         case 1:
                             _a = _b.sent(), data = _a.data;
+                            return [2 /*return*/, data];
+                    }
+                });
+            });
+        };
+        PablockSDK.prototype.mintNFT = function (amount, uri, contractAddress, webhookUrl) {
+            return __awaiter$b(this, void 0, void 0, function () {
+                var _a, status, data;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, axios.post(config["ENDPOINT_" + this.env] + "/mintToken", { to: this.wallet.address, amount: amount, uri: uri, contractAddress: contractAddress, webhookUrl: webhookUrl }, {
+                                headers: {
+                                    Authorization: "Bearer " + this.authToken,
+                                },
+                            })];
+                        case 1:
+                            _a = _b.sent(), status = _a.status, data = _a.data;
+                            console.log(status, data);
                             return [2 /*return*/, data];
                     }
                 });

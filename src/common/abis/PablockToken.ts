@@ -208,20 +208,6 @@ export default {
     },
     {
       inputs: [],
-      name: "symbol",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [],
       name: "totalSupply",
       outputs: [
         {
@@ -387,6 +373,26 @@ export default {
       ],
       stateMutability: "nonpayable",
       type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_contract",
+          type: "address",
+        },
+      ],
+      name: "getContractStatus",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true,
     },
     {
       inputs: [],

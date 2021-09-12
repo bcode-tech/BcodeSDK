@@ -19,6 +19,7 @@ import config from "../config";
 
 type Configuration = {
   env?: "LOCAL" | "MUMBAI" | "POLYGON";
+  debugMode: boolean | false;
   // network: "LOCAL" | "MUMBAI" | "POLYGON";
 };
 
@@ -37,6 +38,10 @@ export class PablockSDK {
   // network: string;
 
   constructor(sdkOptions: SdkOptions) {
+    this.env = sdkOptions.config?.env || "MUMBAI";
+
+    console.log(`[Debug] Working environment: ${this.env}`);
+
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
     } else {
@@ -44,20 +49,20 @@ export class PablockSDK {
       process.exit(1);
     }
 
-    this.env = sdkOptions.config?.env || "MUMBAI";
-
     // this.network = sdkOptions.config?.network || "MUMBAI";
 
-    this.provider = null;
+    this.provider = new ethers.providers.JsonRpcProvider(
+      config[`RPC_PROVIDER_${this.env}`]
+    );
 
     if (sdkOptions.privateKey) {
       this.wallet = new ethers.Wallet(sdkOptions.privateKey);
-
-      this.provider = new ethers.providers.JsonRpcProvider(
-        config[`RPC_PROVIDER_${this.env}`]
-      );
     } else {
       this.wallet = ethers.Wallet.createRandom();
+    }
+
+    if (!sdkOptions.config?.debugMode) {
+      console.log = () => {};
     }
   }
 
@@ -93,6 +98,8 @@ export class PablockSDK {
       PablockToken.abi,
       this.provider
     );
+    const balance = (await pablockToken.balanceOf(address)).toString();
+    return balance;
   }
 
   async sendToken(
@@ -156,7 +163,7 @@ export class PablockSDK {
     return data;
   }
 
-  async requestToken(contractAddress: string, to: string, amount: number) {
+  async requestToken(to: string, amount: number, contractAddress: string) {
     let { status, data } = await axios.post(
       `${config[`ENDPOINT_${this.env}`]}/mintToken`,
       { contractAddress, to, amount },
@@ -166,6 +173,27 @@ export class PablockSDK {
         },
       }
     );
+
+    return data;
+  }
+
+  async mintNFT(
+    amount: number,
+    uri: string,
+    contractAddress: string,
+    webhookUrl: string | null
+  ) {
+    let { status, data } = await axios.post(
+      `${config[`ENDPOINT_${this.env}`]}/mintToken`,
+      { to: this.wallet!.address, amount, uri, contractAddress, webhookUrl },
+      {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+        },
+      }
+    );
+
+    console.log(status, data);
 
     return data;
   }
