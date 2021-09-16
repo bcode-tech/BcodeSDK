@@ -42,34 +42,6 @@
         });
     }
 
-    function __generator(thisArg, body) {
-        var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-        function verb(n) { return function (v) { return step([n, v]); }; }
-        function step(op) {
-            if (f) throw new TypeError("Generator is already executing.");
-            while (_) try {
-                if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-                if (y = 0, t) op = [op[0] & 2, t.value];
-                switch (op[0]) {
-                    case 0: case 1: t = op; break;
-                    case 4: _.label++; return { value: op[1], done: false };
-                    case 5: _.label++; y = op[1]; op = [0]; continue;
-                    case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                    default:
-                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                        if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                        if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                        if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                        if (t[2]) _.ops.pop();
-                        _.trys.pop(); continue;
-                }
-                op = body.call(thisArg, _);
-            } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-            if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-        }
-    }
-
     var bind = function bind(fn, thisArg) {
       return function wrap() {
         var args = new Array(arguments.length);
@@ -27232,16 +27204,16 @@
         }
     }
 
-    var _a = require("ethers/lib/utils"), keccak256 = _a.keccak256, defaultAbiCoder = _a.defaultAbiCoder, toUtf8Bytes = _a.toUtf8Bytes, solidityPack = _a.solidityPack;
-    var ecsign = require("ethereumjs-util").ecsign;
-    var PERMIT_TYPEHASH = keccak256(toUtf8Bytes("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"));
-    var sign = function (digest, privateKey) {
+    const { keccak256, defaultAbiCoder, toUtf8Bytes, solidityPack, } = require("ethers/lib/utils");
+    const { ecsign } = require("ethereumjs-util");
+    const PERMIT_TYPEHASH = keccak256(toUtf8Bytes("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"));
+    const sign = (digest, privateKey) => {
         return ecsign(Buffer.from(digest.slice(2), "hex"), privateKey);
     };
     // Returns the EIP712 hash which should be signed by the user
     // in order to make a call to `permit`
     function getPermitDigest(name, address, chainId, approve, nonce, deadline) {
-        var DOMAIN_SEPARATOR = getDomainSeparator(name, address, chainId);
+        const DOMAIN_SEPARATOR = getDomainSeparator(name, address, chainId);
         return keccak256(solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [
             "0x19",
             "0x01",
@@ -27267,7 +27239,7 @@
         ]));
     }
 
-    var ERROR_TYPE = {
+    const ERROR_TYPE = {
         NOT_INITIALIZE: "SDK not initialized",
         API_KEY_NOT_AUTHENTICATED: "API Key not authenticated",
     };
@@ -28211,13 +28183,13 @@
         PABLOCK_TOKEN_ADDRESS_MUMBAI: "0x9D0d991c90112C2805F250cD7B5D399c5e834088",
     };
 
-    var PablockSDK = /** @class */ (function () {
+    class PablockSDK {
         // network: string;
-        function PablockSDK(sdkOptions) {
-            var _this = this;
+        constructor(sdkOptions) {
             var _a, _b;
             this.env = ((_a = sdkOptions.config) === null || _a === void 0 ? void 0 : _a.env) || "MUMBAI";
-            console.log("[Debug] Working environment: " + this.env);
+            console.log(`[Debug] Working environment: ${this.env}`);
+            console.log("[Debug] RPC Provider ", config[`RPC_PROVIDER_${this.env}`]);
             if (sdkOptions.apiKey) {
                 this.apiKey = sdkOptions.apiKey;
             }
@@ -28226,7 +28198,8 @@
                 process.exit(1);
             }
             // this.network = sdkOptions.config?.network || "MUMBAI";
-            this.provider = new JsonRpcProvider(config["RPC_PROVIDER_" + this.env]);
+            console.log("[Debug] ", this.provider);
+            // this.provider = ethers.providers.getDefaultProvider("goerli");
             if (sdkOptions.privateKey) {
                 this.wallet = new Wallet(sdkOptions.privateKey);
             }
@@ -28234,157 +28207,144 @@
                 this.wallet = Wallet.createRandom();
             }
             if (!((_b = sdkOptions.config) === null || _b === void 0 ? void 0 : _b.debugMode)) {
-                console.log = function () { };
+                console.log = () => { };
             }
-            var test = function () { return __awaiter$b(_this, void 0, void 0, function () {
-                var pablockToken, _a, _b;
-                return __generator(this, function (_c) {
-                    switch (_c.label) {
-                        case 0:
-                            pablockToken = new Contract(config["PABLOCK_TOKEN_ADDRESS_" + this.env], PablockToken.abi, this.provider);
-                            _b = (_a = console).log;
-                            return [4 /*yield*/, pablockToken.balanceOf(this.wallet.address)];
-                        case 1:
-                            _b.apply(_a, [(_c.sent()).toString()]);
-                            return [2 /*return*/];
-                    }
-                });
-            }); };
-            test();
         }
-        PablockSDK.prototype.init = function () {
-            return __awaiter$b(this, void 0, void 0, function () {
-                var _a, status_1, data;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0:
-                            _b.trys.push([0, 2, , 3]);
-                            return [4 /*yield*/, axios.get(config["ENDPOINT_" + this.env] + "/generateJWT/" + this.apiKey)];
-                        case 1:
-                            _a = _b.sent(), status_1 = _a.status, data = _a.data;
-                            if (status_1 === 200) {
-                                this.authToken = data.authToken;
-                            }
-                            else {
-                                throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
-                            }
-                            return [3 /*break*/, 3];
-                        case 2:
-                            _b.sent();
-                            throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
-                        case 3: return [2 /*return*/];
+        /**
+         * Need to called once after calling constructor
+         */
+        init() {
+            return __awaiter$b(this, void 0, void 0, function* () {
+                try {
+                    this.provider = new JsonRpcProvider(config[`RPC_PROVIDER_${this.env}`]);
+                    let { status, data } = yield axios.get(`${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}`);
+                    if (status === 200) {
+                        // console.log("[Debug] Auth token received ", data.authToken);
+                        this.authToken = data.authToken;
                     }
-                });
+                    else {
+                        throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
+                    }
+                }
+                catch (error) {
+                    console.log("[Error] ", error);
+                    throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
+                }
             });
-        };
-        PablockSDK.prototype.getAuthToken = function () {
-            console.log("AUTH TOKEN ==>", this.authToken);
-            return this.authToken;
-        };
-        PablockSDK.prototype.getApiKey = function () {
-            console.log("API KEY ==>", this.apiKey);
+        }
+        /**
+         * Return JWT token
+         *
+         * @returns authToken
+         */
+        getAuthToken() {
+            console.log(`[Debug] Your auth token is: ${this.authToken}`);
+            if (this.authToken) {
+                return this.authToken;
+            }
+            else {
+                console.error("[Error] run sdk.init() if you don't already do that, otherwise check if your API key is correct");
+                return null;
+            }
+        }
+        /**
+         * Return apiKey added in contructor
+         *
+         * @returns apiKey
+         */
+        getApiKey() {
+            console.log(`[Debug] Your API key is: ${this.apiKey}`);
             return this.apiKey;
-        };
-        PablockSDK.prototype.getPablockTokenBalance = function (address) {
-            if (address === void 0) { address = this.wallet.address; }
-            return __awaiter$b(this, void 0, void 0, function () {
-                var pablockToken, balance;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            pablockToken = new Contract(config["PABLOCK_TOKEN_ADDRESS_" + this.env], PablockToken.abi, this.provider);
-                            return [4 /*yield*/, pablockToken.balanceOf(address)];
-                        case 1:
-                            balance = (_a.sent()).toString();
-                            return [2 /*return*/, balance];
-                    }
-                });
+        }
+        /**
+         * Return address of wallet associated in current instance
+         *
+         * @returns wallet address
+         */
+        getWalletAddress() {
+            return this.wallet.address;
+        }
+        getPablockTokenBalance(address = this.wallet.address) {
+            return __awaiter$b(this, void 0, void 0, function* () {
+                const pablockToken = new Contract(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], PablockToken.abi, this.provider);
+                const balance = parseInt((yield pablockToken.balanceOf("0x5d1305A4EEE866c6b3C3Cf25ad70392b6459f2cD")).toString());
+                console.log("BALANCE ==>", balance);
+                return balance;
             });
-        };
-        PablockSDK.prototype.sendToken = function (contractAddress, spender, value, deadline) {
+        }
+        getMaticBalance(address = this.wallet.address) {
+            return __awaiter$b(this, void 0, void 0, function* () {
+                const balance = parseInt((yield this.provider.getBalance("0x5d1305A4EEE866c6b3C3Cf25ad70392b6459f2cD")).toString());
+                console.log("BALANCE ==>", balance);
+                return balance;
+            });
+        }
+        sendToken(contractAddress, spender, value, deadline) {
             var _a;
-            return __awaiter$b(this, void 0, void 0, function () {
-                var customERC20, approve, nonce, _b, digest, _c, _d, _e, _f, v, r, s, tx, _g, data;
-                return __generator(this, function (_h) {
-                    switch (_h.label) {
-                        case 0:
-                            customERC20 = new Contract(contractAddress, CustomERC20.abi, 
-                            // this.wallet.connect(this.provider)
-                            this.provider);
-                            approve = {
-                                owner: this.wallet.address,
-                                spender: spender,
-                                value: value,
-                            };
-                            _b = parseInt;
-                            return [4 /*yield*/, customERC20.nonces(approve.owner)];
-                        case 1:
-                            nonce = _b.apply(void 0, [(_h.sent()).toString()]);
-                            _c = getPermitDigest;
-                            return [4 /*yield*/, customERC20.name()];
-                        case 2:
-                            _d = [_h.sent(), customERC20.address];
-                            _e = parseInt;
-                            return [4 /*yield*/, customERC20.getChainId()];
-                        case 3:
-                            digest = _c.apply(void 0, _d.concat([_e.apply(void 0, [_h.sent()]), approve,
-                                nonce,
-                                deadline]));
-                            _f = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex")), v = _f.v, r = _f.r, s = _f.s;
-                            return [4 /*yield*/, customERC20.populateTransaction.permit(approve.owner, approve.spender, approve.value, deadline, v, r, s)];
-                        case 4:
-                            tx = _h.sent();
-                            return [4 /*yield*/, axios.post(
-                                // `${config[`ENDPOINT_${this.env}`]}/sendToken`,
-                                "http://127.0.0.1:8082/sendPermit", { tx: tx, contractAddress: contractAddress, address: (_a = this.wallet) === null || _a === void 0 ? void 0 : _a.address }, {
-                                    headers: {
-                                        Authorization: "Bearer " + this.authToken,
-                                    },
-                                })];
-                        case 5:
-                            _g = _h.sent(), data = _g.data;
-                            return [2 /*return*/, data];
-                    }
+            return __awaiter$b(this, void 0, void 0, function* () {
+                const customERC20 = new Contract(contractAddress, CustomERC20.abi, 
+                // this.wallet.connect(this.provider)
+                this.provider);
+                const approve = {
+                    owner: this.wallet.address,
+                    spender,
+                    value,
+                };
+                const nonce = parseInt((yield customERC20.nonces(approve.owner)).toString());
+                const digest = getPermitDigest(yield customERC20.name(), customERC20.address, parseInt(yield customERC20.getChainId()), approve, nonce, deadline);
+                const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
+                const tx = yield customERC20.populateTransaction.permit(approve.owner, approve.spender, approve.value, deadline, v, r, s);
+                let { status, data } = yield axios.post(
+                // `${config[`ENDPOINT_${this.env}`]}/sendToken`,
+                "http://127.0.0.1:8082/sendPermit", { tx, contractAddress, address: (_a = this.wallet) === null || _a === void 0 ? void 0 : _a.address }, {
+                    headers: {
+                        Authorization: `Bearer ${this.authToken}`,
+                    },
                 });
+                return data;
             });
-        };
-        PablockSDK.prototype.requestToken = function (to, amount, contractAddress) {
-            return __awaiter$b(this, void 0, void 0, function () {
-                var _a, data;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0: return [4 /*yield*/, axios.post(config["ENDPOINT_" + this.env] + "/mintToken", { contractAddress: contractAddress, to: to, amount: amount }, {
-                                headers: {
-                                    Authorization: "Bearer " + this.authToken,
-                                },
-                            })];
-                        case 1:
-                            _a = _b.sent(), data = _a.data;
-                            return [2 /*return*/, data];
-                    }
+        }
+        requestToken(to, amount, contractAddress) {
+            return __awaiter$b(this, void 0, void 0, function* () {
+                console.log(`[Debug] Request ${amount} token from ${to}`);
+                let { status, data } = yield axios.post(`${config[`ENDPOINT_${this.env}`]}/mintToken`, { contractAddress, to, amount }, {
+                    headers: {
+                        Authorization: `Bearer ${this.authToken}`,
+                    },
                 });
+                console.log(`[Debug] Request token status: ${status}`);
+                return data;
             });
-        };
-        PablockSDK.prototype.mintNFT = function (amount, uri, contractAddress, webhookUrl) {
-            return __awaiter$b(this, void 0, void 0, function () {
-                var _a, status, data;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0: return [4 /*yield*/, axios.post(config["ENDPOINT_" + this.env] + "/mintToken", { to: this.wallet.address, amount: amount, uri: uri, contractAddress: contractAddress, webhookUrl: webhookUrl }, {
-                                headers: {
-                                    Authorization: "Bearer " + this.authToken,
-                                },
-                            })];
-                        case 1:
-                            _a = _b.sent(), status = _a.status, data = _a.data;
-                            console.log(status, data);
-                            return [2 /*return*/, data];
-                    }
+        }
+        mintNFT(amount, uri, contractAddress, webhookUrl) {
+            return __awaiter$b(this, void 0, void 0, function* () {
+                let { status, data } = yield axios.post(`${config[`ENDPOINT_${this.env}`]}/mintToken`, { to: this.wallet.address, amount, uri, contractAddress, webhookUrl }, {
+                    headers: {
+                        Authorization: `Bearer ${this.authToken}`,
+                    },
                 });
+                console.log(status, data);
+                return data;
             });
-        };
-        return PablockSDK;
-    }());
+        }
+        checkJWTValidity() {
+            return __awaiter$b(this, void 0, void 0, function* () {
+                let { status, data } = yield axios.get(`${config[`ENDPOINT_${this.env}`]}/checkJWT`, {
+                    headers: {
+                        Authorization: `Bearer ${this.authToken}`,
+                    },
+                });
+                console.log(status, data);
+                return data;
+            });
+        }
+        getAPIVersion() {
+            return __awaiter$b(this, void 0, void 0, function* () {
+                let { data } = yield axios.get(`${config[`ENDPOINT_${this.env}`]}/getVersion`);
+                return data;
+            });
+        }
+    }
 
     exports.PablockSDK = PablockSDK;
 

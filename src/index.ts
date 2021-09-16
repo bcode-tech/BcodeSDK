@@ -41,6 +41,7 @@ export class PablockSDK {
     this.env = sdkOptions.config?.env || "MUMBAI";
 
     console.log(`[Debug] Working environment: ${this.env}`);
+    console.log("[Debug] RPC Provider ", config[`RPC_PROVIDER_${this.env}`]);
 
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
@@ -51,9 +52,9 @@ export class PablockSDK {
 
     // this.network = sdkOptions.config?.network || "MUMBAI";
 
-    this.provider = new ethers.providers.JsonRpcProvider(
-      config[`RPC_PROVIDER_${this.env}`]
-    );
+    console.log("[Debug] ", this.provider);
+
+    // this.provider = ethers.providers.getDefaultProvider("goerli");
 
     if (sdkOptions.privateKey) {
       this.wallet = new ethers.Wallet(sdkOptions.privateKey);
@@ -66,30 +67,67 @@ export class PablockSDK {
     }
   }
 
+  /**
+   * Need to called once after calling constructor
+   */
   async init() {
     try {
+      this.provider = new ethers.providers.JsonRpcProvider(
+        config[`RPC_PROVIDER_${this.env}`]
+      );
+
       let { status, data } = await axios.get(
         `${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}`
       );
 
       if (status === 200) {
+        // console.log("[Debug] Auth token received ", data.authToken);
+
         this.authToken = data.authToken;
       } else {
         throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
       }
     } catch (error) {
+      console.log("[Error] ", error);
       throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
     }
   }
 
+  /**
+   * Return JWT token
+   *
+   * @returns authToken
+   */
   getAuthToken() {
-    console.log("AUTH TOKEN ==>", this.authToken);
-    return this.authToken;
+    console.log(`[Debug] Your auth token is: ${this.authToken}`);
+
+    if (this.authToken) {
+      return this.authToken;
+    } else {
+      console.error(
+        "[Error] run sdk.init() if you don't already do that, otherwise check if your API key is correct"
+      );
+      return null;
+    }
   }
 
+  /**
+   * Return apiKey added in contructor
+   *
+   * @returns apiKey
+   */
   getApiKey() {
-    console.log("API KEY ==>", this.apiKey);
+    console.log(`[Debug] Your API key is: ${this.apiKey}`);
     return this.apiKey;
+  }
+
+  /**
+   * Return address of wallet associated in current instance
+   *
+   * @returns wallet address
+   */
+  getWalletAddress() {
+    return this.wallet!.address;
   }
 
   async getPablockTokenBalance(address: string = this.wallet!.address) {
@@ -98,7 +136,29 @@ export class PablockSDK {
       PablockToken.abi,
       this.provider
     );
-    const balance = (await pablockToken.balanceOf(address)).toString();
+
+    const balance = parseInt(
+      (
+        await pablockToken.balanceOf(
+          "0x5d1305A4EEE866c6b3C3Cf25ad70392b6459f2cD"
+        )
+      ).toString()
+    );
+
+    console.log("BALANCE ==>", balance);
+    return balance;
+  }
+
+  async getMaticBalance(address: string = this.wallet!.address) {
+    const balance = parseInt(
+      (
+        await this.provider.getBalance(
+          "0x5d1305A4EEE866c6b3C3Cf25ad70392b6459f2cD"
+        )
+      ).toString()
+    );
+
+    console.log("BALANCE ==>", balance);
     return balance;
   }
 
@@ -164,6 +224,8 @@ export class PablockSDK {
   }
 
   async requestToken(to: string, amount: number, contractAddress: string) {
+    console.log(`[Debug] Request ${amount} token from ${to}`);
+
     let { status, data } = await axios.post(
       `${config[`ENDPOINT_${this.env}`]}/mintToken`,
       { contractAddress, to, amount },
@@ -173,6 +235,8 @@ export class PablockSDK {
         },
       }
     );
+
+    console.log(`[Debug] Request token status: ${status}`);
 
     return data;
   }
@@ -195,6 +259,28 @@ export class PablockSDK {
 
     console.log(status, data);
 
+    return data;
+  }
+
+  async checkJWTValidity() {
+    let { status, data } = await axios.get(
+      `${config[`ENDPOINT_${this.env}`]}/checkJWT`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+        },
+      }
+    );
+
+    console.log(status, data);
+
+    return data;
+  }
+
+  async getAPIVersion() {
+    let { data } = await axios.get(
+      `${config[`ENDPOINT_${this.env}`]}/getVersion`
+    );
     return data;
   }
 }

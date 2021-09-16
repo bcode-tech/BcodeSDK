@@ -417,13 +417,14 @@ const PablockToken = {
 const axios = require("axios");
 
 const sdk = new PablockSDK({
-  apiKey: "xdx",
+  apiKey: "api_test",
   privateKey:
     "0xfc0846a4e1d827c9c7a1fd8f255074d01bb019760a2065e0756b578dde00ecf1",
   config: { env: "LOCAL", debugMode: true },
 });
 
 (async () => {
+  await sdk.init();
   // await sdk.sendToken(
   //   "0x0932a1D86dea2e3C235a192c918bf3f14B12303b",
   //   "0xfc8CFa30350f7B195f2b5c6F350f76720bfD89f4",
@@ -432,42 +433,37 @@ const sdk = new PablockSDK({
   // );
   // await sdk.requestToken(
   //   "0x0932a1D86dea2e3C235a192c918bf3f14B12303b",
-  //   "0x5d1305A4EEE866c6b3C3Cf25ad70392b6459f2cD",
-  //   10
+  //   10,
+  //   "0x2b9233683001657161db866c7405493Fc1d1C22d"
   // );
+
   // const provider = new ethers.providers.JsonRpcProvider(
   //   "http://127.0.0.1:7545"
   // );
-  // const pablockToken = new ethers.Contract(
-  //   "0x2b9233683001657161db866c7405493Fc1d1C22d",
-  //   PablockToken.abi,
-  //   provider
-  // );
+
   // console.log(
-  //   (
-  //     await pablockToken.balanceOf("0x5d1305A4EEE866c6b3C3Cf25ad70392b6459f2cD")
-  //   ).toString()
+  //   (await provider.getBalance(await sdk.getWalletAddress())).toString()
   // );
-  // console.log(await sdk.getPablockTokenBalance());
-  // const { data } = await axios.get("http://127.0.0.1:8082/generateJWT/prova");
-  // const response = await axios.get(
-  //   "http://127.0.0.1:8082/generateSubJWT",
-  //   // { id: "pincopallino", apiKey: "prova" },
-  //   { headers: { Authorization: `Bearer ${data.authToken}` } }
-  // );
-  // console.log(response);
+
+  console.log(await sdk.getMaticBalance());
 })();
 
 // describe("Pablock SDK Test", () => {
-//   // it("should create Library", () => {
-//   //   expect(sdk.getApiKey()).toBe("xdx");
-//   // });
+// it("should create Library", () => {
+//   expect(sdk.getApiKey()).toBe("xdx");
+// });
 
-//   it("should mint NFT", () => {
-//     const test = async () => {
-//       return await sdk.mintNFT(1, "http://uridiprova.it");
-//     };
+// it("should have token", () => {
+//   expect(sdk.getPablockTokenBalance().then((e) => e)).toBeGreaterThan(0);
+// });
 
-//     expect(test()).toBe({});
-//   });
+// it("should mint NFT", () => {
+//   const test = async () => {
+//     return await sdk.mintNFT(1, "http://uridiprova.it");
+//   };
+
+//   console.log(test());
+
+//   expect({ foo: "bar" }).toMatchObject({ foo: "bar" });
+// });
 // });
