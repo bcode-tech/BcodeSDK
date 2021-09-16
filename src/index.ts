@@ -4,6 +4,7 @@ import { ethers, Wallet } from "ethers";
 
 //Utils
 import { sign, getPermitDigest } from "./common/utils";
+import { logger } from "./common/logger";
 
 //Constants
 import { ERROR_TYPE } from "./common/constants";
@@ -38,10 +39,14 @@ export class PablockSDK {
   // network: string;
 
   constructor(sdkOptions: SdkOptions) {
+    if (!sdkOptions.config?.debugMode) {
+      logger.transports[0].silent = true;
+    }
+
     this.env = sdkOptions.config?.env || "MUMBAI";
 
-    console.log(`[Debug] Working environment: ${this.env}`);
-    console.log("[Debug] RPC Provider ", config[`RPC_PROVIDER_${this.env}`]);
+    logger.info(`[Debug] Working environment: ${this.env}`);
+    logger.info("[Debug] RPC Provider ", config[`RPC_PROVIDER_${this.env}`]);
 
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
@@ -51,8 +56,9 @@ export class PablockSDK {
     }
 
     // this.network = sdkOptions.config?.network || "MUMBAI";
-
-    console.log("[Debug] ", this.provider);
+    this.provider = new ethers.providers.JsonRpcProvider(
+      config[`RPC_PROVIDER_${this.env}`]
+    );
 
     // this.provider = ethers.providers.getDefaultProvider("goerli");
 
@@ -62,9 +68,7 @@ export class PablockSDK {
       this.wallet = ethers.Wallet.createRandom();
     }
 
-    if (!sdkOptions.config?.debugMode) {
-      console.log = () => {};
-    }
+    logger.info("[Debug] Finished initialization");
   }
 
   /**
@@ -72,23 +76,19 @@ export class PablockSDK {
    */
   async init() {
     try {
-      this.provider = new ethers.providers.JsonRpcProvider(
-        config[`RPC_PROVIDER_${this.env}`]
-      );
-
       let { status, data } = await axios.get(
         `${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}`
       );
 
       if (status === 200) {
-        // console.log("[Debug] Auth token received ", data.authToken);
+        // logger.info("[Debug] Auth token received ", data.authToken);
 
         this.authToken = data.authToken;
       } else {
         throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
       }
     } catch (error) {
-      console.log("[Error] ", error);
+      logger.info("[Error] ", error);
       throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
     }
   }
@@ -99,7 +99,7 @@ export class PablockSDK {
    * @returns authToken
    */
   getAuthToken() {
-    console.log(`[Debug] Your auth token is: ${this.authToken}`);
+    logger.info(`[Debug] Your auth token is: ${this.authToken}`);
 
     if (this.authToken) {
       return this.authToken;
@@ -117,7 +117,7 @@ export class PablockSDK {
    * @returns apiKey
    */
   getApiKey() {
-    console.log(`[Debug] Your API key is: ${this.apiKey}`);
+    logger.info(`[Debug] Your API key is: ${this.apiKey}`);
     return this.apiKey;
   }
 
@@ -145,7 +145,7 @@ export class PablockSDK {
       ).toString()
     );
 
-    console.log("BALANCE ==>", balance);
+    logger.info("BALANCE ==>", balance);
     return balance;
   }
 
@@ -158,7 +158,7 @@ export class PablockSDK {
       ).toString()
     );
 
-    console.log("BALANCE ==>", balance);
+    logger.info("BALANCE ==>", balance);
     return balance;
   }
 
@@ -224,7 +224,7 @@ export class PablockSDK {
   }
 
   async requestToken(to: string, amount: number, contractAddress: string) {
-    console.log(`[Debug] Request ${amount} token from ${to}`);
+    logger.info(`[Debug] Request ${amount} token from ${to}`);
 
     let { status, data } = await axios.post(
       `${config[`ENDPOINT_${this.env}`]}/mintToken`,
@@ -236,7 +236,7 @@ export class PablockSDK {
       }
     );
 
-    console.log(`[Debug] Request token status: ${status}`);
+    logger.info(`[Debug] Request token status: ${status}`);
 
     return data;
   }
@@ -257,7 +257,7 @@ export class PablockSDK {
       }
     );
 
-    console.log(status, data);
+    logger.info(status, data);
 
     return data;
   }
@@ -272,7 +272,7 @@ export class PablockSDK {
       }
     );
 
-    console.log(status, data);
+    logger.info(status, data);
 
     return data;
   }
