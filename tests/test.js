@@ -1,420 +1,11 @@
+// const NodeMonkey = require("node-monkey");
+
 const { ethers } = require("ethers");
 const { PablockSDK } = require("../build");
 
-const PablockToken = {
-  abi: [
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "_maxSupply",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "nonpayable",
-      type: "constructor",
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "address",
-          name: "owner",
-          type: "address",
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "spender",
-          type: "address",
-        },
-        {
-          indexed: false,
-          internalType: "uint256",
-          name: "value",
-          type: "uint256",
-        },
-      ],
-      name: "Approval",
-      type: "event",
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "address",
-          name: "from",
-          type: "address",
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "to",
-          type: "address",
-        },
-        {
-          indexed: false,
-          internalType: "uint256",
-          name: "value",
-          type: "uint256",
-        },
-      ],
-      name: "Transfer",
-      type: "event",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "owner",
-          type: "address",
-        },
-        {
-          internalType: "address",
-          name: "spender",
-          type: "address",
-        },
-      ],
-      name: "allowance",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "spender",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "amount",
-          type: "uint256",
-        },
-      ],
-      name: "approve",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool",
-        },
-      ],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "account",
-          type: "address",
-        },
-      ],
-      name: "balanceOf",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [],
-      name: "decimals",
-      outputs: [
-        {
-          internalType: "uint8",
-          name: "",
-          type: "uint8",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "spender",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "subtractedValue",
-          type: "uint256",
-        },
-      ],
-      name: "decreaseAllowance",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool",
-        },
-      ],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "spender",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "addedValue",
-          type: "uint256",
-        },
-      ],
-      name: "increaseAllowance",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool",
-        },
-      ],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "name",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [],
-      name: "totalSupply",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "recipient",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "amount",
-          type: "uint256",
-        },
-      ],
-      name: "transfer",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool",
-        },
-      ],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "sender",
-          type: "address",
-        },
-        {
-          internalType: "address",
-          name: "recipient",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "amount",
-          type: "uint256",
-        },
-      ],
-      name: "transferFrom",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool",
-        },
-      ],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "to",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "mintQuantity",
-          type: "uint256",
-        },
-      ],
-      name: "requestToken",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_contract",
-          type: "address",
-        },
-      ],
-      name: "addContractToWhitelist",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_contract",
-          type: "address",
-        },
-      ],
-      name: "removeContractFromWhitelist",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_newOwner",
-          type: "address",
-        },
-      ],
-      name: "changeOwner",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "_maxSupply",
-          type: "uint256",
-        },
-      ],
-      name: "changeMaxSupply",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "unlimitedApprove",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "amount",
-          type: "uint256",
-        },
-        {
-          internalType: "address",
-          name: "addr",
-          type: "address",
-        },
-      ],
-      name: "receiveAndBurn",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool",
-        },
-      ],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_contract",
-          type: "address",
-        },
-      ],
-      name: "getContractStatus",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [],
-      name: "getVersion",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-  ],
-};
+const config = require("../config.json");
 
-const axios = require("axios");
+// NodeMonkey();
 
 const sdk = new PablockSDK({
   apiKey: "api_test",
@@ -423,47 +14,92 @@ const sdk = new PablockSDK({
   config: { env: "LOCAL", debugMode: true },
 });
 
+const sdk2 = new PablockSDK({
+  apiKey: "api_test",
+  privateKey:
+    "0xcac55b77a9a055839272436dba5c38aa9ed18b052330c9a3bf426848ccfcd4fc",
+  config: { env: "LOCAL", debugMode: true },
+});
+
 (async () => {
   await sdk.init();
-  // await sdk.sendToken(
-  //   "0x0932a1D86dea2e3C235a192c918bf3f14B12303b",
-  //   "0xfc8CFa30350f7B195f2b5c6F350f76720bfD89f4",
-  //   1,
+  await sdk2.init();
+
+  // await sdk.sendPermit("0x31726b5C129E23E2B045dc5BCB661c770B11DC91");
+
+  // const { tx } = await sdk.mintNFT(1, "http://uridiprova.it");
+  // console.log(tx);
+
+  // const tokens = await sdk.getOwnedNFT([
+  //   "0xFe4074912571C54E1402992d1CdA77A22098cD4f",
+  // ]);
+  // console.log(tokens);
+
+  // const tokens = await sdk.getOwnedNFT([
+  //   "0x12eA8a8C7C8b427246D84911454F3eC86440da17",
+  // ]);
+  // console.log(tokens);
+
+  // const res = await sdk.sendNFT(
+  //   "0x4c617b110afc0926bf35dce33D0e0178580B50AF",
+  //   0,
   //   1657121546000
   // );
-  // await sdk.requestToken(
-  //   "0x0932a1D86dea2e3C235a192c918bf3f14B12303b",
-  //   10,
-  //   "0x2b9233683001657161db866c7405493Fc1d1C22d"
-  // );
-
-  // const provider = new ethers.providers.JsonRpcProvider(
-  //   "http://127.0.0.1:7545"
-  // );
-
-  // console.log(
-  //   (await provider.getBalance(await sdk.getWalletAddress())).toString()
-  // );
-
-  console.log(await sdk.getMaticBalance());
+  // console.log(res);
 })();
 
-// describe("Pablock SDK Test", () => {
-// it("should create Library", () => {
-//   expect(sdk.getApiKey()).toBe("xdx");
-// });
+describe("Pablock SDK Test", () => {
+  it("should create Library", () => {
+    expect(sdk.getApiKey()).toBe("api_test");
+  });
 
-// it("should have token", () => {
-//   expect(sdk.getPablockTokenBalance().then((e) => e)).toBeGreaterThan(0);
-// });
+  it("should have token", async () => {
+    expect(await sdk.getPablockTokenBalance()).toBeGreaterThan(0);
+  });
 
-// it("should mint NFT", () => {
-//   const test = async () => {
-//     return await sdk.mintNFT(1, "http://uridiprova.it");
-//   };
+  it("should mint and transfer NFT", async () => {
+    const { tx } = await sdk.mintNFT(1, "http://uridiprova.it");
 
-//   console.log(test());
+    expect(tx).toMatchObject({
+      from: expect.any(String),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      blockHash: expect.any(String),
+    });
+  });
 
-//   expect({ foo: "bar" }).toMatchObject({ foo: "bar" });
-// });
-// });
+  it("should have NFTs", async () => {
+    const contractAddress = config[`PABLOCK_NFT_ADDRESS_LOCAL`];
+
+    const tokens = await sdk.getOwnedNFT([contractAddress]);
+    // console.log(tokens);
+
+    expect(tokens[contractAddress].length).toBeGreaterThan(0);
+  });
+
+  it("should send NFT", async () => {
+    const res = await sdk.sendNFT(
+      "0x4c617b110afc0926bf35dce33D0e0178580B50AF",
+      1,
+      1657121546000
+    );
+
+    console.log(res);
+
+    expect(res.tx).toMatchObject({
+      from: expect.any(String),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      blockHash: expect.any(String),
+    });
+  });
+
+  it("receiver addres shoul have NFT", async () => {
+    const contractAddress = config[`PABLOCK_NFT_ADDRESS_LOCAL`];
+
+    const tokens = await sdk2.getOwnedNFT([contractAddress]);
+    console.log(tokens);
+
+    expect(tokens[contractAddress].length).toBeGreaterThan(0);
+  });
+});

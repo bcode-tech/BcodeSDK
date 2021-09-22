@@ -1,6 +1,7 @@
 //Libraries
 import axios from "axios";
 import { ethers, Wallet } from "ethers";
+import { range } from "lodash";
 
 //Utils
 import { sign, getPermitDigest } from "./common/utils";
@@ -12,9 +13,10 @@ import { ERROR_TYPE } from "./common/constants";
 //Abis
 import CustomERC20 from "./common/abis/CustomERC20";
 import PablockToken from "./common/abis/PablockToken";
+import PablockNFT from "./common/abis/PablockNFT";
 
 //Config
-import config from "../config";
+import config from "./config";
 
 // const config = process.env || [];
 
@@ -45,8 +47,8 @@ export class PablockSDK {
 
     this.env = sdkOptions.config?.env || "MUMBAI";
 
-    logger.info(`[Debug] Working environment: ${this.env}`);
-    logger.info("[Debug] RPC Provider ", config[`RPC_PROVIDER_${this.env}`]);
+    logger.info(`Working environment: ${this.env}`);
+    // logger.info("RPC Provider ", config[`RPC_PROVIDER_${this.env}`]);
 
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
@@ -60,15 +62,13 @@ export class PablockSDK {
       config[`RPC_PROVIDER_${this.env}`]
     );
 
-    // this.provider = ethers.providers.getDefaultProvider("goerli");
-
     if (sdkOptions.privateKey) {
       this.wallet = new ethers.Wallet(sdkOptions.privateKey);
     } else {
       this.wallet = ethers.Wallet.createRandom();
     }
 
-    logger.info("[Debug] Finished initialization");
+    logger.info("Finished initialization");
   }
 
   /**
@@ -77,11 +77,13 @@ export class PablockSDK {
   async init() {
     try {
       let { status, data } = await axios.get(
-        `${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}`
+        `${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}/${
+          this.wallet!.address
+        }`
       );
 
       if (status === 200) {
-        // logger.info("[Debug] Auth token received ", data.authToken);
+        // logger.info("Auth token received ", data.authToken);
 
         this.authToken = data.authToken;
       } else {
@@ -99,7 +101,7 @@ export class PablockSDK {
    * @returns authToken
    */
   getAuthToken() {
-    logger.info(`[Debug] Your auth token is: ${this.authToken}`);
+    logger.info(`Your auth token is: ${this.authToken}`);
 
     if (this.authToken) {
       return this.authToken;
@@ -117,7 +119,7 @@ export class PablockSDK {
    * @returns apiKey
    */
   getApiKey() {
-    logger.info(`[Debug] Your API key is: ${this.apiKey}`);
+    logger.info(`Your API key is: ${this.apiKey}`);
     return this.apiKey;
   }
 
@@ -130,7 +132,13 @@ export class PablockSDK {
     return this.wallet!.address;
   }
 
-  async getPablockTokenBalance(address: string = this.wallet!.address) {
+  /**
+   * This function helps to check PablockToken (PTK)
+   *
+   * @param address
+   * @returns
+   */
+  async getPablockTokenBalance(address = this.wallet!.address) {
     const pablockToken = new ethers.Contract(
       config[`PABLOCK_TOKEN_ADDRESS_${this.env}`],
       PablockToken.abi,
@@ -138,31 +146,39 @@ export class PablockSDK {
     );
 
     const balance = parseInt(
-      (
-        await pablockToken.balanceOf(
-          "0x5d1305A4EEE866c6b3C3Cf25ad70392b6459f2cD"
-        )
-      ).toString()
+      (await pablockToken.balanceOf(address)).toString()
     );
 
-    logger.info("BALANCE ==>", balance);
+    logger.info(`User has ${balance} PTK`);
     return balance;
   }
 
-  async getMaticBalance(address: string = this.wallet!.address) {
+  /**
+   * This function return MATIC balance of the user wallet by default, otherwise, returns
+   * the balance of specified wallet
+   *
+   * @param address
+   * @returns number
+   */
+  async getMaticBalance(address = this.wallet!.address) {
     const balance = parseInt(
-      (
-        await this.provider.getBalance(
-          "0x5d1305A4EEE866c6b3C3Cf25ad70392b6459f2cD"
-        )
-      ).toString()
+      (await this.provider.getBalance(address)).toString()
     );
 
-    logger.info("BALANCE ==>", balance);
+    logger.info(`User has ${balance} MATIC`);
     return balance;
   }
 
-  async sendToken(
+  /**
+   * This function allows the user to set the allowance to a user over his token
+   *
+   * @param contractAddress
+   * @param spender
+   * @param value
+   * @param deadline
+   * @returns transaction data
+   */
+  async sendPermit(
     contractAddress: string,
     spender: string,
     value: number,
@@ -191,7 +207,8 @@ export class PablockSDK {
       parseInt(await customERC20.getChainId()),
       approve,
       nonce,
-      deadline
+      deadline,
+      "token"
     );
 
     const { v, r, s } = sign(
@@ -223,12 +240,19 @@ export class PablockSDK {
     return data;
   }
 
-  async requestToken(to: string, amount: number, contractAddress: string) {
-    logger.info(`[Debug] Request ${amount} token from ${to}`);
+  /**
+   * Request token of contract for user
+   *
+   * @param amount
+   * @param contractAddress
+   * @returns request response
+   */
+  async requestToken(amount: number, contractAddress: string) {
+    logger.info(`Request ${amount} token from ${this.wallet!.address}`);
 
     let { status, data } = await axios.post(
       `${config[`ENDPOINT_${this.env}`]}/mintToken`,
-      { contractAddress, to, amount },
+      { contractAddress, to: this.wallet!.address, amount },
       {
         headers: {
           Authorization: `Bearer ${this.authToken}`,
@@ -236,19 +260,29 @@ export class PablockSDK {
       }
     );
 
-    logger.info(`[Debug] Request token status: ${status}`);
+    logger.info(`Request token status: ${status}`);
 
     return data;
   }
 
+  /**
+   * Function that allows user to mintNFT from PablockNFT contract or other contract if specified
+   * The specified contract must be Pablock-compatible
+   *
+   * @param amount
+   * @param uri
+   * @param contractAddress
+   * @param webhookUrl
+   * @returns
+   */
   async mintNFT(
     amount: number,
     uri: string,
-    contractAddress: string,
+    contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`],
     webhookUrl: string | null
   ) {
     let { status, data } = await axios.post(
-      `${config[`ENDPOINT_${this.env}`]}/mintToken`,
+      `${config[`ENDPOINT_${this.env}`]}/mintNFT`,
       { to: this.wallet!.address, amount, uri, contractAddress, webhookUrl },
       {
         headers: {
@@ -262,6 +296,128 @@ export class PablockSDK {
     return data;
   }
 
+  /**
+   * This function set allowance and permit Pablock Address to transfer the NFT to the set receiver address
+   *
+   * @param to
+   * @param tokenId
+   * @param deadline
+   * @param contractAddress
+   * @returns
+   */
+  async sendNFT(
+    to: string,
+    tokenId: number,
+    deadline: number,
+    contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`]
+  ) {
+    try {
+      const customERC721 = new ethers.Contract(
+        contractAddress,
+        PablockNFT.abi,
+        // this.wallet.connect(this.provider)
+        this.provider
+      );
+
+      const approve = {
+        owner: this.wallet!.address,
+        spender: config[`PABLOCK_ADDRESS_${this.env}`],
+        tokenId,
+      };
+
+      const nonce = parseInt(
+        (await customERC721.getNonces(approve.owner)).toString()
+      );
+
+      const digest = getPermitDigest(
+        await customERC721.name(),
+        customERC721.address,
+        parseInt(await customERC721.getChainId()),
+        approve,
+        nonce,
+        deadline,
+        "nft"
+      );
+
+      const { v, r, s } = sign(
+        digest,
+        Buffer.from(this.wallet!.privateKey.substring(2), "hex")
+      );
+
+      const tx = await customERC721.populateTransaction.requestPermit(
+        approve.owner,
+        approve.spender,
+        approve.tokenId,
+        deadline,
+        v,
+        r,
+        s
+      );
+
+      let { status, data } = await axios.post(
+        "http://127.0.0.1:8082/transferNFT",
+        { tx, to, tokenId, contractAddress },
+        {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`,
+          },
+        }
+      );
+      return data;
+    } catch (err) {
+      logger.error(`NFTTransfer error: ${err} `);
+      return null;
+    }
+  }
+
+  /**
+   * This functions outputs the NFT tokens, owned by the user, of the contract addresses given through the input
+   *
+   * @param contractAddresses
+   * @param ownerAddress
+   * @returns Object with contract addresses as keys and NFT arrays as value
+   */
+  async getOwnedNFT(
+    contractAddresses: string[],
+    ownerAddress = this.wallet!.address
+  ) {
+    let tokenOfOwner = {};
+
+    for (const addr of contractAddresses) {
+      let contract = new ethers.Contract(
+        addr,
+        PablockNFT.abi,
+        this.wallet!.connect(this.provider)
+      );
+
+      let balance = await contract.balanceOf(ownerAddress);
+
+      logger.info(`User has ${balance} NFTs in ${addr} contract`);
+      let tokenIds = [];
+      for (const i of range(balance)) {
+        const tokenId = await contract.tokenOfOwnerByIndex(ownerAddress, i);
+
+        logger.info(`Token: ${await contract.baseURI()}`);
+
+        // tokenOfOwner[addr] = parseInt(tokenId.values.toString());
+        tokenIds.push({
+          tokenId: tokenId.toString(),
+          tokenURI: await contract.tokenURI(tokenId.toString()),
+        });
+      }
+
+      tokenOfOwner[addr] = tokenIds;
+      // logger.info(`User own from ${addr}: ${tokenOfOwner[addr]}`);
+    }
+
+    return tokenOfOwner;
+  }
+
+  /**
+   * Check if JWT Token is still valid
+   *
+   * @returns boolean
+   */
   async checkJWTValidity() {
     let { status, data } = await axios.get(
       `${config[`ENDPOINT_${this.env}`]}/checkJWT`,
@@ -277,6 +433,11 @@ export class PablockSDK {
     return data;
   }
 
+  /**
+   * Return API version
+   *
+   * @returns string
+   */
   async getAPIVersion() {
     let { data } = await axios.get(
       `${config[`ENDPOINT_${this.env}`]}/getVersion`

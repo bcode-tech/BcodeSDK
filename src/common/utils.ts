@@ -6,17 +6,29 @@ const {
 } = require("ethers/lib/utils");
 const { ecsign } = require("ethereumjs-util");
 
-const PERMIT_TYPEHASH = keccak256(
-  toUtf8Bytes(
-    "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-  )
-);
+const PERMIT_TYPEHASH = {
+  token: keccak256(
+    toUtf8Bytes(
+      "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+    )
+  ),
+  nft: keccak256(
+    toUtf8Bytes(
+      "Permit(address owner,address spender,uint256 tokenId,uint256 nonce,uint256 deadline)"
+    )
+  ),
+};
 
 export const sign = (digest: string, privateKey: Buffer) => {
   return ecsign(Buffer.from(digest.slice(2), "hex"), privateKey);
 };
 
-type Approve = { owner: string; spender: string; value: number };
+type Approve = {
+  owner: string;
+  spender: string;
+  value?: number;
+  tokenId?: number;
+};
 
 // Returns the EIP712 hash which should be signed by the user
 // in order to make a call to `permit`
@@ -26,7 +38,8 @@ export function getPermitDigest(
   chainId: number,
   approve: Approve,
   nonce: number,
-  deadline: number
+  deadline: number,
+  contractType: "nft" | "token"
 ) {
   const DOMAIN_SEPARATOR = getDomainSeparator(name, address, chainId);
   return keccak256(
@@ -40,10 +53,10 @@ export function getPermitDigest(
           defaultAbiCoder.encode(
             ["bytes32", "address", "address", "uint256", "uint256", "uint256"],
             [
-              PERMIT_TYPEHASH,
+              PERMIT_TYPEHASH[contractType],
               approve.owner,
               approve.spender,
-              approve.value,
+              approve.value || approve.tokenId,
               nonce,
               deadline,
             ]
