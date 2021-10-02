@@ -64,7 +64,6 @@
 import dts from "rollup-plugin-dts";
 import esbuild from "rollup-plugin-esbuild";
 import json from "@rollup/plugin-json";
-import jsdoc from "rollup-plugin-jsdoc";
 
 const name = require("./package.json").main.replace(/\.js$/, "");
 
@@ -90,20 +89,11 @@ export default [
       },
     ],
   }),
-  bundle({
-    input: "./src/index.ts",
-    plugins: [
-      jsdoc({
-        args: ["-d", "doc"], // Command-line options passed to JSDoc, Note: use "config" to indicate configuration file, do not use "-c" or "--configure" in "args"
-        config: "jsdoc.config.json", // Path to the configuration file for JSDoc. Default: jsdoc.json
-      }),
-    ],
-  }),
-  bundle({
-    plugins: [dts()],
-    output: {
-      file: `${name}.d.ts`,
-      format: "es",
-    },
-  }),
+  // bundle({
+  //   plugins: [dts()],
+  //   output: {
+  //     file: `${name}.d.ts`,
+  //     format: "es",
+  //   },
+  // }),
 ];

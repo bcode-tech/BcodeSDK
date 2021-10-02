@@ -182,7 +182,7 @@ export class PablockSDK {
     deadline: number,
     abi = CustomERC20.abi
   ) {
-    const customERC20 = new ethers.Contract(
+    const contract = new ethers.Contract(
       contractAddress,
       abi,
       // this.wallet.connect(this.provider)
@@ -195,14 +195,12 @@ export class PablockSDK {
       value,
     };
 
-    const nonce = parseInt(
-      (await customERC20.nonces(approve.owner)).toString()
-    );
+    const nonce = parseInt((await contract.nonces(approve.owner)).toString());
 
     const digest = getPermitDigest(
-      await customERC20.name(),
-      customERC20.address,
-      parseInt(await customERC20.getChainId()),
+      await contract.name(),
+      contract.address,
+      parseInt(await contract.getChainId()),
       approve,
       nonce,
       deadline,
@@ -214,7 +212,7 @@ export class PablockSDK {
       Buffer.from(this.wallet!.privateKey.substring(2), "hex")
     );
 
-    const tx = await customERC20.populateTransaction.permit(
+    const tx = await contract.populateTransaction.permit(
       approve.owner,
       approve.spender,
       approve.value,
@@ -384,8 +382,8 @@ export class PablockSDK {
         1657121546000,
         PablockToken.abi
       );
-      console.log(data);
 
+      logger.info("Execute transaction: ", data);
       return data;
     } catch (err) {
       logger.error(`Notarization error: ${err} `);

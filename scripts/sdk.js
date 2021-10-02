@@ -13,5 +13,5 @@ const sdk = new PablockSDK({
 
 (async () => {
   await sdk.init();
-  console.log(await sdk.executeNotarization());
+  console.log(await sdk.getWalletAddress());
 })();

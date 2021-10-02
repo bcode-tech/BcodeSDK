@@ -5,6 +5,8 @@ const { PablockSDK } = require("../build");
 
 const config = require("../config.json");
 
+let tokenId = null;
+
 // NodeMonkey();
 
 const sdk = new PablockSDK({
@@ -53,10 +55,15 @@ describe("Pablock SDK Test", () => {
     expect(sdk.getApiKey()).toBe("api_test");
   });
 
-  it("should have token", async () => {
+  it("should have PTK", async () => {
     expect(await sdk.getPablockTokenBalance()).toBeGreaterThan(0);
   });
+  it("should have MATIC", async () => {
+    expect(await sdk.getMaticBalance()).toBeGreaterThan(0);
+  });
+});
 
+describe("Pablock SDK NFT Test", () => {
   it("should mint and transfer NFT", async () => {
     const { tx } = await sdk.mintNFT(1, "http://uridiprova.it");
 
@@ -72,7 +79,8 @@ describe("Pablock SDK Test", () => {
     const contractAddress = config[`PABLOCK_NFT_ADDRESS_LOCAL`];
 
     const tokens = await sdk.getOwnedNFT([contractAddress]);
-    // console.log(tokens);
+    // console.log("MY TOKENS ==>", tokens);
+    tokenId = tokens[contractAddress][0].tokenId;
 
     expect(tokens[contractAddress].length).toBeGreaterThan(0);
   });
@@ -80,7 +88,7 @@ describe("Pablock SDK Test", () => {
   it("should send NFT", async () => {
     const res = await sdk.sendNFT(
       "0x4c617b110afc0926bf35dce33D0e0178580B50AF",
-      1,
+      tokenId,
       1657121546000
     );
 
@@ -94,12 +102,18 @@ describe("Pablock SDK Test", () => {
     });
   });
 
-  it("receiver addres shoul have NFT", async () => {
+  it("receiver address should have NFT", async () => {
     const contractAddress = config[`PABLOCK_NFT_ADDRESS_LOCAL`];
 
     const tokens = await sdk2.getOwnedNFT([contractAddress]);
-    console.log(tokens);
+    // console.log("HIS TOKENS ==>", tokens);
 
     expect(tokens[contractAddress].length).toBeGreaterThan(0);
+  });
+});
+
+describe("Pablock SDK Notarization Test", () => {
+  it("Execute notarization", () => {
+    expect(true).toBe(true);
   });
 });

@@ -1647,19 +1647,19 @@ var config = {
   ENDPOINT_POLYGON: "http://127.0.0.1:8082",
   RPC_PROVIDER_LOCAL: "http://127.0.0.1:7545",
   RPC_PROVIDER_MUMBAI: "https://polygon-mumbai.infura.io/v3/98084ec8ac4d49e181f0ffc83562f6f6",
-  PABLOCK_TOKEN_ADDRESS_LOCAL: "0x2b9233683001657161db866c7405493Fc1d1C22d",
+  PABLOCK_TOKEN_ADDRESS_LOCAL: "0x345B60e0D77b17AF10BF099778BE466D030E18df",
+  PABLOCK_NFT_ADDRESS_LOCAL: "0x1C25F7507C09B9616e13343Fc5E5C1ba9082323A",
+  PABLOCK_NOTARIZATION_ADDRESS_LOCAL: "0xFDd1a4f58fF4c725e585DD5dD443F56c642Ee1a4",
   PABLOCK_TOKEN_ADDRESS_MUMBAI: "0x9D0d991c90112C2805F250cD7B5D399c5e834088",
-  PABLOCK_NFT_ADDRESS_LOCAL: "0x29f8015263c90a19eB08a354De4Fb97c5A68376F",
   PABLOCK_ADDRESS_LOCAL: "0xfc8CFa30350f7B195f2b5c6F350f76720bfD89f4"
 };
 
 class PablockSDK {
   constructor(sdkOptions) {
-    var _a, _b;
-    if (!((_a = sdkOptions.config) == null ? void 0 : _a.debugMode)) {
+    if (!sdkOptions.config?.debugMode) {
       logger.transports[0].silent = true;
     }
-    this.env = ((_b = sdkOptions.config) == null ? void 0 : _b.env) || "MUMBAI";
+    this.env = sdkOptions.config?.env || "MUMBAI";
     logger.info(`Working environment: ${this.env}`);
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
@@ -1716,18 +1716,17 @@ class PablockSDK {
     return balance;
   }
   async sendPermit(contractAddress, spender, value, deadline, abi = CustomERC20.abi) {
-    var _a;
-    const customERC20 = new ethers.ethers.Contract(contractAddress, abi, this.provider);
+    const contract = new ethers.ethers.Contract(contractAddress, abi, this.provider);
     const approve = {
       owner: this.wallet.address,
       spender,
       value
     };
-    const nonce = parseInt((await customERC20.nonces(approve.owner)).toString());
-    const digest = getPermitDigest(await customERC20.name(), customERC20.address, parseInt(await customERC20.getChainId()), approve, nonce, deadline, "token");
+    const nonce = parseInt((await contract.nonces(approve.owner)).toString());
+    const digest = getPermitDigest(await contract.name(), contract.address, parseInt(await contract.getChainId()), approve, nonce, deadline, "token");
     const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
-    const tx = await customERC20.populateTransaction.permit(approve.owner, approve.spender, approve.value, deadline, v, r, s);
-    let { status, data } = await axios__default['default'].post("http://127.0.0.1:8082/sendPermit", { tx, contractAddress, address: (_a = this.wallet) == null ? void 0 : _a.address }, {
+    const tx = await contract.populateTransaction.permit(approve.owner, approve.spender, approve.value, deadline, v, r, s);
+    let { status, data } = await axios__default['default'].post("http://127.0.0.1:8082/sendPermit", { tx, contractAddress, address: this.wallet?.address }, {
       headers: {
         Authorization: `Bearer ${this.authToken}`
       }
@@ -1779,7 +1778,7 @@ class PablockSDK {
   async executeNotarization() {
     try {
       const data = await this.sendPermit(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], config[`PABLOCK_ADDRESS_${this.env}`], 1, 1657121546e3, PablockToken.abi);
-      console.log(data);
+      logger.info("Execute transaction: ", data);
       return data;
     } catch (err) {
       logger.error(`Notarization error: ${err} `);
