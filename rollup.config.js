@@ -99,11 +99,11 @@ export default [
       }),
     ],
   }),
-  // bundle({
-  //   plugins: [dts()],
-  //   output: {
-  //     file: `${name}.d.ts`,
-  //     format: "es",
-  //   },
-  // }),
+  bundle({
+    plugins: [dts()],
+    output: {
+      file: `${name}.d.ts`,
+      format: "es",
+    },
+  }),
 ];

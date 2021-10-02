@@ -14,16 +14,14 @@ import { ERROR_TYPE } from "./common/constants";
 import CustomERC20 from "./common/abis/CustomERC20";
 import PablockToken from "./common/abis/PablockToken";
 import PablockNFT from "./common/abis/PablockNFT";
+// import PablockNotarization from "./common/abis/PablockNotarization";
 
 //Config
 import config from "./config";
 
-// const config = process.env || [];
-
 type Configuration = {
   env?: "LOCAL" | "MUMBAI" | "POLYGON";
   debugMode: boolean | false;
-  // network: "LOCAL" | "MUMBAI" | "POLYGON";
 };
 
 type SdkOptions = {
@@ -38,7 +36,6 @@ export class PablockSDK {
   provider?: any;
   authToken?: string;
   env: string;
-  // network: string;
 
   constructor(sdkOptions: SdkOptions) {
     if (!sdkOptions.config?.debugMode) {
@@ -182,11 +179,12 @@ export class PablockSDK {
     contractAddress: string,
     spender: string,
     value: number,
-    deadline: number
+    deadline: number,
+    abi = CustomERC20.abi
   ) {
     const customERC20 = new ethers.Contract(
       contractAddress,
-      CustomERC20.abi,
+      abi,
       // this.wallet.connect(this.provider)
       this.provider
     );
@@ -366,6 +364,31 @@ export class PablockSDK {
       return data;
     } catch (err) {
       logger.error(`NFTTransfer error: ${err} `);
+      return null;
+    }
+  }
+
+  async executeNotarization() {
+    try {
+      // const pablockNotarization = new ethers.Contract(
+      //   config[`PABLOCK_NOTARIZATION_ADDRESS_${this.env}`],
+      //   PablockNotarization.abi,
+      //   // this.wallet.connect(this.provider)
+      //   this.provider
+      // );
+
+      const data = await this.sendPermit(
+        config[`PABLOCK_TOKEN_ADDRESS_${this.env}`],
+        config[`PABLOCK_ADDRESS_${this.env}`],
+        1,
+        1657121546000,
+        PablockToken.abi
+      );
+      console.log(data);
+
+      return data;
+    } catch (err) {
+      logger.error(`Notarization error: ${err} `);
       return null;
     }
   }

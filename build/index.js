@@ -1655,10 +1655,11 @@ var config = {
 
 class PablockSDK {
   constructor(sdkOptions) {
-    if (!sdkOptions.config?.debugMode) {
+    var _a, _b;
+    if (!((_a = sdkOptions.config) == null ? void 0 : _a.debugMode)) {
       logger.transports[0].silent = true;
     }
-    this.env = sdkOptions.config?.env || "MUMBAI";
+    this.env = ((_b = sdkOptions.config) == null ? void 0 : _b.env) || "MUMBAI";
     logger.info(`Working environment: ${this.env}`);
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
@@ -1714,8 +1715,9 @@ class PablockSDK {
     logger.info(`User has ${balance} MATIC`);
     return balance;
   }
-  async sendPermit(contractAddress, spender, value, deadline) {
-    const customERC20 = new ethers.ethers.Contract(contractAddress, CustomERC20.abi, this.provider);
+  async sendPermit(contractAddress, spender, value, deadline, abi = CustomERC20.abi) {
+    var _a;
+    const customERC20 = new ethers.ethers.Contract(contractAddress, abi, this.provider);
     const approve = {
       owner: this.wallet.address,
       spender,
@@ -1725,7 +1727,7 @@ class PablockSDK {
     const digest = getPermitDigest(await customERC20.name(), customERC20.address, parseInt(await customERC20.getChainId()), approve, nonce, deadline, "token");
     const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
     const tx = await customERC20.populateTransaction.permit(approve.owner, approve.spender, approve.value, deadline, v, r, s);
-    let { status, data } = await axios__default['default'].post("http://127.0.0.1:8082/sendPermit", { tx, contractAddress, address: this.wallet?.address }, {
+    let { status, data } = await axios__default['default'].post("http://127.0.0.1:8082/sendPermit", { tx, contractAddress, address: (_a = this.wallet) == null ? void 0 : _a.address }, {
       headers: {
         Authorization: `Bearer ${this.authToken}`
       }
@@ -1771,6 +1773,16 @@ class PablockSDK {
       return data;
     } catch (err) {
       logger.error(`NFTTransfer error: ${err} `);
+      return null;
+    }
+  }
+  async executeNotarization() {
+    try {
+      const data = await this.sendPermit(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], config[`PABLOCK_ADDRESS_${this.env}`], 1, 1657121546e3, PablockToken.abi);
+      console.log(data);
+      return data;
+    } catch (err) {
+      logger.error(`Notarization error: ${err} `);
       return null;
     }
   }
