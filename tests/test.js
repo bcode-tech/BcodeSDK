@@ -63,6 +63,14 @@ describe("Pablock SDK Test", () => {
   });
 });
 
+describe("Execute meta transaction", () => {
+  it("should prepare transaction", () => {
+
+    const txData = await sdk.prepareTransaction({address: "", abi: [], name: "Test Meta Transaction", version: "0.1.0"})
+    expect(true).toBe(true)
+  })
+})
+
 describe("Pablock SDK NFT Test", () => {
   it("should mint and transfer NFT", async () => {
     const { tx } = await sdk.mintNFT(1, "http://uridiprova.it");
@@ -79,7 +87,7 @@ describe("Pablock SDK NFT Test", () => {
     const contractAddress = config[`PABLOCK_NFT_ADDRESS_LOCAL`];
 
     const tokens = await sdk.getOwnedNFT([contractAddress]);
-    // console.log("MY TOKENS ==>", tokens);
+    console.log("MY TOKENS ==>", tokens);
     tokenId = tokens[contractAddress][0].tokenId;
 
     expect(tokens[contractAddress].length).toBeGreaterThan(0);
@@ -108,12 +116,24 @@ describe("Pablock SDK NFT Test", () => {
     const tokens = await sdk2.getOwnedNFT([contractAddress]);
     // console.log("HIS TOKENS ==>", tokens);
 
-    expect(tokens[contractAddress].length).toBeGreaterThan(0);
+    expect(!!tokens[contractAddress].find((el) => el.tokenId === tokenId)).toBe(
+      true
+    );
   });
 });
 
 describe("Pablock SDK Notarization Test", () => {
-  it("Execute notarization", () => {
-    expect(true).toBe(true);
+  it("Send permit and", async () => {
+    let { tx } = await sdk.executeNotarization(
+      "0xb133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2",
+      "http://uri di prova"
+    );
+
+    expect(tx).toMatchObject({
+      from: expect.any(String),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      blockHash: expect.any(String),
+    });
   });
 });

@@ -1,10 +1,11 @@
 //Libraries
 import axios from "axios";
-import { ethers, Wallet } from "ethers";
+import { ethers, Wallet, BigNumber, ContractInterface } from "ethers";
 import { range } from "lodash";
+import web3Abi from "web3-eth-abi";
 
 //Utils
-import { sign, getPermitDigest } from "./common/utils";
+import { sign, getPermitDigest, getTransactionData } from "./common/utils";
 import { logger } from "./common/logger";
 
 //Constants
@@ -14,7 +15,7 @@ import { ERROR_TYPE } from "./common/constants";
 import CustomERC20 from "./common/abis/CustomERC20";
 import PablockToken from "./common/abis/PablockToken";
 import PablockNFT from "./common/abis/PablockNFT";
-// import PablockNotarization from "./common/abis/PablockNotarization";
+import PablockNotarization from "./common/abis/PablockNotarization";
 
 //Config
 import config from "./config";
@@ -26,12 +27,20 @@ type Configuration = {
 
 type SdkOptions = {
   apiKey: string;
+  authToken?: string;
   privateKey: string;
   config?: Configuration;
 };
 
+type ContractStruct = {
+  address: string;
+  abi: Array<any>;
+  name: string;
+  version: string;
+};
+
 export class PablockSDK {
-  apiKey: string;
+  apiKey?: string;
   wallet?: Wallet;
   provider?: any;
   authToken?: string;
@@ -49,8 +58,12 @@ export class PablockSDK {
 
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
+    } else if (sdkOptions.authToken) {
+      this.authToken = sdkOptions.authToken;
     } else {
-      console.error("[Error] API key is required, please insert one!");
+      console.error(
+        "[Error] API key or auth token are required, please insert one!"
+      );
       process.exit(1);
     }
 
@@ -73,18 +86,21 @@ export class PablockSDK {
    */
   async init() {
     try {
-      let { status, data } = await axios.get(
-        `${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}/${
-          this.wallet!.address
-        }`
-      );
+      if (this.apiKey) {
+        let { status, data } = await axios.get(
+          `${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}/${
+            this.wallet!.address
+          }`
+        );
+        if (status === 200) {
+          // logger.info("Auth token received ", data.authToken);
 
-      if (status === 200) {
-        // logger.info("Auth token received ", data.authToken);
-
-        this.authToken = data.authToken;
-      } else {
-        throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
+          this.authToken = data.authToken;
+        } else {
+          throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
+        }
+      } else if (this.authToken) {
+        this.checkJWTValidity();
       }
     } catch (error) {
       logger.info("[Error] ", error);
@@ -133,7 +149,7 @@ export class PablockSDK {
    * This function helps to check PablockToken (PTK)
    *
    * @param address
-   * @returns
+   * @returns balance - string
    */
   async getPablockTokenBalance(address = this.wallet!.address) {
     const pablockToken = new ethers.Contract(
@@ -143,11 +159,34 @@ export class PablockSDK {
     );
 
     const balance = parseInt(
-      (await pablockToken.balanceOf(address)).toString()
+      ethers.utils.formatEther(await pablockToken.balanceOf(address))
     );
 
     logger.info(`User has ${balance} PTK`);
     return balance;
+  }
+
+  async getTokenBalance(
+    contractAddress = config[`CUSTOM_TOKEN_ADDRESS_${this.env}`],
+    address = this.wallet!.address
+  ) {
+    try {
+      const customToken = new ethers.Contract(
+        contractAddress,
+        CustomERC20.abi,
+        this.provider
+      );
+
+      const balance = parseInt(
+        ethers.utils.formatEther(await customToken.balanceOf(address))
+      );
+
+      logger.info(`User has ${balance} ${await customToken.name()}`);
+      return balance;
+    } catch (err) {
+      logger.error("[Pablock API] Custom token balance: ", err);
+      throw ERROR_TYPE.CONTRACT_ERROR;
+    }
   }
 
   /**
@@ -182,58 +221,68 @@ export class PablockSDK {
     deadline: number,
     abi = CustomERC20.abi
   ) {
-    const contract = new ethers.Contract(
-      contractAddress,
-      abi,
-      // this.wallet.connect(this.provider)
-      this.provider
-    );
+    try {
+      const contract = new ethers.Contract(
+        contractAddress,
+        abi,
+        // this.wallet.connect(this.provider)
+        this.provider
+      );
 
-    const approve = {
-      owner: this.wallet!.address,
-      spender,
-      value,
-    };
+      console.log(await contract.getVersion());
 
-    const nonce = parseInt((await contract.nonces(approve.owner)).toString());
+      const approve = {
+        owner: this.wallet!.address,
+        spender,
+        value,
+      };
 
-    const digest = getPermitDigest(
-      await contract.name(),
-      contract.address,
-      parseInt(await contract.getChainId()),
-      approve,
-      nonce,
-      deadline,
-      "token"
-    );
+      const nonce = parseInt(
+        (await contract.getNonces(approve.owner)).toString()
+      );
 
-    const { v, r, s } = sign(
-      digest,
-      Buffer.from(this.wallet!.privateKey.substring(2), "hex")
-    );
-
-    const tx = await contract.populateTransaction.permit(
-      approve.owner,
-      approve.spender,
-      approve.value,
-      deadline,
-      v,
-      r,
-      s
-    );
-
-    let { status, data } = await axios.post(
-      // `${config[`ENDPOINT_${this.env}`]}/sendToken`,
-      "http://127.0.0.1:8082/sendPermit",
-      { tx, contractAddress, address: this.wallet?.address },
-      {
-        headers: {
-          Authorization: `Bearer ${this.authToken}`,
+      const digest = getPermitDigest(
+        await contract.name(),
+        contract.address,
+        config[`CHAIN_ID_${this.env}`],
+        {
+          approve,
+          nonce,
+          deadline,
         },
-      }
-    );
+        "token"
+      );
 
-    return data;
+      const { v, r, s } = sign(
+        digest,
+        Buffer.from(this.wallet!.privateKey.substring(2), "hex")
+      );
+
+      const tx = await contract.populateTransaction.requestPermit(
+        approve.owner,
+        approve.spender,
+        approve.value,
+        deadline,
+        v,
+        r,
+        s
+      );
+
+      let { status, data } = await axios.post(
+        // `${config[`ENDPOINT_${this.env}`]}/sendToken`,
+        `${config[`ENDPOINT_${this.env}`]}/sendPermit`,
+        { tx, contractAddress, address: this.wallet?.address },
+        {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`,
+          },
+        }
+      );
+
+      return data;
+    } catch (error) {
+      logger.info("[Send Permit] ", error);
+    }
   }
 
   /**
@@ -277,6 +326,7 @@ export class PablockSDK {
     contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`],
     webhookUrl: string | null
   ) {
+    console.log("CONTRACT ADDRESS ==>", contractAddress);
     let { status, data } = await axios.post(
       `${config[`ENDPOINT_${this.env}`]}/mintNFT`,
       { to: this.wallet!.address, amount, uri, contractAddress, webhookUrl },
@@ -328,10 +378,12 @@ export class PablockSDK {
       const digest = getPermitDigest(
         await customERC721.name(),
         customERC721.address,
-        parseInt(await customERC721.getChainId()),
-        approve,
-        nonce,
-        deadline,
+        config[`CHAIN_ID_${this.env}`],
+        {
+          approve,
+          nonce,
+          deadline,
+        },
         "nft"
       );
 
@@ -351,7 +403,7 @@ export class PablockSDK {
       );
 
       let { status, data } = await axios.post(
-        "http://127.0.0.1:8082/transferNFT",
+        `${config[`ENDPOINT_${this.env}`]}/transferNFT`,
         { tx, to, tokenId, contractAddress },
         {
           headers: {
@@ -366,29 +418,112 @@ export class PablockSDK {
     }
   }
 
-  async executeNotarization() {
+  async executeNotarization(
+    hash: string,
+    uri: string,
+    deadline = 1657121546000,
+    metadata: object | null,
+    webhookUrl: string | null,
+    secret: string | null
+  ) {
     try {
-      // const pablockNotarization = new ethers.Contract(
-      //   config[`PABLOCK_NOTARIZATION_ADDRESS_${this.env}`],
-      //   PablockNotarization.abi,
-      //   // this.wallet.connect(this.provider)
-      //   this.provider
-      // );
+      const pablockNotarization = new ethers.Contract(
+        config[`PABLOCK_NOTARIZATION_ADDRESS_${this.env}`],
+        PablockNotarization.abi,
+        // this.wallet.connect(this.provider)
+        this.provider
+      );
 
-      const data = await this.sendPermit(
+      const permit = await this.sendPermit(
         config[`PABLOCK_TOKEN_ADDRESS_${this.env}`],
         config[`PABLOCK_ADDRESS_${this.env}`],
         1,
-        1657121546000,
+        deadline,
         PablockToken.abi
       );
 
-      logger.info("Execute transaction: ", data);
+      const digest = getPermitDigest(
+        "notarization",
+        pablockNotarization.address,
+        config[`CHAIN_ID_${this.env}`],
+        { hash, uri, applicant: this.wallet!.address },
+        "notarization"
+      );
+
+      console.log("DIGEST ==>", digest);
+
+      const { v, r, s } = sign(
+        digest,
+        Buffer.from(this.wallet!.privateKey.substring(2), "hex")
+      );
+
+      const tx = await pablockNotarization.populateTransaction.notarize(
+        hash,
+        uri,
+        this.wallet!.address,
+        v,
+        r,
+        s
+      );
+
+      let { status, data } = await axios.post(
+        `${config[`ENDPOINT_${this.env}`]}/sendTransaction`,
+        { tx, from: this.wallet!.address },
+        {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`,
+          },
+        }
+      );
       return data;
     } catch (err) {
       logger.error(`Notarization error: ${err} `);
       return null;
     }
+  }
+
+  async prepareTransaction(
+    contractObj: ContractStruct,
+    functionName: string,
+    params = []
+  ) {
+    let contract = new ethers.Contract(
+      contractObj.address,
+      contractObj.abi,
+      this.wallet
+    );
+
+    let functionSignature = web3Abi.encodeFunctionCall(
+      contractObj.abi.find(
+        (el) => el.type === "function" && el.name === functionName
+      ),
+      params
+    );
+
+    const { data } = await axios.get(`/getNonce/${this.wallet!.address}`, {
+      headers: { Authorization: `Bearer ${this.authToken}` },
+    });
+
+    let { r, s, v } = await getTransactionData(
+      data.nonce,
+      functionSignature,
+      this.wallet!.address,
+      this.wallet!.privateKey,
+      {
+        name: contractObj.name,
+        version: contractObj.version,
+        address: contractObj.address,
+      }
+    );
+
+    return {
+      contractAddress: contractObj.address,
+      userAddress: this.wallet!.address,
+      functionSignature,
+      r,
+      s,
+      v,
+    };
   }
 
   /**
@@ -440,18 +575,44 @@ export class PablockSDK {
    * @returns boolean
    */
   async checkJWTValidity() {
-    let { status, data } = await axios.get(
-      `${config[`ENDPOINT_${this.env}`]}/checkJWT`,
-      {
-        headers: {
-          Authorization: `Bearer ${this.authToken}`,
-        },
-      }
-    );
+    try {
+      let { status, data } = await axios.get(
+        `${config[`ENDPOINT_${this.env}`]}/checkJWT`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`,
+          },
+        }
+      );
 
-    logger.info(status, data);
+      logger.info(status, data);
 
-    return data;
+      return data;
+    } catch (error) {
+      throw ERROR_TYPE.UNABLE_TO_CHECK_TOKEN;
+    }
+  }
+
+  async generateSubJWT(address: string) {
+    try {
+      let { status, data } = await axios.get(
+        `${config[`ENDPOINT_${this.env}`]}/generateSubJWT/${address}`,
+        {
+          headers: {
+            // Authorization: `Bearer ${this.authToken}`,
+            Authorization:
+              "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlLZXkiOiJhcGlfdGVzdCIsImFkZHJlc3MiOiJ1bmRlZmluZWQiLCJzdWJUb2tlbiI6dHJ1ZSwiaWF0IjoxNjMzNjg0NTk4fQ.UQEZ-IHNXNKwYO6Q7xRs_MrUGA37T-fG4QD3nTQwPJuA5emPNuE52X-RVJdSOcRiQWnTrgqm9q2EDZoM4ukuoQ",
+          },
+        }
+      );
+
+      console.log(data);
+      logger.info(`SubJWT: ${data.authToken}`);
+
+      return data.authToken;
+    } catch (error) {
+      throw ERROR_TYPE.UNABLE_TO_GENERATE_SUB_JWT;
+    }
   }
 
   /**

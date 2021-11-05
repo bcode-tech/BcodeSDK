@@ -3,11 +3,6 @@ export default {
     {
       inputs: [
         {
-          internalType: "uint256",
-          name: "_maxSupply",
-          type: "uint256",
-        },
-        {
           internalType: "string",
           name: "_name",
           type: "string",
@@ -25,6 +20,11 @@ export default {
         {
           internalType: "address",
           name: "_delegate",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "_pablockTokenAddress",
           type: "address",
         },
       ],
@@ -93,7 +93,6 @@ export default {
       ],
       stateMutability: "view",
       type: "function",
-      constant: true,
     },
     {
       inputs: [],
@@ -107,7 +106,19 @@ export default {
       ],
       stateMutability: "view",
       type: "function",
-      constant: true,
+    },
+    {
+      inputs: [],
+      name: "TRANSFER_TYPEHASH",
+      outputs: [
+        {
+          internalType: "bytes32",
+          name: "",
+          type: "bytes32",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
     },
     {
       inputs: [
@@ -132,7 +143,6 @@ export default {
       ],
       stateMutability: "view",
       type: "function",
-      constant: true,
     },
     {
       inputs: [
@@ -143,7 +153,7 @@ export default {
         },
         {
           internalType: "uint256",
-          name: "wad",
+          name: "amount",
           type: "uint256",
         },
       ],
@@ -162,7 +172,7 @@ export default {
       inputs: [
         {
           internalType: "address",
-          name: "guy",
+          name: "account",
           type: "address",
         },
       ],
@@ -176,21 +186,67 @@ export default {
       ],
       stateMutability: "view",
       type: "function",
-      constant: true,
     },
     {
       inputs: [],
       name: "decimals",
       outputs: [
         {
-          internalType: "uint256",
+          internalType: "uint8",
           name: "",
-          type: "uint256",
+          type: "uint8",
         },
       ],
       stateMutability: "view",
       type: "function",
-      constant: true,
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "spender",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "subtractedValue",
+          type: "uint256",
+        },
+      ],
+      name: "decreaseAllowance",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool",
+        },
+      ],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "spender",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "addedValue",
+          type: "uint256",
+        },
+      ],
+      name: "increaseAllowance",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool",
+        },
+      ],
+      stateMutability: "nonpayable",
+      type: "function",
     },
     {
       inputs: [],
@@ -204,84 +260,6 @@ export default {
       ],
       stateMutability: "view",
       type: "function",
-      constant: true,
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
-      ],
-      name: "nonces",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "owner",
-          type: "address",
-        },
-        {
-          internalType: "address",
-          name: "spender",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "amount",
-          type: "uint256",
-        },
-        {
-          internalType: "uint256",
-          name: "deadline",
-          type: "uint256",
-        },
-        {
-          internalType: "uint8",
-          name: "v",
-          type: "uint8",
-        },
-        {
-          internalType: "bytes32",
-          name: "r",
-          type: "bytes32",
-        },
-        {
-          internalType: "bytes32",
-          name: "s",
-          type: "bytes32",
-        },
-      ],
-      name: "permit",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "symbol",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
     },
     {
       inputs: [],
@@ -295,18 +273,17 @@ export default {
       ],
       stateMutability: "view",
       type: "function",
-      constant: true,
     },
     {
       inputs: [
         {
           internalType: "address",
-          name: "dst",
+          name: "recipient",
           type: "address",
         },
         {
           internalType: "uint256",
-          name: "wad",
+          name: "amount",
           type: "uint256",
         },
       ],
@@ -325,44 +302,14 @@ export default {
       inputs: [
         {
           internalType: "address",
-          name: "src",
+          name: "contractAddr",
           type: "address",
         },
-        {
-          internalType: "address",
-          name: "dst",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "wad",
-          type: "uint256",
-        },
       ],
-      name: "transferFrom",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool",
-        },
-      ],
+      name: "initialize",
+      outputs: [],
       stateMutability: "nonpayable",
       type: "function",
-    },
-    {
-      inputs: [],
-      name: "version",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string",
-        },
-      ],
-      stateMutability: "pure",
-      type: "function",
-      constant: true,
     },
     {
       inputs: [
@@ -424,12 +371,42 @@ export default {
     {
       inputs: [
         {
+          internalType: "address",
+          name: "from",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "to",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "spender",
+          type: "address",
+        },
+        {
           internalType: "uint256",
-          name: "_maxSupply",
+          name: "amount",
           type: "uint256",
         },
+        {
+          internalType: "uint8",
+          name: "v",
+          type: "uint8",
+        },
+        {
+          internalType: "bytes32",
+          name: "r",
+          type: "bytes32",
+        },
+        {
+          internalType: "bytes32",
+          name: "s",
+          type: "bytes32",
+        },
       ],
-      name: "changeMaxSupply",
+      name: "transferToken",
       outputs: [],
       stateMutability: "nonpayable",
       type: "function",
@@ -452,7 +429,7 @@ export default {
           type: "uint256",
         },
       ],
-      name: "transferToken",
+      name: "transferFrom",
       outputs: [
         {
           internalType: "bool",
@@ -481,7 +458,6 @@ export default {
       ],
       stateMutability: "view",
       type: "function",
-      constant: true,
     },
     {
       inputs: [],
@@ -493,9 +469,8 @@ export default {
           type: "string",
         },
       ],
-      stateMutability: "view",
+      stateMutability: "pure",
       type: "function",
-      constant: true,
     },
     {
       inputs: [],
@@ -509,7 +484,102 @@ export default {
       ],
       stateMutability: "view",
       type: "function",
-      constant: true,
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "owner",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "spender",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "amount",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "deadline",
+          type: "uint256",
+        },
+        {
+          internalType: "uint8",
+          name: "v",
+          type: "uint8",
+        },
+        {
+          internalType: "bytes32",
+          name: "r",
+          type: "bytes32",
+        },
+        {
+          internalType: "bytes32",
+          name: "s",
+          type: "bytes32",
+        },
+      ],
+      name: "requestPermit",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "bytes32",
+          name: "hash",
+          type: "bytes32",
+        },
+        {
+          internalType: "uint8",
+          name: "v",
+          type: "uint8",
+        },
+        {
+          internalType: "bytes32",
+          name: "r",
+          type: "bytes32",
+        },
+        {
+          internalType: "bytes32",
+          name: "s",
+          type: "bytes32",
+        },
+      ],
+      name: "verifySignature",
+      outputs: [
+        {
+          internalType: "address",
+          name: "signer",
+          type: "address",
+        },
+      ],
+      stateMutability: "pure",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "addr",
+          type: "address",
+        },
+      ],
+      name: "getNonces",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
     },
   ],
 };

@@ -26,9 +26,29 @@ export default {
           name: "uri",
           type: "string",
         },
+        {
+          indexed: false,
+          internalType: "address",
+          name: "applicant",
+          type: "address",
+        },
       ],
       name: "Notarize",
       type: "event",
+    },
+    {
+      inputs: [],
+      name: "NOTARIZE_TYPEHASH",
+      outputs: [
+        {
+          internalType: "bytes32",
+          name: "",
+          type: "bytes32",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true,
     },
     {
       inputs: [
@@ -54,6 +74,26 @@ export default {
           internalType: "string",
           name: "uri",
           type: "string",
+        },
+        {
+          internalType: "address",
+          name: "applicant",
+          type: "address",
+        },
+        {
+          internalType: "uint8",
+          name: "v",
+          type: "uint8",
+        },
+        {
+          internalType: "bytes32",
+          name: "r",
+          type: "bytes32",
+        },
+        {
+          internalType: "bytes32",
+          name: "s",
+          type: "bytes32",
         },
       ],
       name: "notarize",
