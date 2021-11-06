@@ -54,8 +54,8 @@ const sign = (digest, privateKey) => {
   return ecsign(Buffer.from(digest.slice(2), "hex"), privateKey);
 };
 function getPermitDigest(name, address, chainId, data, contractType) {
+  const DOMAIN_SEPARATOR = getDomainSeparator(name, "0.1.0", address, chainId);
   const digestData = DIGEST_DATA[contractType];
-  console.log("VALUES ==>", digestData.values.map((el) => data[el] || data.approve?.[el]));
   return keccak256(solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [
     "0x19",
     "0x01",
@@ -76,10 +76,11 @@ async function getDomainSeparator(name, version, contractAddress, chainId) {
   ]));
 }
 async function getTransactionData(nonce, functionSignature, publicKey, privateKey, contract) {
+  console.log("DOMAIN_SEPARATOR ==>", getDomainSeparator(contract.name, contract.version, contract.address, 1));
   const digest = keccak256(solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [
     "0x19",
     "0x01",
-    getDomainSeparator(contract.name, contract.version, contract.address, 1),
+    await getDomainSeparator(contract.name, contract.version, contract.address, 1),
     keccak256(defaultAbiCoder.encode(["uint256", "address", "bytes32"], [
       nonce,
       publicKey,
@@ -2074,7 +2075,6 @@ class PablockSDK {
     return data;
   }
   async mintNFT(amount, uri, contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`], webhookUrl) {
-    console.log("CONTRACT ADDRESS ==>", contractAddress);
     let { status, data } = await axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/mintNFT`, { to: this.wallet.address, amount, uri, contractAddress, webhookUrl }, {
       headers: {
         Authorization: `Bearer ${this.authToken}`
@@ -2132,7 +2132,7 @@ class PablockSDK {
   async prepareTransaction(contractObj, functionName, params = []) {
     new ethers.ethers.Contract(contractObj.address, contractObj.abi, this.wallet);
     let functionSignature = web3Abi__default['default'].encodeFunctionCall(contractObj.abi.find((el) => el.type === "function" && el.name === functionName), params);
-    const { data } = await axios__default['default'].get(`/getNonce/${this.wallet.address}`, {
+    const { data } = await axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet.address}`, {
       headers: { Authorization: `Bearer ${this.authToken}` }
     });
     let { r, s, v } = await getTransactionData(data.nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
@@ -2158,7 +2158,6 @@ class PablockSDK {
       let tokenIds = [];
       for (const i of lodash.range(balance)) {
         const tokenId = await contract.tokenOfOwnerByIndex(ownerAddress, i);
-        logger.info(`Token: ${await contract.baseURI()}`);
         tokenIds.push({
           tokenId: tokenId.toString(),
           tokenURI: await contract.tokenURI(tokenId.toString())

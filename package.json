@@ -13,7 +13,7 @@
     "watch": "rollup -cw rollup.config.js",
     "configure-npm": "node ./set-registry.js -s https://registry.npmjs.org",
     "configure-gpr": "node ./set-registry.js -s https://npm.pkg.github.com",
-    "test": "jest",
+    "test": "npm run build && jest",
     "build-test": "rollup -c rollup.config.js && jest"
   },
   "repository": {

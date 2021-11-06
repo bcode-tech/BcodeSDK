@@ -326,7 +326,6 @@ export class PablockSDK {
     contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`],
     webhookUrl: string | null
   ) {
-    console.log("CONTRACT ADDRESS ==>", contractAddress);
     let { status, data } = await axios.post(
       `${config[`ENDPOINT_${this.env}`]}/mintNFT`,
       { to: this.wallet!.address, amount, uri, contractAddress, webhookUrl },
@@ -500,9 +499,12 @@ export class PablockSDK {
       params
     );
 
-    const { data } = await axios.get(`/getNonce/${this.wallet!.address}`, {
-      headers: { Authorization: `Bearer ${this.authToken}` },
-    });
+    const { data } = await axios.get(
+      `${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet!.address}`,
+      {
+        headers: { Authorization: `Bearer ${this.authToken}` },
+      }
+    );
 
     let { r, s, v } = await getTransactionData(
       data.nonce,
@@ -553,7 +555,7 @@ export class PablockSDK {
       for (const i of range(balance)) {
         const tokenId = await contract.tokenOfOwnerByIndex(ownerAddress, i);
 
-        logger.info(`Token: ${await contract.baseURI()}`);
+        // logger.info(`Token: ${await contract.baseURI()}`);
 
         // tokenOfOwner[addr] = parseInt(tokenId.values.toString());
         tokenIds.push({

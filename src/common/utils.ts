@@ -79,14 +79,9 @@ export function getPermitDigest(
   data: Data,
   contractType: "nft" | "token" | "notarization"
 ) {
-  // const DOMAIN_SEPARATOR = getDomainSeparator(name, address, chainId);
+  const DOMAIN_SEPARATOR = getDomainSeparator(name, "0.1.0", address, chainId);
 
   const digestData = DIGEST_DATA[contractType];
-
-  console.log(
-    "VALUES ==>",
-    digestData.values.map((el) => data[el] || data.approve?.[el])
-  );
 
   return keccak256(
     solidityPack(
@@ -161,13 +156,17 @@ export async function getTransactionData(
   privateKey: string,
   contract: { name: string; version: string; address: string }
 ) {
+  console.log(
+    "DOMAIN_SEPARATOR ==>",
+    getDomainSeparator(contract.name, contract.version, contract.address, 1)
+  );
   const digest = keccak256(
     solidityPack(
       ["bytes1", "bytes1", "bytes32", "bytes32"],
       [
         "0x19",
         "0x01",
-        getDomainSeparator(
+        await getDomainSeparator(
           contract.name,
           contract.version,
           contract.address,
