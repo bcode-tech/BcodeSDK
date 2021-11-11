@@ -551,7 +551,11 @@ export class PablockSDK {
   }
 
   getContract(address: string, abi: any[]) {
-    return new ethers.Contract(address, abi, this.wallet);
+    return new ethers.Contract(
+      address,
+      abi,
+      this.wallet?.connect(this.provider)
+    );
   }
 
   /**
