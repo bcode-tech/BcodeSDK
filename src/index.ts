@@ -515,8 +515,6 @@ export class PablockSDK {
       }
     );
 
-    console.log("NONCE ==>", typeof data.nonce);
-
     let { r, s, v } = await getTransactionData(
       data.nonce,
       functionSignature,
@@ -552,7 +550,7 @@ export class PablockSDK {
     return status;
   }
 
-  async getContract(address: string, abi: any[]) {
+  getContract(address: string, abi: any[]) {
     return new ethers.Contract(address, abi, this.wallet);
   }
 

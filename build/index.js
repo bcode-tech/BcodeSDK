@@ -2219,7 +2219,6 @@ class PablockSDK {
       const { data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet.address}`, {
         headers: { Authorization: `Bearer ${this.authToken}` }
       });
-      console.log("NONCE ==>", typeof data.nonce);
       let { r, s, v } = yield getTransactionData(data.nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
         name: contractObj.name,
         version: contractObj.version,
@@ -2245,9 +2244,7 @@ class PablockSDK {
     });
   }
   getContract(address, abi) {
-    return __async(this, null, function* () {
-      return new ethers.ethers.Contract(address, abi, this.wallet);
-    });
+    return new ethers.ethers.Contract(address, abi, this.wallet);
   }
   getOwnedNFT(_0) {
     return __async(this, arguments, function* (contractAddresses, ownerAddress = this.wallet.address) {
