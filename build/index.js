@@ -2244,6 +2244,11 @@ class PablockSDK {
       return status;
     });
   }
+  getContract(address, abi) {
+    return __async(this, null, function* () {
+      return new ethers.ethers.Contract(address, abi, this.wallet);
+    });
+  }
   getOwnedNFT(_0) {
     return __async(this, arguments, function* (contractAddresses, ownerAddress = this.wallet.address) {
       let tokenOfOwner = {};

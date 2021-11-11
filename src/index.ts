@@ -2,7 +2,7 @@
 import axios from "axios";
 import { ethers, Wallet } from "ethers";
 import { range } from "lodash";
-import w3Abi, {AbiCoder} from "web3-eth-abi";
+import w3Abi, { AbiCoder } from "web3-eth-abi";
 
 //Utils
 import { sign, getPermitDigest, getTransactionData } from "./common/utils";
@@ -550,6 +550,10 @@ export class PablockSDK {
     console.log("RESULT ==>", data);
 
     return status;
+  }
+
+  async getContract(address: string, abi: any[]) {
+    return new ethers.Contract(address, abi, this.wallet);
   }
 
   /**
