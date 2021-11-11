@@ -93,7 +93,7 @@ export class PablockSDK {
           }`
         );
         if (status === 200) {
-          // logger.info("Auth token received ", data.authToken);
+          logger.info("Auth token received ");
 
           this.authToken = data.authToken;
         } else {
@@ -143,6 +143,10 @@ export class PablockSDK {
    */
   getWalletAddress() {
     return this.wallet!.address;
+  }
+
+  getWallet() {
+    return this.wallet;
   }
 
   /**
@@ -506,6 +510,8 @@ export class PablockSDK {
       }
     );
 
+    console.log("NONCE ==>", typeof data.nonce);
+
     let { r, s, v } = await getTransactionData(
       data.nonce,
       functionSignature,
@@ -529,16 +535,16 @@ export class PablockSDK {
   }
 
   async executeTransaction(tx: any) {
-    const res = await axios.post(
+    const { status, data } = await axios.post(
       `${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`,
       {
         tx,
       },
       { headers: { Authorization: `Bearer ${this.authToken}` } }
     );
-    console.log("RESULT ==>", res);
+    console.log("RESULT ==>", data);
 
-    return res;
+    return status;
   }
 
   /**
@@ -628,6 +634,10 @@ export class PablockSDK {
     } catch (error) {
       throw ERROR_TYPE.UNABLE_TO_GENERATE_SUB_JWT;
     }
+  }
+
+  async createContract(contractAddres: string, abi: any[]) {
+    return new ethers.Contract(contractAddres, abi, this.wallet);
   }
 
   /**

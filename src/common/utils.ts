@@ -127,7 +127,7 @@ export function getPermitDigest(
 //   );
 // }
 
-export async function getDomainSeparator(
+export function getDomainSeparator(
   name: string,
   version: string,
   contractAddress: string,
@@ -164,11 +164,11 @@ export async function getTransactionData(
       [
         "0x19",
         "0x01",
-        await getDomainSeparator(
+        getDomainSeparator(
           contract.name,
           contract.version,
           contract.address,
-          0
+          80001
         ),
         keccak256(
           defaultAbiCoder.encode(

@@ -67,7 +67,7 @@ function getPermitDigest(name, address, chainId, data, contractType) {
     ]))
   ]));
 }
-async function getDomainSeparator(name, version, contractAddress, chainId) {
+function getDomainSeparator(name, version, contractAddress, chainId) {
   return keccak256(defaultAbiCoder.encode(["bytes32", "bytes32", "bytes32", "uint256", "address"], [
     keccak256(toUtf8Bytes("EIP712Domain(string name, string version, uint256 chainId, address verifyingContract)")),
     keccak256(toUtf8Bytes(name)),
@@ -80,7 +80,7 @@ async function getTransactionData(nonce, functionSignature, publicKey, privateKe
   const digest = keccak256(solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [
     "0x19",
     "0x01",
-    await getDomainSeparator(contract.name, contract.version, contract.address, 0),
+    getDomainSeparator(contract.name, contract.version, contract.address, 80001),
     keccak256(defaultAbiCoder.encode(["uint256", "address", "bytes32"], [
       nonce,
       publicKey,
@@ -1992,6 +1992,7 @@ class PablockSDK {
       if (this.apiKey) {
         let { status, data } = await axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}/${this.wallet.address}`);
         if (status === 200) {
+          logger.info("Auth token received ");
           this.authToken = data.authToken;
         } else {
           throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
@@ -2019,6 +2020,9 @@ class PablockSDK {
   }
   getWalletAddress() {
     return this.wallet.address;
+  }
+  getWallet() {
+    return this.wallet;
   }
   async getPablockTokenBalance(address = this.wallet.address) {
     const pablockToken = new ethers.ethers.Contract(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], PablockToken.abi, this.provider);
@@ -2140,6 +2144,7 @@ class PablockSDK {
     const { data } = await axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet.address}`, {
       headers: { Authorization: `Bearer ${this.authToken}` }
     });
+    console.log("NONCE ==>", typeof data.nonce);
     let { r, s, v } = await getTransactionData(data.nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
       name: contractObj.name,
       version: contractObj.version,
@@ -2155,11 +2160,11 @@ class PablockSDK {
     };
   }
   async executeTransaction(tx) {
-    const res = await axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`, {
+    const { status, data } = await axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`, {
       tx
     }, { headers: { Authorization: `Bearer ${this.authToken}` } });
-    console.log("RESULT ==>", res);
-    return res;
+    console.log("RESULT ==>", data);
+    return status;
   }
   async getOwnedNFT(contractAddresses, ownerAddress = this.wallet.address) {
     let tokenOfOwner = {};
@@ -2205,6 +2210,9 @@ class PablockSDK {
     } catch (error) {
       throw ERROR_TYPE.UNABLE_TO_GENERATE_SUB_JWT;
     }
+  }
+  async createContract(contractAddres, abi) {
+    return new ethers.ethers.Contract(contractAddres, abi, this.wallet);
   }
   async getAPIVersion() {
     let { data } = await axios__default['default'].get(`/getVersion`);

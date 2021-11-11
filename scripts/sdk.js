@@ -9,8 +9,8 @@ const { abi, testMetaTxAbi, metaTxAbi } = require("./abi");
 
 const sdk = new PablockSDK({
   apiKey: "api_test",
-  privateKey:
-    "0xfc0846a4e1d827c9c7a1fd8f255074d01bb019760a2065e0756b578dde00ecf1",
+  // privateKey:
+  //   "0xfc0846a4e1d827c9c7a1fd8f255074d01bb019760a2065e0756b578dde00ecf1",
   config: { env: "MUMBAI", debugMode: true },
 });
 
@@ -31,9 +31,23 @@ const sdk = new PablockSDK({
       name: "TestMetaTransaction",
       version: "0.0.1",
     },
-    "increment",
-    []
+    "increment"
   );
   console.log(res);
   console.log(await sdk.executeTransaction(res));
+
+  // const provider = new ethers.providers.JsonRpcProvider(
+  //   "https://polygon-mumbai.infura.io/v3/98084ec8ac4d49e181f0ffc83562f6f6"
+  // );
+
+  // const wallet = new ethers.Wallet(
+  //   "0xfc0846a4e1d827c9c7a1fd8f255074d01bb019760a2065e0756b578dde00ecf1"
+  // ).connect(provider);
+  // const contract = new ethers.Contract(
+  //   "0x50D3A7B998C90EF96e0021e90027d093A529c67D",
+  //   testMetaTxAbi,
+  //   wallet
+  // );
+
+  // console.log((await contract.getCounter()).toString());
 })();
