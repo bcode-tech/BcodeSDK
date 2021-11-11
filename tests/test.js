@@ -14,14 +14,14 @@ const { testMetaTxAbi } = require("../scripts/abi");
 const sdk = new PablockSDK({
   apiKey: "api_test",
   privateKey:
-    "0xfc0846a4e1d827c9c7a1fd8f255074d01bb019760a2065e0756b578dde00ecf1",
+    "0Xf6a01b0dea644d7a82fc4ee90e4f5259a7bb67a62befe2d22cad609d5bfc5588",
   config: { env: "LOCAL", debugMode: true },
 });
 
 const sdk2 = new PablockSDK({
   apiKey: "api_test",
   privateKey:
-    "0xcac55b77a9a055839272436dba5c38aa9ed18b052330c9a3bf426848ccfcd4fc",
+    "0Xb4f68ff7c166097d16fc64fc1ece2d5be82e3fac3a7bb2a8efa012d4a88d726d",
   config: { env: "LOCAL", debugMode: true },
 });
 

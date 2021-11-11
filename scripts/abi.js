@@ -510,7 +510,7 @@ const testMetaTxAbi = [
       },
       {
         internalType: "address",
-        name: "metaContract",
+        name: "_metaTxAddress",
         type: "address",
       },
     ],
@@ -550,34 +550,6 @@ const testMetaTxAbi = [
         internalType: "uint256",
         name: "",
         type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    constant: true,
-  },
-  {
-    inputs: [],
-    name: "name",
-    outputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    constant: true,
-  },
-  {
-    inputs: [],
-    name: "version",
-    outputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
       },
     ],
     stateMutability: "view",
@@ -655,4 +627,140 @@ const testMetaTxAbi = [
   },
 ];
 
-module.exports = { abi, testMetaTxAbi };
+const metaTxAbi = [
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "version",
+        type: "string",
+      },
+      {
+        internalType: "address",
+        name: "_pablockTokenAddress",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "userAddress",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address payable",
+        name: "relayerAddress",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "functionSignature",
+        type: "bytes",
+      },
+    ],
+    name: "MetaTransactionExecuted",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "version",
+        type: "string",
+      },
+      {
+        internalType: "address",
+        name: "contractAddress",
+        type: "address",
+      },
+    ],
+    name: "registerContract",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "destinationContract",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "userAddress",
+        type: "address",
+      },
+      {
+        internalType: "bytes",
+        name: "functionSignature",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes32",
+        name: "sigR",
+        type: "bytes32",
+      },
+      {
+        internalType: "bytes32",
+        name: "sigS",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint8",
+        name: "sigV",
+        type: "uint8",
+      },
+    ],
+    name: "executeMetaTransaction",
+    outputs: [
+      {
+        internalType: "bytes",
+        name: "",
+        type: "bytes",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+    payable: true,
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "getNonce",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "nonce",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+    constant: true,
+  },
+];
+module.exports = { abi, testMetaTxAbi, metaTxAbi };

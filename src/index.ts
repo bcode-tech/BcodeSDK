@@ -21,7 +21,7 @@ import PablockNotarization from "./common/abis/PablockNotarization";
 import config from "./config";
 
 type Configuration = {
-  env?: "LOCAL" | "MUMBAI" | "POLYGON";
+  env: "LOCAL" | "MUMBAI" | "POLYGON";
   debugMode: boolean | false;
 };
 
@@ -29,7 +29,7 @@ type SdkOptions = {
   apiKey: string;
   authToken?: string;
   privateKey: string;
-  config?: Configuration;
+  config: Configuration;
 };
 
 type ContractStruct = {
@@ -522,10 +522,23 @@ export class PablockSDK {
       contractAddress: contractObj.address,
       userAddress: this.wallet!.address,
       functionSignature,
-      r,
-      s,
+      r: `0x${r.toString("hex")}`,
+      s: `0x${s.toString("hex")}`,
       v,
     };
+  }
+
+  async executeTransaction(tx: any) {
+    const res = await axios.post(
+      `${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`,
+      {
+        tx,
+      },
+      { headers: { Authorization: `Bearer ${this.authToken}` } }
+    );
+    console.log("RESULT ==>", res);
+
+    return res;
   }
 
   /**
@@ -623,9 +636,7 @@ export class PablockSDK {
    * @returns string
    */
   async getAPIVersion() {
-    let { data } = await axios.get(
-      `${config[`ENDPOINT_${this.env}`]}/getVersion`
-    );
+    let { data } = await axios.get(`/getVersion`);
     return data;
   }
 }

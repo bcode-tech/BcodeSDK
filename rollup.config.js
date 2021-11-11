@@ -75,7 +75,7 @@ const bundle = (config) => ({
 
 export default [
   bundle({
-    plugins: [esbuild(), json({ compact: true })],
+    plugins: [esbuild({ target: "es2020" }), json({ compact: true })],
     output: [
       {
         file: `${name}.js`,

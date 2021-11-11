@@ -19,6 +19,7 @@ const {
   solidityPack
 } = require("ethers/lib/utils");
 const { ecsign } = require("ethereumjs-util");
+require("../config");
 const DIGEST_DATA = {
   token: {
     typehash: keccak256(toUtf8Bytes("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")),
@@ -76,11 +77,10 @@ async function getDomainSeparator(name, version, contractAddress, chainId) {
   ]));
 }
 async function getTransactionData(nonce, functionSignature, publicKey, privateKey, contract) {
-  console.log("DOMAIN_SEPARATOR ==>", getDomainSeparator(contract.name, contract.version, contract.address, 1));
   const digest = keccak256(solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [
     "0x19",
     "0x01",
-    await getDomainSeparator(contract.name, contract.version, contract.address, 1),
+    await getDomainSeparator(contract.name, contract.version, contract.address, 0),
     keccak256(defaultAbiCoder.encode(["uint256", "address", "bytes32"], [
       nonce,
       publicKey,
@@ -1944,8 +1944,8 @@ var PablockNotarization = {
 
 var config = {
   ENDPOINT_LOCAL: "http://127.0.0.1:8082",
-  ENDPOINT_MUMBAI: "http://127.0.0.1:8082",
-  ENDPOINT_POLYGON: "http://127.0.0.1:8082",
+  ENDPOINT_MUMBAI: "http://127.0.0.1:5010",
+  ENDPOINT_POLYGON: "http://127.0.0.1:5010",
   CHAIN_ID_LOCAL: 1,
   CHAIN_ID_MUMBAI: 80001,
   CHAIN_ID_POLYGON: 137,
@@ -1955,7 +1955,12 @@ var config = {
   PABLOCK_NFT_ADDRESS_LOCAL: "0x383254cBDF631C6611A56502864c3f5D6f56f2A5",
   PABLOCK_NOTARIZATION_ADDRESS_LOCAL: "0x8Dc4E4CBd83e5939EF82f6e2347b7476206610f3",
   CUSTOM_TOKEN_ADDRESS_LOCAL: "0x2f5C8a986f4b1136b50b0F0D7F3fe2cD5046a6c3",
-  PABLOCK_TOKEN_ADDRESS_MUMBAI: "0x9D0d991c90112C2805F250cD7B5D399c5e834088",
+  PABLOCK_TOKEN_ADDRESS_MUMBAI: "0xa723fc1E105923a98a7FbdB8040296C8f118d883",
+  PABLOCK_META_TRANSACTION_MUMBAI: "0x32245dd760151576419743aB4b0Bf07cea22C785",
+  PABLOCK_NOTARIZATION_MUMBAI: "0x914E1139208f1fA125568eAB5ac052b2e1Ec5fF8",
+  PABLOCK_NFT_MUMBAI: "0xfF8014328c7a9d699BCE98b2Ff9ACB94818046A5",
+  PABLOCK_MULTISIGN_FACTORY_MUMBAI: "0x8Ee7308787DfbE30C777F21bcAB9b47e5D16dE68",
+  TEST_META_TX_MUMBAI: "0x50D3A7B998C90EF96e0021e90027d093A529c67D",
   PABLOCK_ADDRESS_LOCAL: "0xfc8CFa30350f7B195f2b5c6F350f76720bfD89f4"
 };
 
@@ -2144,10 +2149,17 @@ class PablockSDK {
       contractAddress: contractObj.address,
       userAddress: this.wallet.address,
       functionSignature,
-      r,
-      s,
+      r: `0x${r.toString("hex")}`,
+      s: `0x${s.toString("hex")}`,
       v
     };
+  }
+  async executeTransaction(tx) {
+    const res = await axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`, {
+      tx
+    }, { headers: { Authorization: `Bearer ${this.authToken}` } });
+    console.log("RESULT ==>", res);
+    return res;
   }
   async getOwnedNFT(contractAddresses, ownerAddress = this.wallet.address) {
     let tokenOfOwner = {};
@@ -2195,7 +2207,7 @@ class PablockSDK {
     }
   }
   async getAPIVersion() {
-    let { data } = await axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/getVersion`);
+    let { data } = await axios__default['default'].get(`/getVersion`);
     return data;
   }
 }

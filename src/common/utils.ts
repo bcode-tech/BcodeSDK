@@ -6,6 +6,8 @@ const {
 } = require("ethers/lib/utils");
 const { ecsign } = require("ethereumjs-util");
 
+const config = require("../config");
+
 const DIGEST_DATA = {
   token: {
     typehash: keccak256(
@@ -156,10 +158,6 @@ export async function getTransactionData(
   privateKey: string,
   contract: { name: string; version: string; address: string }
 ) {
-  console.log(
-    "DOMAIN_SEPARATOR ==>",
-    getDomainSeparator(contract.name, contract.version, contract.address, 1)
-  );
   const digest = keccak256(
     solidityPack(
       ["bytes1", "bytes1", "bytes32", "bytes32"],
@@ -170,7 +168,7 @@ export async function getTransactionData(
           contract.name,
           contract.version,
           contract.address,
-          1
+          0
         ),
         keccak256(
           defaultAbiCoder.encode(
