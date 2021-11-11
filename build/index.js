@@ -5,13 +5,36 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var axios = require('axios');
 var ethers = require('ethers');
 var lodash = require('lodash');
-var web3Abi = require('web3-eth-abi');
+var w3Abi = require('web3-eth-abi');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 var axios__default = /*#__PURE__*/_interopDefaultLegacy(axios);
-var web3Abi__default = /*#__PURE__*/_interopDefaultLegacy(web3Abi);
+var w3Abi__default = /*#__PURE__*/_interopDefaultLegacy(w3Abi);
 
+typeof require !== "undefined" ? require : (x) => {
+  throw new Error('Dynamic require of "' + x + '" is not supported');
+};
+var __async$1 = (__this, __arguments, generator) => {
+  return new Promise((resolve, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
+};
 const {
   keccak256,
   defaultAbiCoder,
@@ -63,7 +86,10 @@ function getPermitDigest(name, address, chainId, data, contractType) {
     DOMAIN_SEPARATOR,
     keccak256(defaultAbiCoder.encode(digestData.valueTypes, [
       digestData.typehash,
-      ...digestData.values.map((el) => data[el] || data.approve?.[el])
+      ...digestData.values.map((el) => {
+        var _a;
+        return data[el] || ((_a = data.approve) == null ? void 0 : _a[el]);
+      })
     ]))
   ]));
 }
@@ -76,19 +102,21 @@ function getDomainSeparator(name, version, contractAddress, chainId) {
     contractAddress
   ]));
 }
-async function getTransactionData(nonce, functionSignature, publicKey, privateKey, contract) {
-  const digest = keccak256(solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [
-    "0x19",
-    "0x01",
-    getDomainSeparator(contract.name, contract.version, contract.address, 80001),
-    keccak256(defaultAbiCoder.encode(["uint256", "address", "bytes32"], [
-      nonce,
-      publicKey,
-      keccak256(Buffer.from(functionSignature.replace("0x", ""), "hex"))
-    ]))
-  ]));
-  const signature = sign(digest, Buffer.from(privateKey.replace("0x", ""), "hex"));
-  return signature;
+function getTransactionData(nonce, functionSignature, publicKey, privateKey, contract) {
+  return __async$1(this, null, function* () {
+    const digest = keccak256(solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [
+      "0x19",
+      "0x01",
+      getDomainSeparator(contract.name, contract.version, contract.address, 80001),
+      keccak256(defaultAbiCoder.encode(["uint256", "address", "bytes32"], [
+        nonce,
+        publicKey,
+        keccak256(Buffer.from(functionSignature.replace("0x", ""), "hex"))
+      ]))
+    ]));
+    const signature = sign(digest, Buffer.from(privateKey.replace("0x", ""), "hex"));
+    return signature;
+  });
 }
 
 const { createLogger, format, transports } = require("winston");
@@ -1964,12 +1992,40 @@ var config = {
   PABLOCK_ADDRESS_LOCAL: "0xfc8CFa30350f7B195f2b5c6F350f76720bfD89f4"
 };
 
+typeof require !== "undefined" ? require : (x) => {
+  throw new Error('Dynamic require of "' + x + '" is not supported');
+};
+var __async = (__this, __arguments, generator) => {
+  return new Promise((resolve, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
+};
+function getWeb3Abi(w3Abi2) {
+  return w3Abi2;
+}
+const web3Abi = getWeb3Abi(w3Abi__default['default']);
 class PablockSDK {
   constructor(sdkOptions) {
-    if (!sdkOptions.config?.debugMode) {
+    var _a, _b;
+    if (!((_a = sdkOptions.config) == null ? void 0 : _a.debugMode)) {
       logger.transports[0].silent = true;
     }
-    this.env = sdkOptions.config?.env || "MUMBAI";
+    this.env = ((_b = sdkOptions.config) == null ? void 0 : _b.env) || "MUMBAI";
     logger.info(`Working environment: ${this.env}`);
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
@@ -1977,7 +2033,6 @@ class PablockSDK {
       this.authToken = sdkOptions.authToken;
     } else {
       console.error("[Error] API key or auth token are required, please insert one!");
-      process.exit(1);
     }
     this.provider = new ethers.ethers.providers.JsonRpcProvider(config[`RPC_PROVIDER_${this.env}`]);
     if (sdkOptions.privateKey) {
@@ -1987,23 +2042,25 @@ class PablockSDK {
     }
     logger.info("Finished initialization");
   }
-  async init() {
-    try {
-      if (this.apiKey) {
-        let { status, data } = await axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}/${this.wallet.address}`);
-        if (status === 200) {
-          logger.info("Auth token received ");
-          this.authToken = data.authToken;
-        } else {
-          throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
+  init() {
+    return __async(this, null, function* () {
+      try {
+        if (this.apiKey) {
+          let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}/${this.wallet.address}`);
+          if (status === 200) {
+            logger.info("Auth token received ");
+            this.authToken = data.authToken;
+          } else {
+            throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
+          }
+        } else if (this.authToken) {
+          this.checkJWTValidity();
         }
-      } else if (this.authToken) {
-        this.checkJWTValidity();
+      } catch (error) {
+        logger.info("[Error] ", error);
+        throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
       }
-    } catch (error) {
-      logger.info("[Error] ", error);
-      throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
-    }
+    });
   }
   getAuthToken() {
     logger.info(`Your auth token is: ${this.authToken}`);
@@ -2024,199 +2081,230 @@ class PablockSDK {
   getWallet() {
     return this.wallet;
   }
-  async getPablockTokenBalance(address = this.wallet.address) {
-    const pablockToken = new ethers.ethers.Contract(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], PablockToken.abi, this.provider);
-    const balance = parseInt(ethers.ethers.utils.formatEther(await pablockToken.balanceOf(address)));
-    logger.info(`User has ${balance} PTK`);
-    return balance;
-  }
-  async getTokenBalance(contractAddress = config[`CUSTOM_TOKEN_ADDRESS_${this.env}`], address = this.wallet.address) {
-    try {
-      const customToken = new ethers.ethers.Contract(contractAddress, CustomERC20.abi, this.provider);
-      const balance = parseInt(ethers.ethers.utils.formatEther(await customToken.balanceOf(address)));
-      logger.info(`User has ${balance} ${await customToken.name()}`);
+  getPablockTokenBalance() {
+    return __async(this, arguments, function* (address = this.wallet.address) {
+      const pablockToken = new ethers.ethers.Contract(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], PablockToken.abi, this.provider);
+      const balance = parseInt(ethers.ethers.utils.formatEther(yield pablockToken.balanceOf(address)));
+      logger.info(`User has ${balance} PTK`);
       return balance;
-    } catch (err) {
-      logger.error("[Pablock API] Custom token balance: ", err);
-      throw ERROR_TYPE.CONTRACT_ERROR;
-    }
+    });
   }
-  async getMaticBalance(address = this.wallet.address) {
-    const balance = parseInt((await this.provider.getBalance(address)).toString());
-    logger.info(`User has ${balance} MATIC`);
-    return balance;
-  }
-  async sendPermit(contractAddress, spender, value, deadline, abi = CustomERC20.abi) {
-    try {
-      const contract = new ethers.ethers.Contract(contractAddress, abi, this.provider);
-      console.log(await contract.getVersion());
-      const approve = {
-        owner: this.wallet.address,
-        spender,
-        value
-      };
-      const nonce = parseInt((await contract.getNonces(approve.owner)).toString());
-      const digest = getPermitDigest(await contract.name(), contract.address, config[`CHAIN_ID_${this.env}`], {
-        approve,
-        nonce,
-        deadline
-      }, "token");
-      const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
-      const tx = await contract.populateTransaction.requestPermit(approve.owner, approve.spender, approve.value, deadline, v, r, s);
-      let { status, data } = await axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendPermit`, { tx, contractAddress, address: this.wallet?.address }, {
-        headers: {
-          Authorization: `Bearer ${this.authToken}`
-        }
-      });
-      return data;
-    } catch (error) {
-      logger.info("[Send Permit] ", error);
-    }
-  }
-  async requestToken(amount, contractAddress) {
-    logger.info(`Request ${amount} token from ${this.wallet.address}`);
-    let { status, data } = await axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/mintToken`, { contractAddress, to: this.wallet.address, amount }, {
-      headers: {
-        Authorization: `Bearer ${this.authToken}`
+  getTokenBalance() {
+    return __async(this, arguments, function* (contractAddress = config[`CUSTOM_TOKEN_ADDRESS_${this.env}`], address = this.wallet.address) {
+      try {
+        const customToken = new ethers.ethers.Contract(contractAddress, CustomERC20.abi, this.provider);
+        const balance = parseInt(ethers.ethers.utils.formatEther(yield customToken.balanceOf(address)));
+        logger.info(`User has ${balance} ${yield customToken.name()}`);
+        return balance;
+      } catch (err) {
+        logger.error("[Pablock API] Custom token balance: ", err);
+        throw ERROR_TYPE.CONTRACT_ERROR;
       }
     });
-    logger.info(`Request token status: ${status}`);
-    return data;
   }
-  async mintNFT(amount, uri, contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`], webhookUrl) {
-    let { status, data } = await axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/mintNFT`, { to: this.wallet.address, amount, uri, contractAddress, webhookUrl }, {
-      headers: {
-        Authorization: `Bearer ${this.authToken}`
-      }
+  getMaticBalance() {
+    return __async(this, arguments, function* (address = this.wallet.address) {
+      const balance = parseInt((yield this.provider.getBalance(address)).toString());
+      logger.info(`User has ${balance} MATIC`);
+      return balance;
     });
-    logger.info(status, data);
-    return data;
   }
-  async sendNFT(to, tokenId, deadline, contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`]) {
-    try {
-      const customERC721 = new ethers.ethers.Contract(contractAddress, PablockNFT.abi, this.provider);
-      const approve = {
-        owner: this.wallet.address,
-        spender: config[`PABLOCK_ADDRESS_${this.env}`],
-        tokenId
-      };
-      const nonce = parseInt((await customERC721.getNonces(approve.owner)).toString());
-      const digest = getPermitDigest(await customERC721.name(), customERC721.address, config[`CHAIN_ID_${this.env}`], {
-        approve,
-        nonce,
-        deadline
-      }, "nft");
-      const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
-      const tx = await customERC721.populateTransaction.requestPermit(approve.owner, approve.spender, approve.tokenId, deadline, v, r, s);
-      let { status, data } = await axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/transferNFT`, { tx, to, tokenId, contractAddress }, {
-        headers: {
-          Authorization: `Bearer ${this.authToken}`
-        }
-      });
-      return data;
-    } catch (err) {
-      logger.error(`NFTTransfer error: ${err} `);
-      return null;
-    }
-  }
-  async executeNotarization(hash, uri, deadline = 1657121546e3, metadata, webhookUrl, secret) {
-    try {
-      const pablockNotarization = new ethers.ethers.Contract(config[`PABLOCK_NOTARIZATION_ADDRESS_${this.env}`], PablockNotarization.abi, this.provider);
-      const permit = await this.sendPermit(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], config[`PABLOCK_ADDRESS_${this.env}`], 1, deadline, PablockToken.abi);
-      const digest = getPermitDigest("notarization", pablockNotarization.address, config[`CHAIN_ID_${this.env}`], { hash, uri, applicant: this.wallet.address }, "notarization");
-      console.log("DIGEST ==>", digest);
-      const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
-      const tx = await pablockNotarization.populateTransaction.notarize(hash, uri, this.wallet.address, v, r, s);
-      let { status, data } = await axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendTransaction`, { tx, from: this.wallet.address }, {
-        headers: {
-          Authorization: `Bearer ${this.authToken}`
-        }
-      });
-      return data;
-    } catch (err) {
-      logger.error(`Notarization error: ${err} `);
-      return null;
-    }
-  }
-  async prepareTransaction(contractObj, functionName, params = []) {
-    new ethers.ethers.Contract(contractObj.address, contractObj.abi, this.wallet);
-    let functionSignature = web3Abi__default['default'].encodeFunctionCall(contractObj.abi.find((el) => el.type === "function" && el.name === functionName), params);
-    const { data } = await axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet.address}`, {
-      headers: { Authorization: `Bearer ${this.authToken}` }
-    });
-    console.log("NONCE ==>", typeof data.nonce);
-    let { r, s, v } = await getTransactionData(data.nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
-      name: contractObj.name,
-      version: contractObj.version,
-      address: contractObj.address
-    });
-    return {
-      contractAddress: contractObj.address,
-      userAddress: this.wallet.address,
-      functionSignature,
-      r: `0x${r.toString("hex")}`,
-      s: `0x${s.toString("hex")}`,
-      v
-    };
-  }
-  async executeTransaction(tx) {
-    const { status, data } = await axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`, {
-      tx
-    }, { headers: { Authorization: `Bearer ${this.authToken}` } });
-    console.log("RESULT ==>", data);
-    return status;
-  }
-  async getOwnedNFT(contractAddresses, ownerAddress = this.wallet.address) {
-    let tokenOfOwner = {};
-    for (const addr of contractAddresses) {
-      let contract = new ethers.ethers.Contract(addr, PablockNFT.abi, this.wallet.connect(this.provider));
-      let balance = await contract.balanceOf(ownerAddress);
-      logger.info(`User has ${balance} NFTs in ${addr} contract`);
-      let tokenIds = [];
-      for (const i of lodash.range(balance)) {
-        const tokenId = await contract.tokenOfOwnerByIndex(ownerAddress, i);
-        tokenIds.push({
-          tokenId: tokenId.toString(),
-          tokenURI: await contract.tokenURI(tokenId.toString())
+  sendPermit(_0, _1, _2, _3) {
+    return __async(this, arguments, function* (contractAddress, spender, value, deadline, abi = CustomERC20.abi) {
+      var _a;
+      try {
+        const contract = new ethers.ethers.Contract(contractAddress, abi, this.provider);
+        console.log(yield contract.getVersion());
+        const approve = {
+          owner: this.wallet.address,
+          spender,
+          value
+        };
+        const nonce = parseInt((yield contract.getNonces(approve.owner)).toString());
+        const digest = getPermitDigest(yield contract.name(), contract.address, config[`CHAIN_ID_${this.env}`], {
+          approve,
+          nonce,
+          deadline
+        }, "token");
+        const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
+        const tx = yield contract.populateTransaction.requestPermit(approve.owner, approve.spender, approve.value, deadline, v, r, s);
+        let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendPermit`, { tx, contractAddress, address: (_a = this.wallet) == null ? void 0 : _a.address }, {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`
+          }
         });
+        return data;
+      } catch (error) {
+        logger.info("[Send Permit] ", error);
       }
-      tokenOfOwner[addr] = tokenIds;
-    }
-    return tokenOfOwner;
+    });
   }
-  async checkJWTValidity() {
-    try {
-      let { status, data } = await axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/checkJWT`, {
+  requestToken(amount, contractAddress) {
+    return __async(this, null, function* () {
+      logger.info(`Request ${amount} token from ${this.wallet.address}`);
+      let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/mintToken`, { contractAddress, to: this.wallet.address, amount }, {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`
+        }
+      });
+      logger.info(`Request token status: ${status}`);
+      return data;
+    });
+  }
+  mintNFT(_0, _1) {
+    return __async(this, arguments, function* (amount, uri, contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`], webhookUrl) {
+      let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/mintNFT`, { to: this.wallet.address, amount, uri, contractAddress, webhookUrl }, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
       });
       logger.info(status, data);
       return data;
-    } catch (error) {
-      throw ERROR_TYPE.UNABLE_TO_CHECK_TOKEN;
-    }
+    });
   }
-  async generateSubJWT(address) {
-    try {
-      let { status, data } = await axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/generateSubJWT/${address}`, {
-        headers: {
-          Authorization: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlLZXkiOiJhcGlfdGVzdCIsImFkZHJlc3MiOiJ1bmRlZmluZWQiLCJzdWJUb2tlbiI6dHJ1ZSwiaWF0IjoxNjMzNjg0NTk4fQ.UQEZ-IHNXNKwYO6Q7xRs_MrUGA37T-fG4QD3nTQwPJuA5emPNuE52X-RVJdSOcRiQWnTrgqm9q2EDZoM4ukuoQ"
-        }
+  sendNFT(_0, _1, _2) {
+    return __async(this, arguments, function* (to, tokenId, deadline, contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`]) {
+      try {
+        const customERC721 = new ethers.ethers.Contract(contractAddress, PablockNFT.abi, this.provider);
+        const approve = {
+          owner: this.wallet.address,
+          spender: config[`PABLOCK_ADDRESS_${this.env}`],
+          tokenId
+        };
+        const nonce = parseInt((yield customERC721.getNonces(approve.owner)).toString());
+        const digest = getPermitDigest(yield customERC721.name(), customERC721.address, config[`CHAIN_ID_${this.env}`], {
+          approve,
+          nonce,
+          deadline
+        }, "nft");
+        const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
+        const tx = yield customERC721.populateTransaction.requestPermit(approve.owner, approve.spender, approve.tokenId, deadline, v, r, s);
+        let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/transferNFT`, { tx, to, tokenId, contractAddress }, {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`
+          }
+        });
+        return data;
+      } catch (err) {
+        logger.error(`NFTTransfer error: ${err} `);
+        return null;
+      }
+    });
+  }
+  executeNotarization(hash, uri, deadline = 1657121546e3, metadata, webhookUrl, secret) {
+    return __async(this, null, function* () {
+      try {
+        const pablockNotarization = new ethers.ethers.Contract(config[`PABLOCK_NOTARIZATION_ADDRESS_${this.env}`], PablockNotarization.abi, this.provider);
+        const permit = yield this.sendPermit(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], config[`PABLOCK_ADDRESS_${this.env}`], 1, deadline, PablockToken.abi);
+        const digest = getPermitDigest("notarization", pablockNotarization.address, config[`CHAIN_ID_${this.env}`], { hash, uri, applicant: this.wallet.address }, "notarization");
+        console.log("DIGEST ==>", digest);
+        const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
+        const tx = yield pablockNotarization.populateTransaction.notarize(hash, uri, this.wallet.address, v, r, s);
+        let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendTransaction`, { tx, from: this.wallet.address }, {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`
+          }
+        });
+        return data;
+      } catch (err) {
+        logger.error(`Notarization error: ${err} `);
+        return null;
+      }
+    });
+  }
+  prepareTransaction(_0, _1) {
+    return __async(this, arguments, function* (contractObj, functionName, params = []) {
+      new ethers.ethers.Contract(contractObj.address, contractObj.abi, this.wallet);
+      let functionSignature = web3Abi.encodeFunctionCall(contractObj.abi.find((el) => el.type === "function" && el.name === functionName), params);
+      const { data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet.address}`, {
+        headers: { Authorization: `Bearer ${this.authToken}` }
       });
-      console.log(data);
-      logger.info(`SubJWT: ${data.authToken}`);
-      return data.authToken;
-    } catch (error) {
-      throw ERROR_TYPE.UNABLE_TO_GENERATE_SUB_JWT;
-    }
+      console.log("NONCE ==>", typeof data.nonce);
+      let { r, s, v } = yield getTransactionData(data.nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
+        name: contractObj.name,
+        version: contractObj.version,
+        address: contractObj.address
+      });
+      return {
+        contractAddress: contractObj.address,
+        userAddress: this.wallet.address,
+        functionSignature,
+        r: `0x${r.toString("hex")}`,
+        s: `0x${s.toString("hex")}`,
+        v
+      };
+    });
   }
-  async createContract(contractAddres, abi) {
-    return new ethers.ethers.Contract(contractAddres, abi, this.wallet);
+  executeTransaction(tx) {
+    return __async(this, null, function* () {
+      const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`, {
+        tx
+      }, { headers: { Authorization: `Bearer ${this.authToken}` } });
+      console.log("RESULT ==>", data);
+      return status;
+    });
   }
-  async getAPIVersion() {
-    let { data } = await axios__default['default'].get(`/getVersion`);
-    return data;
+  getOwnedNFT(_0) {
+    return __async(this, arguments, function* (contractAddresses, ownerAddress = this.wallet.address) {
+      let tokenOfOwner = {};
+      for (const addr of contractAddresses) {
+        let contract = new ethers.ethers.Contract(addr, PablockNFT.abi, this.wallet.connect(this.provider));
+        let balance = yield contract.balanceOf(ownerAddress);
+        logger.info(`User has ${balance} NFTs in ${addr} contract`);
+        let tokenIds = [];
+        for (const i of lodash.range(balance)) {
+          const tokenId = yield contract.tokenOfOwnerByIndex(ownerAddress, i);
+          tokenIds.push({
+            tokenId: tokenId.toString(),
+            tokenURI: yield contract.tokenURI(tokenId.toString())
+          });
+        }
+        tokenOfOwner[addr] = tokenIds;
+      }
+      return tokenOfOwner;
+    });
+  }
+  checkJWTValidity() {
+    return __async(this, null, function* () {
+      try {
+        let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/checkJWT`, {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`
+          }
+        });
+        logger.info(status, data);
+        return data;
+      } catch (error) {
+        throw ERROR_TYPE.UNABLE_TO_CHECK_TOKEN;
+      }
+    });
+  }
+  generateSubJWT(address) {
+    return __async(this, null, function* () {
+      try {
+        let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/generateSubJWT/${address}`, {
+          headers: {
+            Authorization: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlLZXkiOiJhcGlfdGVzdCIsImFkZHJlc3MiOiJ1bmRlZmluZWQiLCJzdWJUb2tlbiI6dHJ1ZSwiaWF0IjoxNjMzNjg0NTk4fQ.UQEZ-IHNXNKwYO6Q7xRs_MrUGA37T-fG4QD3nTQwPJuA5emPNuE52X-RVJdSOcRiQWnTrgqm9q2EDZoM4ukuoQ"
+          }
+        });
+        console.log(data);
+        logger.info(`SubJWT: ${data.authToken}`);
+        return data.authToken;
+      } catch (error) {
+        throw ERROR_TYPE.UNABLE_TO_GENERATE_SUB_JWT;
+      }
+    });
+  }
+  createContract(contractAddres, abi) {
+    return __async(this, null, function* () {
+      return new ethers.ethers.Contract(contractAddres, abi, this.wallet);
+    });
+  }
+  getAPIVersion() {
+    return __async(this, null, function* () {
+      let { data } = yield axios__default['default'].get(`/getVersion`);
+      return data;
+    });
   }
 }
 

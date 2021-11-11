@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
     "moduleResolution": "node",
-    "target": "esnext",
-    // "module": "es2015",
-    // "lib": ["es2015", "es2016", "es2017", "dom"],
+    "target": "es2015",
+    "module": "es2015",
     "strict": true,
     "sourceMap": true,
     "declaration": true,
@@ -12,8 +11,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
-    "declarationDir": "dist",
-    "outDir": "dist/lib",
     "typeRoots": ["node_modules/@types"],
     "noImplicitReturns": true,
     "noImplicitThis": true,
@@ -22,13 +19,13 @@
     "suppressImplicitAnyIndexErrors": true
   },
   "include": ["src"],
+  "exclude": ["node_modules", "**/*.spec.ts"],
   "typedocOptions": {
     "mode": "modules",
     "out": "docs",
     "exclude": "test",
     "theme": "default",
     "ignoreCompilerErrors": true,
-    // "excludePrivate": true,
     "excludeNotExported": true,
     "target": "ES6",
     "moduleResolution": "node",
@@ -39,15 +36,3 @@
     "module": "commonjs"
   }
 }
-
-// {
-//   "compilerOptions": {
-//     "target": "esnext",
-//     "moduleResolution": "node",
-//     "resolveJsonModule": true,
-//     "esModuleInterop": true,
-//     "declaration": true
-//   },
-//   "include": ["src/**/*.ts"],
-//   "exclude": ["node_modules"]
-// }

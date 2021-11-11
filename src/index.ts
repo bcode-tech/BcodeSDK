@@ -1,8 +1,8 @@
 //Libraries
 import axios from "axios";
-import { ethers, Wallet, BigNumber, ContractInterface } from "ethers";
+import { ethers, Wallet } from "ethers";
 import { range } from "lodash";
-import web3Abi from "web3-eth-abi";
+import w3Abi, {AbiCoder} from "web3-eth-abi";
 
 //Utils
 import { sign, getPermitDigest, getTransactionData } from "./common/utils";
@@ -19,6 +19,12 @@ import PablockNotarization from "./common/abis/PablockNotarization";
 
 //Config
 import config from "./config";
+
+function getWeb3Abi(w3Abi: unknown): AbiCoder {
+  return w3Abi as AbiCoder;
+}
+
+const web3Abi = getWeb3Abi(w3Abi);
 
 type Configuration = {
   env: "LOCAL" | "MUMBAI" | "POLYGON";
@@ -64,7 +70,6 @@ export class PablockSDK {
       console.error(
         "[Error] API key or auth token are required, please insert one!"
       );
-      process.exit(1);
     }
 
     // this.network = sdkOptions.config?.network || "MUMBAI";
