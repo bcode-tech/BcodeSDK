@@ -332,7 +332,7 @@ export class PablockSDK {
   async mintNFT(
     amount: number,
     uri: string,
-    contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`],
+    contractAddress = config[`PABLOCK_NFT_${this.env}`],
     webhookUrl: string | null
   ) {
     let { status, data } = await axios.post(

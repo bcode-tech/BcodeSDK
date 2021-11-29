@@ -9,25 +9,25 @@ let tokenId = null;
 
 const { testMetaTxAbi } = require("../scripts/abi");
 
-// NodeMonkey();
+const env = "LOCAL";
 
 const sdk = new PablockSDK({
-  apiKey: "api_test",
+  apiKey: "api-test",
   privateKey:
-    "0Xf6a01b0dea644d7a82fc4ee90e4f5259a7bb67a62befe2d22cad609d5bfc5588",
-  config: { env: "LOCAL", debugMode: true },
+    "0xf6a01b0dea644d7a82fc4ee90e4f5259a7bb67a62befe2d22cad609d5bfc5588",
+  config: { env, debugMode: true },
 });
 
-const sdk2 = new PablockSDK({
-  apiKey: "api_test",
-  privateKey:
-    "0Xb4f68ff7c166097d16fc64fc1ece2d5be82e3fac3a7bb2a8efa012d4a88d726d",
-  config: { env: "LOCAL", debugMode: true },
-});
+// const sdk2 = new PablockSDK({
+//   apiKey: "api-test",
+//   privateKey:
+//     "0xb4f68ff7c166097d16fc64fc1ece2d5be82e3fac3a7bb2a8efa012d4a88d726d",
+//   config: { env: "LOCAL", debugMode: true },
+// });
 
 (async () => {
   await sdk.init();
-  await sdk2.init();
+  // await sdk2.init();
 
   // await sdk.sendPermit("0x31726b5C129E23E2B045dc5BCB661c770B11DC91");
 
@@ -54,14 +54,14 @@ const sdk2 = new PablockSDK({
 
 describe("Pablock SDK Test", () => {
   it("should create Library", () => {
-    expect(sdk.getApiKey()).toBe("api_test");
+    expect(sdk.getApiKey()).toBe("api-test");
   });
 
   it("should have PTK", async () => {
     expect(await sdk.getPablockTokenBalance()).toBeGreaterThan(0);
   });
-  it("should have MATIC", async () => {
-    expect(await sdk.getMaticBalance()).toBeGreaterThan(0);
+  it("should not have MATIC", async () => {
+    expect(await sdk.getMaticBalance()).toEqual(0);
   });
 });
 
@@ -69,7 +69,7 @@ describe("Execute meta transaction", () => {
   it("should prepare transaction", async () => {
     const txData = await sdk.prepareTransaction(
       {
-        address: "0x23f553ca18F5101B3b7de8026FDfB2E8BE88791A",
+        address: config[`TEST_META_TX_${env}`],
         abi: testMetaTxAbi,
         name: "TestMetaTransaction",
         version: "0.0.1",
@@ -82,8 +82,8 @@ describe("Execute meta transaction", () => {
       contractAddress: expect.any(String),
       userAddress: expect.any(String),
       functionSignature: expect.any(String),
-      r: expect.any(Buffer),
-      s: expect.any(Buffer),
+      r: expect.any(String),
+      s: expect.any(String),
       v: expect.any(Number),
     });
   });
@@ -102,13 +102,13 @@ describe("Pablock SDK NFT Test", () => {
   });
 
   it("should have NFTs", async () => {
-    const contractAddress = config[`PABLOCK_NFT_ADDRESS_LOCAL`];
-
+    const contractAddress = config[`PABLOCK_NFT_${env}`];
+    console.log(`PABLOCK_NFT_${this.env}`);
     const tokens = await sdk.getOwnedNFT([contractAddress]);
-    // console.log("MY TOKENS ==>", tokens);
-    tokenId = tokens[contractAddress][0].tokenId;
+    console.log("MY TOKENS ==>", tokens);
 
     expect(tokens[contractAddress].length).toBeGreaterThan(0);
+    tokenId = tokens[contractAddress][0].tokenId;
   });
 
   // it("should send NFT", async () => {
@@ -138,8 +138,8 @@ describe("Pablock SDK NFT Test", () => {
   // });
 });
 
-describe("Pablock SDK Notarization Test", () => {
-  it("Send permit and", async () => {
-    expect(true).toBe(true);
-  });
-});
+// describe("Pablock SDK Notarization Test", () => {
+//   it("Send permit and", async () => {
+//     expect(true).toBe(true);
+//   });
+// });
