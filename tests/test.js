@@ -90,16 +90,16 @@ describe("Execute meta transaction", () => {
 });
 
 describe("Pablock SDK NFT Test", () => {
-  it("should mint and transfer NFT", async () => {
-    const { tx } = await sdk.mintNFT(1, "http://uridiprova.it");
+  // it("should mint and transfer NFT", async () => {
+  //   const { tx } = await sdk.mintNFT(1, "http://uridiprova.it");
 
-    expect(tx).toMatchObject({
-      from: expect.any(String),
-      to: expect.any(String),
-      transactionHash: expect.any(String),
-      blockHash: expect.any(String),
-    });
-  });
+  //   expect(tx).toMatchObject({
+  //     from: expect.any(String),
+  //     to: expect.any(String),
+  //     transactionHash: expect.any(String),
+  //     blockHash: expect.any(String),
+  //   });
+  // });
 
   it("should have NFTs", async () => {
     const contractAddress = config[`PABLOCK_NFT_${env}`];
