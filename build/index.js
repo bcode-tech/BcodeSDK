@@ -1972,7 +1972,7 @@ var PablockNotarization = {
 
 var config = {
   ENDPOINT_LOCAL: "http://127.0.0.1:8082",
-  ENDPOINT_MUMBAI: "http://pablock-api-dev.bcode.cloud",
+  ENDPOINT_MUMBAI: "https://cef9-93-45-83-64.ngrok.io",
   ENDPOINT_POLYGON: "http://127.0.0.1:5010",
   CHAIN_ID_LOCAL: 1,
   CHAIN_ID_MUMBAI: 80001,
@@ -2165,7 +2165,7 @@ class PablockSDK {
     });
   }
   sendNFT(_0, _1, _2) {
-    return __async(this, arguments, function* (to, tokenId, deadline, contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`]) {
+    return __async(this, arguments, function* (to, tokenId, deadline, contractAddress = config[`PABLOCK_NFT_${this.env}`]) {
       try {
         const customERC721 = new ethers.ethers.Contract(contractAddress, PablockNFT.abi, this.provider);
         const approve = {
@@ -2278,7 +2278,7 @@ class PablockSDK {
           }
         });
         logger.info(status, data);
-        return data;
+        return data.auth;
       } catch (error) {
         throw ERROR_TYPE.UNABLE_TO_CHECK_TOKEN;
       }

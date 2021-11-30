@@ -1,6 +1,6 @@
 export default {
   ENDPOINT_LOCAL: "http://127.0.0.1:8082",
-  ENDPOINT_MUMBAI: "http://pablock-api-dev.bcode.cloud",
+  ENDPOINT_MUMBAI: "https://cef9-93-45-83-64.ngrok.io",
   ENDPOINT_POLYGON: "http://127.0.0.1:5010",
 
   CHAIN_ID_LOCAL: 1,

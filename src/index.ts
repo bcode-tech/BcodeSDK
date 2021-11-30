@@ -363,7 +363,7 @@ export class PablockSDK {
     to: string,
     tokenId: number,
     deadline: number,
-    contractAddress = config[`PABLOCK_NFT_ADDRESS_${this.env}`]
+    contractAddress = config[`PABLOCK_NFT_${this.env}`]
   ) {
     try {
       const customERC721 = new ethers.Contract(
@@ -619,7 +619,7 @@ export class PablockSDK {
 
       logger.info(status, data);
 
-      return data;
+      return data.auth;
     } catch (error) {
       throw ERROR_TYPE.UNABLE_TO_CHECK_TOKEN;
     }
