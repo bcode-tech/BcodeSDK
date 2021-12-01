@@ -9,7 +9,7 @@ import { sign, getPermitDigest, getTransactionData } from "./common/utils";
 import { logger } from "./common/logger";
 
 //Constants
-import { ERROR_TYPE } from "./common/constants";
+import { ERROR_TYPE, PABLOCK_NFT_OBJ } from "./common/constants";
 
 //Abis
 import CustomERC20 from "./common/abis/CustomERC20";
@@ -329,25 +329,21 @@ export class PablockSDK {
    * @param webhookUrl
    * @returns
    */
-  async mintNFT(
-    amount: number,
-    uri: string,
-    contractAddress = config[`PABLOCK_NFT_${this.env}`],
-    webhookUrl: string | null
-  ) {
-    let { status, data } = await axios.post(
-      `${config[`ENDPOINT_${this.env}`]}/mintNFT`,
-      { to: this.wallet!.address, amount, uri, contractAddress, webhookUrl },
-      {
-        headers: {
-          Authorization: `Bearer ${this.authToken}`,
-        },
-      }
-    );
+  async mintPablockNFT(amount: number, uri: string, webhookUrl: string | null) {
+    try {
+      const tx = await this.prepareTransaction(
+        { ...PABLOCK_NFT_OBJ, address: config[`PABLOCK_NFT_${this.env}`] },
+        "mintToken",
+        [this.wallet!.address, amount, uri]
+      );
 
-    logger.info(status, data);
+      const receipt = await this.executeTransaction(tx);
 
-    return data;
+      return receipt;
+    } catch (err) {
+      logger.error(`NFTMint error: ${err} `);
+      return null;
+    }
   }
 
   /**
@@ -359,71 +355,74 @@ export class PablockSDK {
    * @param contractAddress
    * @returns
    */
-  async sendNFT(
-    to: string,
-    tokenId: number,
-    deadline: number,
-    contractAddress = config[`PABLOCK_NFT_${this.env}`]
-  ) {
+  async sendPablockNFT(to: string, tokenId: number) {
     try {
-      const customERC721 = new ethers.Contract(
-        contractAddress,
-        PablockNFT.abi,
-        // this.wallet.connect(this.provider)
-        this.provider
+      const tx = await this.prepareTransaction(
+        { ...PABLOCK_NFT_OBJ, address: config[`PABLOCK_NFT_${this.env}`] },
+        "transferFrom",
+        [this.wallet!.address, to, tokenId]
       );
 
-      const approve = {
-        owner: this.wallet!.address,
-        spender: config[`PABLOCK_ADDRESS_${this.env}`],
-        tokenId,
-      };
+      const receipt = await this.executeTransaction(tx);
 
-      const nonce = parseInt(
-        (await customERC721.getNonces(approve.owner)).toString()
-      );
-
-      const digest = getPermitDigest(
-        await customERC721.name(),
-        customERC721.address,
-        config[`CHAIN_ID_${this.env}`],
-        {
-          approve,
-          nonce,
-          deadline,
-        },
-        "nft"
-      );
-
-      const { v, r, s } = sign(
-        digest,
-        Buffer.from(this.wallet!.privateKey.substring(2), "hex")
-      );
-
-      const tx = await customERC721.populateTransaction.requestPermit(
-        approve.owner,
-        approve.spender,
-        approve.tokenId,
-        deadline,
-        v,
-        r,
-        s
-      );
-
-      let { status, data } = await axios.post(
-        `${config[`ENDPOINT_${this.env}`]}/transferNFT`,
-        { tx, to, tokenId, contractAddress },
-        {
-          headers: {
-            Authorization: `Bearer ${this.authToken}`,
-          },
-        }
-      );
-      return data;
+      return receipt;
     } catch (err) {
       logger.error(`NFTTransfer error: ${err} `);
       return null;
     }
+  }
+
+  async prepareTransaction(
+    contractObj: ContractStruct,
+    functionName: string,
+    params: Array<any>
+  ) {
+    let functionSignature = web3Abi.encodeFunctionCall(
+      contractObj.abi.find(
+        (el) => el.type === "function" && el.name === functionName
+      ),
+      params
+    );
+
+    const { data } = await axios.get(
+      `${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet!.address}`,
+      {
+        headers: { Authorization: `Bearer ${this.authToken}` },
+      }
+    );
+
+    let { r, s, v } = await getTransactionData(
+      data.nonce,
+      functionSignature,
+      this.wallet!.address,
+      this.wallet!.privateKey,
+      {
+        name: contractObj.name,
+        version: contractObj.version,
+        address: contractObj.address,
+      }
+    );
+
+    return {
+      contractAddress: contractObj.address,
+      userAddress: this.wallet!.address,
+      functionSignature,
+      r: `0x${r.toString("hex")}`,
+      s: `0x${s.toString("hex")}`,
+      v,
+    };
+  }
+
+  async executeTransaction(tx: any) {
+    const { status, data } = await axios.post(
+      `${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`,
+      {
+        tx,
+      },
+      { headers: { Authorization: `Bearer ${this.authToken}` } }
+    );
+
+    return data.tx;
   }
 
   async executeNotarization(
@@ -488,66 +487,6 @@ export class PablockSDK {
       logger.error(`Notarization error: ${err} `);
       return null;
     }
-  }
-
-  async prepareTransaction(
-    contractObj: ContractStruct,
-    functionName: string,
-    params = []
-  ) {
-    let contract = new ethers.Contract(
-      contractObj.address,
-      contractObj.abi,
-      this.wallet
-    );
-
-    let functionSignature = web3Abi.encodeFunctionCall(
-      contractObj.abi.find(
-        (el) => el.type === "function" && el.name === functionName
-      ),
-      params
-    );
-
-    const { data } = await axios.get(
-      `${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet!.address}`,
-      {
-        headers: { Authorization: `Bearer ${this.authToken}` },
-      }
-    );
-
-    let { r, s, v } = await getTransactionData(
-      data.nonce,
-      functionSignature,
-      this.wallet!.address,
-      this.wallet!.privateKey,
-      {
-        name: contractObj.name,
-        version: contractObj.version,
-        address: contractObj.address,
-      }
-    );
-
-    return {
-      contractAddress: contractObj.address,
-      userAddress: this.wallet!.address,
-      functionSignature,
-      r: `0x${r.toString("hex")}`,
-      s: `0x${s.toString("hex")}`,
-      v,
-    };
-  }
-
-  async executeTransaction(tx: any) {
-    const { status, data } = await axios.post(
-      `${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`,
-      {
-        tx,
-      },
-      { headers: { Authorization: `Bearer ${this.authToken}` } }
-    );
-    console.log("RESULT ==>", data);
-
-    return status;
   }
 
   getContract(address: string, abi: any[]) {

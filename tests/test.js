@@ -1,12 +1,9 @@
-// const NodeMonkey = require("node-monkey");
-
-const { ethers } = require("ethers");
-const { soliditySha256 } = require("ethers/lib/utils");
 const { PablockSDK } = require("../build");
 
 const config = require("../config.json");
 
 let tokenId = null;
+let txData = null;
 
 const { testMetaTxAbi } = require("../scripts/abi");
 
@@ -49,15 +46,15 @@ describe("Pablock SDK Test", () => {
 
 describe("Execute meta transaction", () => {
   it("should prepare transaction", async () => {
-    const txData = await sdk.prepareTransaction(
+    txData = await sdk.prepareTransaction(
       {
         address: config[`TEST_META_TX_${env}`],
         abi: testMetaTxAbi,
         name: "TestMetaTransaction",
         version: "0.0.1",
       },
-      "setCounter",
-      [2, sdk.getWalletAddress()]
+      "increment",
+      []
     );
 
     expect(txData).toMatchObject({
@@ -69,21 +66,34 @@ describe("Execute meta transaction", () => {
       v: expect.any(Number),
     });
   });
+  it("should send meta transaction", async () => {
+    jest.setTimeout(15000);
+    let res = await sdk.executeTransaction(txData);
+
+    expect(res).toMatchObject({
+      from: expect.any(String),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      blockHash: expect.any(String),
+    });
+  });
 });
 
 describe("Pablock SDK NFT Test", () => {
-  // it("should mint and transfer NFT", async () => {
-  //   const { tx } = await sdk.mintNFT(1, "http://uridiprova.it");
+  it("should mint PablockNFT", async () => {
+    jest.setTimeout(15000);
+    const tx = await sdk.mintPablockNFT(1, "http://uridiprova.it");
 
-  //   expect(tx).toMatchObject({
-  //     from: expect.any(String),
-  //     to: expect.any(String),
-  //     transactionHash: expect.any(String),
-  //     blockHash: expect.any(String),
-  //   });
-  // });
+    expect(tx).toMatchObject({
+      from: expect.any(String),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      blockHash: expect.any(String),
+    });
+  });
 
-  it("should have NFTs", async () => {
+  it("should have PablockNFTs", async () => {
+    jest.setTimeout(15000);
     const contractAddress = config[`PABLOCK_NFT_${env}`];
 
     const tokens = await sdk.getOwnedNFT([contractAddress]);
@@ -92,14 +102,11 @@ describe("Pablock SDK NFT Test", () => {
     tokenId = tokens[contractAddress][0].tokenId;
   });
 
-  it("should send NFT", async () => {
-    const res = await sdk.sendNFT(
-      "0x4c617b110afc0926bf35dce33D0e0178580B50AF",
-      tokenId,
-      1657121546000
-    );
-    console.log(res);
-    expect(res.tx).toMatchObject({
+  it("should send PablockNFT", async () => {
+    jest.setTimeout(15000);
+    const res = await sdk.sendPablockNFT(sdk2.getWalletAddress(), tokenId);
+
+    expect(res).toMatchObject({
       from: expect.any(String),
       to: expect.any(String),
       transactionHash: expect.any(String),

@@ -1,6 +1,6 @@
 export default {
   ENDPOINT_LOCAL: "http://127.0.0.1:8082",
-  ENDPOINT_MUMBAI: "https://cef9-93-45-83-64.ngrok.io",
+  ENDPOINT_MUMBAI: "http://127.0.0.1:5010",
   ENDPOINT_POLYGON: "http://127.0.0.1:5010",
 
   CHAIN_ID_LOCAL: 1,

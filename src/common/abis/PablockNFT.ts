@@ -14,7 +14,12 @@ export default {
         },
         {
           internalType: "address",
-          name: "_contractAddr",
+          name: "_pablockTokenAddress",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "_metaTxAddress",
           type: "address",
         },
       ],
@@ -89,7 +94,7 @@ export default {
         {
           indexed: false,
           internalType: "uint256[]",
-          name: "indexes",
+          name: "",
           type: "uint256[]",
         },
       ],
@@ -120,48 +125,6 @@ export default {
       ],
       name: "Transfer",
       type: "event",
-    },
-    {
-      inputs: [],
-      name: "DOMAIN_SEPARATOR",
-      outputs: [
-        {
-          internalType: "bytes32",
-          name: "",
-          type: "bytes32",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [],
-      name: "PERMIT_TYPEHASH",
-      outputs: [
-        {
-          internalType: "bytes32",
-          name: "",
-          type: "bytes32",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [],
-      name: "TRANSFER_TYPEHASH",
-      outputs: [
-        {
-          internalType: "bytes32",
-          name: "",
-          type: "bytes32",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
     },
     {
       inputs: [
@@ -507,8 +470,14 @@ export default {
           type: "string",
         },
       ],
-      name: "generateToken",
-      outputs: [],
+      name: "mintToken",
+      outputs: [
+        {
+          internalType: "uint256[]",
+          name: "indexes",
+          type: "uint256[]",
+        },
+      ],
       stateMutability: "nonpayable",
       type: "function",
     },
@@ -538,45 +507,35 @@ export default {
     {
       inputs: [
         {
-          internalType: "address",
-          name: "owner",
-          type: "address",
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256",
         },
-        {
-          internalType: "address",
-          name: "spender",
-          type: "address",
-        },
+      ],
+      name: "unlockToken",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
         {
           internalType: "uint256",
           name: "tokenId",
           type: "uint256",
         },
+      ],
+      name: "isUnlocked",
+      outputs: [
         {
-          internalType: "uint256",
-          name: "deadline",
-          type: "uint256",
-        },
-        {
-          internalType: "uint8",
-          name: "v",
-          type: "uint8",
-        },
-        {
-          internalType: "bytes32",
-          name: "r",
-          type: "bytes32",
-        },
-        {
-          internalType: "bytes32",
-          name: "s",
-          type: "bytes32",
+          internalType: "bool",
+          name: "",
+          type: "bool",
         },
       ],
-      name: "requestPermit",
-      outputs: [],
-      stateMutability: "nonpayable",
+      stateMutability: "view",
       type: "function",
+      constant: true,
     },
     {
       inputs: [],
@@ -586,54 +545,6 @@ export default {
           internalType: "string",
           name: "",
           type: "string",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [],
-      name: "getPablockTokenAddress",
-      outputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "addr",
-          type: "address",
-        },
-      ],
-      name: "getNonces",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true,
-    },
-    {
-      inputs: [],
-      name: "getChainId",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "chain",
-          type: "uint256",
         },
       ],
       stateMutability: "view",

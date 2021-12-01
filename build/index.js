@@ -131,12 +131,573 @@ const logger = createLogger({
   ]
 });
 
+var PablockNFT = {
+  abi: [
+    {
+      inputs: [
+        {
+          internalType: "string",
+          name: "_tokenName",
+          type: "string"
+        },
+        {
+          internalType: "string",
+          name: "_tokenSymbol",
+          type: "string"
+        },
+        {
+          internalType: "address",
+          name: "_pablockTokenAddress",
+          type: "address"
+        },
+        {
+          internalType: "address",
+          name: "_metaTxAddress",
+          type: "address"
+        }
+      ],
+      stateMutability: "nonpayable",
+      type: "constructor"
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "owner",
+          type: "address"
+        },
+        {
+          indexed: true,
+          internalType: "address",
+          name: "approved",
+          type: "address"
+        },
+        {
+          indexed: true,
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        }
+      ],
+      name: "Approval",
+      type: "event"
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "owner",
+          type: "address"
+        },
+        {
+          indexed: true,
+          internalType: "address",
+          name: "operator",
+          type: "address"
+        },
+        {
+          indexed: false,
+          internalType: "bool",
+          name: "approved",
+          type: "bool"
+        }
+      ],
+      name: "ApprovalForAll",
+      type: "event"
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "from",
+          type: "address"
+        },
+        {
+          indexed: true,
+          internalType: "string",
+          name: "uri",
+          type: "string"
+        },
+        {
+          indexed: false,
+          internalType: "uint256[]",
+          name: "",
+          type: "uint256[]"
+        }
+      ],
+      name: "TokenGeneration",
+      type: "event"
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "from",
+          type: "address"
+        },
+        {
+          indexed: true,
+          internalType: "address",
+          name: "to",
+          type: "address"
+        },
+        {
+          indexed: true,
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        }
+      ],
+      name: "Transfer",
+      type: "event"
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "to",
+          type: "address"
+        },
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        }
+      ],
+      name: "approve",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "owner",
+          type: "address"
+        }
+      ],
+      name: "balanceOf",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [],
+      name: "baseURI",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        }
+      ],
+      name: "getApproved",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "owner",
+          type: "address"
+        },
+        {
+          internalType: "address",
+          name: "operator",
+          type: "address"
+        }
+      ],
+      name: "isApprovedForAll",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [],
+      name: "name",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        }
+      ],
+      name: "ownerOf",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "from",
+          type: "address"
+        },
+        {
+          internalType: "address",
+          name: "to",
+          type: "address"
+        },
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        }
+      ],
+      name: "safeTransferFrom",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "from",
+          type: "address"
+        },
+        {
+          internalType: "address",
+          name: "to",
+          type: "address"
+        },
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        },
+        {
+          internalType: "bytes",
+          name: "_data",
+          type: "bytes"
+        }
+      ],
+      name: "safeTransferFrom",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "operator",
+          type: "address"
+        },
+        {
+          internalType: "bool",
+          name: "approved",
+          type: "bool"
+        }
+      ],
+      name: "setApprovalForAll",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "bytes4",
+          name: "interfaceId",
+          type: "bytes4"
+        }
+      ],
+      name: "supportsInterface",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [],
+      name: "symbol",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "index",
+          type: "uint256"
+        }
+      ],
+      name: "tokenByIndex",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "owner",
+          type: "address"
+        },
+        {
+          internalType: "uint256",
+          name: "index",
+          type: "uint256"
+        }
+      ],
+      name: "tokenOfOwnerByIndex",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        }
+      ],
+      name: "tokenURI",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [],
+      name: "totalSupply",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "contractAddr",
+          type: "address"
+        }
+      ],
+      name: "initialize",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "to",
+          type: "address"
+        },
+        {
+          internalType: "uint256",
+          name: "quantity",
+          type: "uint256"
+        },
+        {
+          internalType: "string",
+          name: "_uri",
+          type: "string"
+        }
+      ],
+      name: "mintToken",
+      outputs: [
+        {
+          internalType: "uint256[]",
+          name: "indexes",
+          type: "uint256[]"
+        }
+      ],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "from",
+          type: "address"
+        },
+        {
+          internalType: "address",
+          name: "to",
+          type: "address"
+        },
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        }
+      ],
+      name: "transferFrom",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        }
+      ],
+      name: "unlockToken",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256"
+        }
+      ],
+      name: "isUnlocked",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    },
+    {
+      inputs: [],
+      name: "getVersion",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string"
+        }
+      ],
+      stateMutability: "view",
+      type: "function",
+      constant: true
+    }
+  ]
+};
+
 const ERROR_TYPE = {
   NOT_INITIALIZE: "SDK not initialized",
   API_KEY_NOT_AUTHENTICATED: "API Key not authenticated",
   CONTRACT_ERROR: "Smart contract error",
   UNABLE_TO_GENERATE_SUB_JWT: "Unable to generate subJWT",
   UNABLE_TO_CHECK_TOKEN: "Unable to check token"
+};
+const PABLOCK_NFT_OBJ = {
+  abi: PablockNFT.abi,
+  name: "PablockNFT",
+  version: "0.2.1"
 };
 
 var CustomERC20 = {
@@ -1219,651 +1780,6 @@ var PablockToken = {
   ]
 };
 
-var PablockNFT = {
-  abi: [
-    {
-      inputs: [
-        {
-          internalType: "string",
-          name: "_tokenName",
-          type: "string"
-        },
-        {
-          internalType: "string",
-          name: "_tokenSymbol",
-          type: "string"
-        },
-        {
-          internalType: "address",
-          name: "_contractAddr",
-          type: "address"
-        }
-      ],
-      stateMutability: "nonpayable",
-      type: "constructor"
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "address",
-          name: "owner",
-          type: "address"
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "approved",
-          type: "address"
-        },
-        {
-          indexed: true,
-          internalType: "uint256",
-          name: "tokenId",
-          type: "uint256"
-        }
-      ],
-      name: "Approval",
-      type: "event"
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "address",
-          name: "owner",
-          type: "address"
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "operator",
-          type: "address"
-        },
-        {
-          indexed: false,
-          internalType: "bool",
-          name: "approved",
-          type: "bool"
-        }
-      ],
-      name: "ApprovalForAll",
-      type: "event"
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "address",
-          name: "from",
-          type: "address"
-        },
-        {
-          indexed: true,
-          internalType: "string",
-          name: "uri",
-          type: "string"
-        },
-        {
-          indexed: false,
-          internalType: "uint256[]",
-          name: "indexes",
-          type: "uint256[]"
-        }
-      ],
-      name: "TokenGeneration",
-      type: "event"
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "address",
-          name: "from",
-          type: "address"
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "to",
-          type: "address"
-        },
-        {
-          indexed: true,
-          internalType: "uint256",
-          name: "tokenId",
-          type: "uint256"
-        }
-      ],
-      name: "Transfer",
-      type: "event"
-    },
-    {
-      inputs: [],
-      name: "DOMAIN_SEPARATOR",
-      outputs: [
-        {
-          internalType: "bytes32",
-          name: "",
-          type: "bytes32"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [],
-      name: "PERMIT_TYPEHASH",
-      outputs: [
-        {
-          internalType: "bytes32",
-          name: "",
-          type: "bytes32"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [],
-      name: "TRANSFER_TYPEHASH",
-      outputs: [
-        {
-          internalType: "bytes32",
-          name: "",
-          type: "bytes32"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "to",
-          type: "address"
-        },
-        {
-          internalType: "uint256",
-          name: "tokenId",
-          type: "uint256"
-        }
-      ],
-      name: "approve",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "owner",
-          type: "address"
-        }
-      ],
-      name: "balanceOf",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [],
-      name: "baseURI",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "tokenId",
-          type: "uint256"
-        }
-      ],
-      name: "getApproved",
-      outputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "owner",
-          type: "address"
-        },
-        {
-          internalType: "address",
-          name: "operator",
-          type: "address"
-        }
-      ],
-      name: "isApprovedForAll",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [],
-      name: "name",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "tokenId",
-          type: "uint256"
-        }
-      ],
-      name: "ownerOf",
-      outputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "from",
-          type: "address"
-        },
-        {
-          internalType: "address",
-          name: "to",
-          type: "address"
-        },
-        {
-          internalType: "uint256",
-          name: "tokenId",
-          type: "uint256"
-        }
-      ],
-      name: "safeTransferFrom",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "from",
-          type: "address"
-        },
-        {
-          internalType: "address",
-          name: "to",
-          type: "address"
-        },
-        {
-          internalType: "uint256",
-          name: "tokenId",
-          type: "uint256"
-        },
-        {
-          internalType: "bytes",
-          name: "_data",
-          type: "bytes"
-        }
-      ],
-      name: "safeTransferFrom",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "operator",
-          type: "address"
-        },
-        {
-          internalType: "bool",
-          name: "approved",
-          type: "bool"
-        }
-      ],
-      name: "setApprovalForAll",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "bytes4",
-          name: "interfaceId",
-          type: "bytes4"
-        }
-      ],
-      name: "supportsInterface",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [],
-      name: "symbol",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "index",
-          type: "uint256"
-        }
-      ],
-      name: "tokenByIndex",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "owner",
-          type: "address"
-        },
-        {
-          internalType: "uint256",
-          name: "index",
-          type: "uint256"
-        }
-      ],
-      name: "tokenOfOwnerByIndex",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "tokenId",
-          type: "uint256"
-        }
-      ],
-      name: "tokenURI",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [],
-      name: "totalSupply",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "contractAddr",
-          type: "address"
-        }
-      ],
-      name: "initialize",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "to",
-          type: "address"
-        },
-        {
-          internalType: "uint256",
-          name: "quantity",
-          type: "uint256"
-        },
-        {
-          internalType: "string",
-          name: "_uri",
-          type: "string"
-        }
-      ],
-      name: "generateToken",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "from",
-          type: "address"
-        },
-        {
-          internalType: "address",
-          name: "to",
-          type: "address"
-        },
-        {
-          internalType: "uint256",
-          name: "tokenId",
-          type: "uint256"
-        }
-      ],
-      name: "transferFrom",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "owner",
-          type: "address"
-        },
-        {
-          internalType: "address",
-          name: "spender",
-          type: "address"
-        },
-        {
-          internalType: "uint256",
-          name: "tokenId",
-          type: "uint256"
-        },
-        {
-          internalType: "uint256",
-          name: "deadline",
-          type: "uint256"
-        },
-        {
-          internalType: "uint8",
-          name: "v",
-          type: "uint8"
-        },
-        {
-          internalType: "bytes32",
-          name: "r",
-          type: "bytes32"
-        },
-        {
-          internalType: "bytes32",
-          name: "s",
-          type: "bytes32"
-        }
-      ],
-      name: "requestPermit",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [],
-      name: "getVersion",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [],
-      name: "getPablockTokenAddress",
-      outputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "addr",
-          type: "address"
-        }
-      ],
-      name: "getNonces",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    },
-    {
-      inputs: [],
-      name: "getChainId",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "chain",
-          type: "uint256"
-        }
-      ],
-      stateMutability: "view",
-      type: "function",
-      constant: true
-    }
-  ]
-};
-
 var PablockNotarization = {
   abi: [
     {
@@ -1972,7 +1888,7 @@ var PablockNotarization = {
 
 var config = {
   ENDPOINT_LOCAL: "http://127.0.0.1:8082",
-  ENDPOINT_MUMBAI: "https://cef9-93-45-83-64.ngrok.io",
+  ENDPOINT_MUMBAI: "http://127.0.0.1:5010",
   ENDPOINT_POLYGON: "http://127.0.0.1:5010",
   CHAIN_ID_LOCAL: 1,
   CHAIN_ID_MUMBAI: 80001,
@@ -1994,6 +1910,25 @@ var config = {
   PABLOCK_ADDRESS_LOCAL: "0xfc8CFa30350f7B195f2b5c6F350f76720bfD89f4"
 };
 
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 typeof require !== "undefined" ? require : (x) => {
   throw new Error('Dynamic require of "' + x + '" is not supported');
 };
@@ -2153,70 +2088,32 @@ class PablockSDK {
       return data;
     });
   }
-  mintNFT(_0, _1) {
-    return __async(this, arguments, function* (amount, uri, contractAddress = config[`PABLOCK_NFT_${this.env}`], webhookUrl) {
-      let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/mintNFT`, { to: this.wallet.address, amount, uri, contractAddress, webhookUrl }, {
-        headers: {
-          Authorization: `Bearer ${this.authToken}`
-        }
-      });
-      logger.info(status, data);
-      return data;
+  mintPablockNFT(amount, uri, webhookUrl) {
+    return __async(this, null, function* () {
+      try {
+        const tx = yield this.prepareTransaction(__spreadProps(__spreadValues({}, PABLOCK_NFT_OBJ), { address: config[`PABLOCK_NFT_${this.env}`] }), "mintToken", [this.wallet.address, amount, uri]);
+        const receipt = yield this.executeTransaction(tx);
+        return receipt;
+      } catch (err) {
+        logger.error(`NFTMint error: ${err} `);
+        return null;
+      }
     });
   }
-  sendNFT(_0, _1, _2) {
-    return __async(this, arguments, function* (to, tokenId, deadline, contractAddress = config[`PABLOCK_NFT_${this.env}`]) {
+  sendPablockNFT(to, tokenId) {
+    return __async(this, null, function* () {
       try {
-        const customERC721 = new ethers.ethers.Contract(contractAddress, PablockNFT.abi, this.provider);
-        const approve = {
-          owner: this.wallet.address,
-          spender: config[`PABLOCK_ADDRESS_${this.env}`],
-          tokenId
-        };
-        const nonce = parseInt((yield customERC721.getNonces(approve.owner)).toString());
-        const digest = getPermitDigest(yield customERC721.name(), customERC721.address, config[`CHAIN_ID_${this.env}`], {
-          approve,
-          nonce,
-          deadline
-        }, "nft");
-        const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
-        const tx = yield customERC721.populateTransaction.requestPermit(approve.owner, approve.spender, approve.tokenId, deadline, v, r, s);
-        let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/transferNFT`, { tx, to, tokenId, contractAddress }, {
-          headers: {
-            Authorization: `Bearer ${this.authToken}`
-          }
-        });
-        return data;
+        const tx = yield this.prepareTransaction(__spreadProps(__spreadValues({}, PABLOCK_NFT_OBJ), { address: config[`PABLOCK_NFT_${this.env}`] }), "transferFrom", [this.wallet.address, to, tokenId]);
+        const receipt = yield this.executeTransaction(tx);
+        return receipt;
       } catch (err) {
         logger.error(`NFTTransfer error: ${err} `);
         return null;
       }
     });
   }
-  executeNotarization(hash, uri, deadline = 1657121546e3, metadata, webhookUrl, secret) {
+  prepareTransaction(contractObj, functionName, params) {
     return __async(this, null, function* () {
-      try {
-        const pablockNotarization = new ethers.ethers.Contract(config[`PABLOCK_NOTARIZATION_ADDRESS_${this.env}`], PablockNotarization.abi, this.provider);
-        const permit = yield this.sendPermit(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], config[`PABLOCK_ADDRESS_${this.env}`], 1, deadline, PablockToken.abi);
-        const digest = getPermitDigest("notarization", pablockNotarization.address, config[`CHAIN_ID_${this.env}`], { hash, uri, applicant: this.wallet.address }, "notarization");
-        console.log("DIGEST ==>", digest);
-        const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
-        const tx = yield pablockNotarization.populateTransaction.notarize(hash, uri, this.wallet.address, v, r, s);
-        let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendTransaction`, { tx, from: this.wallet.address }, {
-          headers: {
-            Authorization: `Bearer ${this.authToken}`
-          }
-        });
-        return data;
-      } catch (err) {
-        logger.error(`Notarization error: ${err} `);
-        return null;
-      }
-    });
-  }
-  prepareTransaction(_0, _1) {
-    return __async(this, arguments, function* (contractObj, functionName, params = []) {
-      new ethers.ethers.Contract(contractObj.address, contractObj.abi, this.wallet);
       let functionSignature = web3Abi.encodeFunctionCall(contractObj.abi.find((el) => el.type === "function" && el.name === functionName), params);
       const { data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet.address}`, {
         headers: { Authorization: `Bearer ${this.authToken}` }
@@ -2241,8 +2138,28 @@ class PablockSDK {
       const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`, {
         tx
       }, { headers: { Authorization: `Bearer ${this.authToken}` } });
-      console.log("RESULT ==>", data);
-      return status;
+      return data.tx;
+    });
+  }
+  executeNotarization(hash, uri, deadline = 1657121546e3, metadata, webhookUrl, secret) {
+    return __async(this, null, function* () {
+      try {
+        const pablockNotarization = new ethers.ethers.Contract(config[`PABLOCK_NOTARIZATION_ADDRESS_${this.env}`], PablockNotarization.abi, this.provider);
+        const permit = yield this.sendPermit(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], config[`PABLOCK_ADDRESS_${this.env}`], 1, deadline, PablockToken.abi);
+        const digest = getPermitDigest("notarization", pablockNotarization.address, config[`CHAIN_ID_${this.env}`], { hash, uri, applicant: this.wallet.address }, "notarization");
+        console.log("DIGEST ==>", digest);
+        const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
+        const tx = yield pablockNotarization.populateTransaction.notarize(hash, uri, this.wallet.address, v, r, s);
+        let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendTransaction`, { tx, from: this.wallet.address }, {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`
+          }
+        });
+        return data;
+      } catch (err) {
+        logger.error(`Notarization error: ${err} `);
+        return null;
+      }
     });
   }
   getContract(address, abi) {
