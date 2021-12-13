@@ -60,6 +60,10 @@ Constructor config object parameters:
 | env       | MUMBAI        | LOCAL, MUMBAI, POLYGON |
 | debugMode | false         | true, false            |
 
+### Test
+
+For running test you need to create privateKeys.json, with an array of at least 3 privateKeys to submit to test script.
+
 ## Functions
 
 - [init()](#createtext-options)

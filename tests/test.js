@@ -1,6 +1,7 @@
 const { PablockSDK } = require("../build");
 
 const config = require("../config.json");
+const privateKeys = require("../privateKeys.json");
 
 let tokenId = null;
 let txData = null;
@@ -11,15 +12,13 @@ const env = "MUMBAI";
 
 const sdk = new PablockSDK({
   apiKey: "api-test",
-  privateKey:
-    "0xf6a01b0dea644d7a82fc4ee90e4f5259a7bb67a62befe2d22cad609d5bfc5588",
+  privateKey: privateKeys[0],
   config: { env, debugMode: true },
 });
 
 const sdk2 = new PablockSDK({
   apiKey: "api-test",
-  privateKey:
-    "0xb4f68ff7c166097d16fc64fc1ece2d5be82e3fac3a7bb2a8efa012d4a88d726d",
+  privateKey: privateKeys[1],
   config: { env, debugMode: true },
 });
 
