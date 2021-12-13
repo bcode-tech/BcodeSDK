@@ -572,7 +572,7 @@ export class PablockSDK {
           headers: {
             // Authorization: `Bearer ${this.authToken}`,
             Authorization:
-              "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlLZXkiOiJhcGlfdGVzdCIsImFkZHJlc3MiOiJ1bmRlZmluZWQiLCJzdWJUb2tlbiI6dHJ1ZSwiaWF0IjoxNjMzNjg0NTk4fQ.UQEZ-IHNXNKwYO6Q7xRs_MrUGA37T-fG4QD3nTQwPJuA5emPNuE52X-RVJdSOcRiQWnTrgqm9q2EDZoM4ukuoQ",
+              `Bearer ${this.authToken}`,
           },
         }
       );
