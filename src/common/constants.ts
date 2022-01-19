@@ -1,5 +1,6 @@
 import config from "../config";
 import PablockNFT from "./abis/PablockNFT";
+import PablockNotarization from "./abis/PablockNotarization";
 
 export const ERROR_TYPE = {
   NOT_INITIALIZE: "SDK not initialized",
@@ -13,4 +14,10 @@ export const PABLOCK_NFT_OBJ = {
   abi: PablockNFT.abi,
   name: "PablockNFT",
   version: "0.2.1",
+};
+
+export const PABLOCK_NOTARIZATION_OBJ = {
+  abi: PablockNotarization.abi,
+  name: "PablockNotarization",
+  version: "0.1.1",
 };

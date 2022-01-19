@@ -1,3 +1,6 @@
+const { default: axios } = require("axios");
+const { BigNumber } = require("ethers");
+const { lt } = require("lodash");
 const { PablockSDK } = require("../build");
 
 const config = require("../config.json");
@@ -8,7 +11,7 @@ let txData = null;
 
 const { testMetaTxAbi } = require("../scripts/abi");
 
-const env = "MUMBAI";
+const env = "LOCAL";
 
 const sdk = new PablockSDK({
   apiKey: "api-test",
@@ -34,13 +37,18 @@ describe("Pablock SDK Test", () => {
   });
 
   it("should have PTK", async () => {
-    const balance = await sdk.getPablockTokenBalance();
+    let balance = BigNumber.from(await sdk.getPablockTokenBalance());
+    if (balance.lt(10)) {
+      await sdk.requestTestPTK();
+    }
+
+    balance = await sdk.getPablockTokenBalance();
     expect(balance).toBeGreaterThan(0);
   });
-  it("should not have MATIC", async () => {
-    const matic = await sdk.getMaticBalance();
-    expect(matic).toEqual(0);
-  });
+  // it("should not have MATIC", async () => {
+  //   const matic = await sdk.getMaticBalance();
+  //   expect(matic).toEqual(0);
+  // });
 });
 
 describe("Execute meta transaction", () => {
@@ -66,6 +74,17 @@ describe("Execute meta transaction", () => {
     });
   });
   it("should send meta transaction", async () => {
+    jest.setTimeout(15000);
+    let res = await sdk.executeTransaction(txData);
+
+    expect(res).toMatchObject({
+      from: expect.any(String),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      blockHash: expect.any(String),
+    });
+  });
+  it("should request metatx async execution", async () => {
     jest.setTimeout(15000);
     let res = await sdk.executeTransaction(txData);
 
@@ -125,8 +144,20 @@ describe("Pablock SDK NFT Test", () => {
   });
 });
 
-// describe("Pablock SDK Notarization Test", () => {
-//   it("Send permit and", async () => {
-//     expect(true).toBe(true);
-//   });
-// });
+describe("Pablock SDK Notarization Test", () => {
+  it("should notarize hash", async () => {
+    jest.setTimeout(15000);
+    const tx = await sdk.notarizeHash(
+      "0xb133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2",
+      "http://uridiprova.it",
+      "PablockSDKTest"
+    );
+
+    expect(tx).toMatchObject({
+      from: expect.any(String),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      blockHash: expect.any(String),
+    });
+  });
+});

@@ -55,10 +55,10 @@ const { PablockSDK } = require("pablock-sdk")
 
 Constructor config object parameters:
 
-| Param     | Default value | Options                |
-| --------- | ------------- | ---------------------- |
-| env       | MUMBAI        | LOCAL, MUMBAI, POLYGON |
-| debugMode | false         | true, false            |
+| Param     | Default value | Options         |
+| --------- | ------------- | --------------- |
+| env       | MUMBAI        | MUMBAI, POLYGON |
+| debugMode | false         | true, false     |
 
 ### Test
 
@@ -74,11 +74,12 @@ For running test you need to create privateKeys.json, with an array of at least 
 - [getMaticBalance()](#tostringtext-options-cberror-string)
 - [sendPermit()](#tostringtext-options-cberror-string)
 - [requestToken()](#tostringtext-options-cberror-string)
-- [mintNFT()](#tostringtext-options-cberror-string)
-- [sendNFT()](#tostringtext-options-cberror-string)
+- [mintPablockNFT()](#tostringtext-options-cberror-string)
+- [sendPablockNFT()](#tostringtext-options-cberror-string)
 - [getOwnedNFT()](#tostringtext-options-cberror-string)
 - [checkJWTValidity()](#tostringtext-options-cberror-string)
 - [getAPIVersion()](#tostringtext-options-cberror-string)
+- [prepareTransaction()](#tostringtext-options-cberror-string)
 
 #### `init()`
 
@@ -150,7 +151,7 @@ Function for request minting of CustomERC20 token.
 
 ---
 
-#### `mintNFT(amount, uri, contractAddress, webhookUrl)`
+#### `mintPablockNFT(amount, uri, contractAddress, webhookUrl)`
 
 Function for request mint of an NFT.
 
@@ -163,7 +164,7 @@ Function for request mint of an NFT.
 
 ---
 
-#### `sendNFT(to, tokenId, deadline, contractAddress)`
+#### `sendPablockNFT(to, tokenId, deadline, contractAddress)`
 
 Function for send NFT. It has a built-in permit request to allow Pablock to transfer NFT for user wallet.
 

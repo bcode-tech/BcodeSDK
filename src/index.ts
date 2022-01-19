@@ -1,6 +1,6 @@
 //Libraries
 import axios from "axios";
-import { ethers, Wallet } from "ethers";
+import { ethers, Transaction, Wallet } from "ethers";
 import { range } from "lodash";
 import w3Abi, { AbiCoder } from "web3-eth-abi";
 
@@ -9,7 +9,11 @@ import { sign, getPermitDigest, getTransactionData } from "./common/utils";
 import { logger } from "./common/logger";
 
 //Constants
-import { ERROR_TYPE, PABLOCK_NFT_OBJ } from "./common/constants";
+import {
+  ERROR_TYPE,
+  PABLOCK_NFT_OBJ,
+  PABLOCK_NOTARIZATION_OBJ,
+} from "./common/constants";
 
 //Abis
 import CustomERC20 from "./common/abis/CustomERC20";
@@ -20,30 +24,19 @@ import PablockNotarization from "./common/abis/PablockNotarization";
 //Config
 import config from "./config";
 
+//Types
+import {
+  SdkOptions,
+  ContractStruct,
+  Optionals,
+  MetaTransaction,
+} from "./types";
+
 function getWeb3Abi(w3Abi: unknown): AbiCoder {
   return w3Abi as AbiCoder;
 }
 
 const web3Abi = getWeb3Abi(w3Abi);
-
-type Configuration = {
-  env: "LOCAL" | "MUMBAI" | "POLYGON";
-  debugMode: boolean | false;
-};
-
-type SdkOptions = {
-  apiKey: string;
-  authToken?: string;
-  privateKey: string;
-  config: Configuration;
-};
-
-type ContractStruct = {
-  address: string;
-  abi: Array<any>;
-  name: string;
-  version: string;
-};
 
 export class PablockSDK {
   apiKey?: string;
@@ -152,6 +145,10 @@ export class PablockSDK {
 
   getWallet() {
     return this.wallet;
+  }
+
+  getPrivateKey() {
+    return this.wallet!.privateKey;
   }
 
   /**
@@ -294,6 +291,23 @@ export class PablockSDK {
     }
   }
 
+  async requestTestPTK() {
+    logger.info(`Request 10 PTK for test from ${this.wallet!.address}`);
+
+    let { status, data } = await axios.get(
+      `${config[`ENDPOINT_${this.env}`]}/faucet/${this.wallet!.address}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+        },
+      }
+    );
+
+    logger.info(`Request token status: ${status}`);
+
+    return data;
+  }
+
   /**
    * Request token of contract for user
    *
@@ -329,15 +343,19 @@ export class PablockSDK {
    * @param webhookUrl
    * @returns
    */
-  async mintPablockNFT(amount: number, uri: string, webhookUrl: string | null) {
+  async mintPablockNFT(
+    amount: number,
+    uri: string,
+    optionals: Optionals | null
+  ) {
     try {
-      const tx = await this.prepareTransaction(
+      const tx: MetaTransaction = await this.prepareTransaction(
         { ...PABLOCK_NFT_OBJ, address: config[`PABLOCK_NFT_${this.env}`] },
         "mintToken",
         [this.wallet!.address, amount, uri]
       );
 
-      const receipt = await this.executeTransaction(tx);
+      const receipt = await this.executeTransaction(tx, optionals);
 
       return receipt;
     } catch (err) {
@@ -355,15 +373,19 @@ export class PablockSDK {
    * @param contractAddress
    * @returns
    */
-  async sendPablockNFT(to: string, tokenId: number) {
+  async sendPablockNFT(
+    to: string,
+    tokenId: number,
+    optionals: Optionals | null
+  ) {
     try {
-      const tx = await this.prepareTransaction(
+      const tx: MetaTransaction = await this.prepareTransaction(
         { ...PABLOCK_NFT_OBJ, address: config[`PABLOCK_NFT_${this.env}`] },
         "transferFrom",
         [this.wallet!.address, to, tokenId]
       );
 
-      const receipt = await this.executeTransaction(tx);
+      const receipt = await this.executeTransaction(tx, optionals);
 
       return receipt;
     } catch (err) {
@@ -376,7 +398,7 @@ export class PablockSDK {
     contractObj: ContractStruct,
     functionName: string,
     params: Array<any>
-  ) {
+  ): Promise<MetaTransaction> {
     let functionSignature = web3Abi.encodeFunctionCall(
       contractObj.abi.find(
         (el) => el.type === "function" && el.name === functionName
@@ -400,7 +422,8 @@ export class PablockSDK {
         name: contractObj.name,
         version: contractObj.version,
         address: contractObj.address,
-      }
+      },
+      this.env
     );
 
     return {
@@ -413,11 +436,12 @@ export class PablockSDK {
     };
   }
 
-  async executeTransaction(tx: any) {
+  async executeTransaction(tx: MetaTransaction, optionals: Optionals | null) {
     const { status, data } = await axios.post(
       `${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`,
       {
         tx,
+        ...optionals,
       },
       { headers: { Authorization: `Bearer ${this.authToken}` } }
     );
@@ -425,64 +449,27 @@ export class PablockSDK {
     return data.tx;
   }
 
-  async executeNotarization(
+  async notarizeHash(
     hash: string,
     uri: string,
-    deadline = 1657121546000,
-    metadata: object | null,
-    webhookUrl: string | null,
-    secret: string | null
+    appId: string,
+    optionals: Optionals | null
   ) {
     try {
-      const pablockNotarization = new ethers.Contract(
-        config[`PABLOCK_NOTARIZATION_ADDRESS_${this.env}`],
-        PablockNotarization.abi,
-        // this.wallet.connect(this.provider)
-        this.provider
-      );
-
-      const permit = await this.sendPermit(
-        config[`PABLOCK_TOKEN_ADDRESS_${this.env}`],
-        config[`PABLOCK_ADDRESS_${this.env}`],
-        1,
-        deadline,
-        PablockToken.abi
-      );
-
-      const digest = getPermitDigest(
-        "notarization",
-        pablockNotarization.address,
-        config[`CHAIN_ID_${this.env}`],
-        { hash, uri, applicant: this.wallet!.address },
-        "notarization"
-      );
-
-      console.log("DIGEST ==>", digest);
-
-      const { v, r, s } = sign(
-        digest,
-        Buffer.from(this.wallet!.privateKey.substring(2), "hex")
-      );
-
-      const tx = await pablockNotarization.populateTransaction.notarize(
-        hash,
-        uri,
-        this.wallet!.address,
-        v,
-        r,
-        s
-      );
-
-      let { status, data } = await axios.post(
-        `${config[`ENDPOINT_${this.env}`]}/sendTransaction`,
-        { tx, from: this.wallet!.address },
+      const tx = await this.prepareTransaction(
         {
-          headers: {
-            Authorization: `Bearer ${this.authToken}`,
-          },
-        }
+          ...PABLOCK_NOTARIZATION_OBJ,
+          address: config[`PABLOCK_NOTARIZATION_${this.env}`],
+        },
+        "notarize",
+        [hash, uri, this.wallet!.address, appId]
       );
-      return data;
+
+      console.log("TX ==>", tx);
+
+      const receipt = await this.executeTransaction(tx, optionals);
+
+      return receipt;
     } catch (err) {
       logger.error(`Notarization error: ${err} `);
       return null;
@@ -571,8 +558,7 @@ export class PablockSDK {
         {
           headers: {
             // Authorization: `Bearer ${this.authToken}`,
-            Authorization:
-              `Bearer ${this.authToken}`,
+            Authorization: `Bearer ${this.authToken}`,
           },
         }
       );
