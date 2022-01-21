@@ -43,7 +43,7 @@ const {
 } = require("ethers/lib/utils");
 const { ecsign } = require("ethereumjs-util");
 const config$1 = require("../config");
-const DIGEST_DATA = {
+({
   token: {
     typehash: keccak256(toUtf8Bytes("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")),
     valueTypes: [
@@ -73,26 +73,10 @@ const DIGEST_DATA = {
     valueTypes: ["bytes32", "bytes32", "string", "address"],
     values: ["hash", "uri", "applicant"]
   }
-};
+});
 const sign = (digest, privateKey) => {
   return ecsign(Buffer.from(digest.slice(2), "hex"), privateKey);
 };
-function getPermitDigest(name, address, chainId, data, contractType) {
-  const DOMAIN_SEPARATOR = getDomainSeparator(name, "0.1.0", address, chainId);
-  const digestData = DIGEST_DATA[contractType];
-  return keccak256(solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [
-    "0x19",
-    "0x01",
-    DOMAIN_SEPARATOR,
-    keccak256(defaultAbiCoder.encode(digestData.valueTypes, [
-      digestData.typehash,
-      ...digestData.values.map((el) => {
-        var _a;
-        return data[el] || ((_a = data.approve) == null ? void 0 : _a[el]);
-      })
-    ]))
-  ]));
-}
 function getDomainSeparator(name, version, contractAddress, chainId) {
   return keccak256(defaultAbiCoder.encode(["bytes32", "bytes32", "bytes32", "uint256", "address"], [
     keccak256(toUtf8Bytes("EIP712Domain(string name, string version, uint256 chainId, address verifyingContract)")),
@@ -2195,7 +2179,7 @@ var config = {
   ENDPOINT_LOCAL: "http://127.0.0.1:8082",
   ENDPOINT_MUMBAI: "https://pablock-api-dev.bcode.cloud",
   ENDPOINT_POLYGON: "http://pablock-api.bcode.cloud",
-  CHAIN_ID_LOCAL: 1,
+  CHAIN_ID_LOCAL: 1337,
   CHAIN_ID_MUMBAI: 80001,
   CHAIN_ID_POLYGON: 137,
   RPC_PROVIDER_LOCAL: "http://127.0.0.1:7545",
@@ -2355,36 +2339,6 @@ class PablockSDK {
       return balance;
     });
   }
-  sendPermit(_0, _1, _2, _3) {
-    return __async(this, arguments, function* (contractAddress, spender, value, deadline, abi = CustomERC20.abi) {
-      var _a;
-      try {
-        const contract = new ethers.ethers.Contract(contractAddress, abi, this.provider);
-        console.log(yield contract.getVersion());
-        const approve = {
-          owner: this.wallet.address,
-          spender,
-          value
-        };
-        const nonce = parseInt((yield contract.getNonces(approve.owner)).toString());
-        const digest = getPermitDigest(yield contract.name(), contract.address, config[`CHAIN_ID_${this.env}`], {
-          approve,
-          nonce,
-          deadline
-        }, "token");
-        const { v, r, s } = sign(digest, Buffer.from(this.wallet.privateKey.substring(2), "hex"));
-        const tx = yield contract.populateTransaction.requestPermit(approve.owner, approve.spender, approve.value, deadline, v, r, s);
-        let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendPermit`, { tx, contractAddress, address: (_a = this.wallet) == null ? void 0 : _a.address }, {
-          headers: {
-            Authorization: `Bearer ${this.authToken}`
-          }
-        });
-        return data;
-      } catch (error) {
-        logger.info("[Send Permit] ", error);
-      }
-    });
-  }
   requestTestPTK() {
     return __async(this, null, function* () {
       logger.info(`Request 10 PTK for test from ${this.wallet.address}`);
@@ -2460,6 +2414,14 @@ class PablockSDK {
         tx
       }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
       return data.tx;
+    });
+  }
+  executeAsyncTransaction(tx, optionals) {
+    return __async(this, null, function* () {
+      const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransactionAsync`, __spreadValues({
+        tx
+      }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
+      return data.requestId;
     });
   }
   notarizeHash(hash, uri, appId, optionals) {

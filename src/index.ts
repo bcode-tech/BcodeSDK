@@ -211,86 +211,6 @@ export class PablockSDK {
     return balance;
   }
 
-  /**
-   * This function allows the user to set the allowance to a user over his token
-   *
-   * @param contractAddress
-   * @param spender
-   * @param value
-   * @param deadline
-   * @returns transaction data
-   */
-  async sendPermit(
-    contractAddress: string,
-    spender: string,
-    value: number,
-    deadline: number,
-    abi = CustomERC20.abi
-  ) {
-    try {
-      const contract = new ethers.Contract(
-        contractAddress,
-        abi,
-        // this.wallet.connect(this.provider)
-        this.provider
-      );
-
-      console.log(await contract.getVersion());
-
-      const approve = {
-        owner: this.wallet!.address,
-        spender,
-        value,
-      };
-
-      const nonce = parseInt(
-        (await contract.getNonces(approve.owner)).toString()
-      );
-
-      const digest = getPermitDigest(
-        await contract.name(),
-        contract.address,
-        config[`CHAIN_ID_${this.env}`],
-        {
-          approve,
-          nonce,
-          deadline,
-        },
-        "token"
-      );
-
-      const { v, r, s } = sign(
-        digest,
-        Buffer.from(this.wallet!.privateKey.substring(2), "hex")
-      );
-
-      const tx = await contract.populateTransaction.requestPermit(
-        approve.owner,
-        approve.spender,
-        approve.value,
-        deadline,
-        v,
-        r,
-        s
-      );
-
-      let { status, data } = await axios.post(
-        // `${config[`ENDPOINT_${this.env}`]}/sendToken`,
-        `${config[`ENDPOINT_${this.env}`]}/sendPermit`,
-        { tx, contractAddress, address: this.wallet?.address },
-        {
-          headers: {
-            Authorization: `Bearer ${this.authToken}`,
-          },
-        }
-      );
-
-      return data;
-    } catch (error) {
-      logger.info("[Send Permit] ", error);
-    }
-  }
-
   async requestTestPTK() {
     logger.info(`Request 10 PTK for test from ${this.wallet!.address}`);
 
@@ -449,6 +369,19 @@ export class PablockSDK {
     return data.tx;
   }
 
+  async executeAsyncTransaction(tx: MetaTransaction, optionals: Optionals) {
+    const { status, data } = await axios.post(
+      `${config[`ENDPOINT_${this.env}`]}/sendRawTransactionAsync`,
+      {
+        tx,
+        ...optionals,
+      },
+      { headers: { Authorization: `Bearer ${this.authToken}` } }
+    );
+
+    return data.requestId;
+  }
+
   async notarizeHash(
     hash: string,
     uri: string,
@@ -475,6 +408,8 @@ export class PablockSDK {
       return null;
     }
   }
+
+  checkBundledNotarization(hash: string, transactionHash: string) {}
 
   getContract(address: string, abi: any[]) {
     return new ethers.Contract(

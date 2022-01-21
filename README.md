@@ -66,48 +66,48 @@ For running test you need to create privateKeys.json, with an array of at least 
 
 ## Functions
 
-- [init()](#createtext-options)
-- [getAuthToken()](#tocanvascanvaselement-text-options-cberror)
-- [getApiKey()](#todataurltext-options-cberror-url)
-- [getWalletAddress()](#tostringtext-options-cberror-string)
-- [getPablockTokenBalance()](#tostringtext-options-cberror-string)
-- [getMaticBalance()](#tostringtext-options-cberror-string)
-- [sendPermit()](#tostringtext-options-cberror-string)
-- [requestToken()](#tostringtext-options-cberror-string)
-- [mintPablockNFT()](#tostringtext-options-cberror-string)
-- [sendPablockNFT()](#tostringtext-options-cberror-string)
-- [getOwnedNFT()](#tostringtext-options-cberror-string)
-- [checkJWTValidity()](#tostringtext-options-cberror-string)
-- [getAPIVersion()](#tostringtext-options-cberror-string)
-- [prepareTransaction()](#tostringtext-options-cberror-string)
+- [init()](#init)
+- [getAuthToken()](#getAuthToken)
+- [getApiKey()](#getApiKey)
+- [getWalletAddress()](#getWalletAddress)
+- [getPablockTokenBalance()](#getPablockTokenBalance)
+- [getMaticBalance()](#getMaticBalance)
+- [requestToken()](#requestToken)
+- [prepareTransaction()](#prepareTransaction)
+- [executeTransaction()](#executeTransaction)
+- [mintPablockNFT()](#mintPablockNFT)
+- [sendPablockNFT()](#sendPablockNFT)
+- [getOwnedNFT()](#getOwnedNFT)
+- [checkJWTValidity()](#checkJWTValidity)
+- [getAPIVersion()](#getAPIVersion)
 
-#### `init()`
+### [init()](#init)
 
 Initilize user wallet and configure
 
 ---
 
-#### `getAuthToken()`
+### [getAuthToken()](#getAuthToken)
 
 Returns authToken received from Pablock API to authenticate call, it depends on API Key used.
 
 ---
 
-#### `getAPIKey()`
+### [getAPIKey()](#getAPIKey)
 
 Returns apiKey used in contructor, just for reference.
 
 ---
 
-#### `getWalletAddress(address)`
+### [getWalletAddress(address)](#getWalletAddress)
 
 Returns address for generated wallet.
 
-#### `getPablockTokenBalance(address)`
+### [getPablockTokenBalance(address)](#getPablockTokenBalance)
 
 Return Pablock Token (PTK) balance of current wallet or the specified address.
 
-### Params
+#### Params
 
 | Param   | Default value |
 | ------- | ------------- |
@@ -115,11 +115,11 @@ Return Pablock Token (PTK) balance of current wallet or the specified address.
 
 ---
 
-#### `getMaticBalance()`
+### [getMaticBalance()](#getMaticBalance)
 
 Return MATIC balance of the current wallet or the specidfied address.
 
-### Params
+#### Params
 
 | Param   | Default value |
 | ------- | ------------- |
@@ -127,20 +127,7 @@ Return MATIC balance of the current wallet or the specidfied address.
 
 ---
 
-#### `sendPermit(contractAddress, spender, value, deadline)`
-
-Function that allow to send a permit request to Pablock API service to set the allowance for future token transfer. Enable a mechanism of Gasless transaction through Pablock service.
-
-| Param           | Descriptioon                                                |
-| --------------- | ----------------------------------------------------------- |
-| contractAddress | Address of ERC20 token, with integrated Pablock Logic in it |
-| spender         | Address of spender wallet, typically Pablock Wallet address |
-| value           | Amount of token to set allowance                            |
-| deadline        | Deadline of the allowance permission                        |
-
----
-
-#### `requestToken(amount, contractAddress)`
+### [requestToken(amount, contractAddress)](#requestToken)
 
 Function for request minting of CustomERC20 token.
 
@@ -151,7 +138,66 @@ Function for request minting of CustomERC20 token.
 
 ---
 
-#### `mintPablockNFT(amount, uri, contractAddress, webhookUrl)`
+### [prepareTransaction(contractObj, functionName, params)](#prepareTransaction)
+
+Prepare transaction that need to be executed through meta transaction.
+
+| Param        | Default value                   | Description                                   |
+| ------------ | ------------------------------- | --------------------------------------------- |
+| contractObj  | Array with Pablock NFT Contract | Array of interested contract addresses        |
+| functionName | Current user address            | Wallet address of NFT owner                   |
+| params       | Array                           | Array of original prams for contract function |
+
+Example:
+
+```js
+const tx = await sdk.prepareTransaction(
+  {
+    address: config[`TEST_META_TX_${env}`],
+    abi: testMetaTxAbi,
+    name: "TestMetaTransaction",
+    version: "0.0.1",
+  },
+  "increment",
+  []
+));
+```
+
+---
+
+### [executeTransaction(tx, optionals)](#executeTransaction)
+
+Prepare transaction that need to be executed through meta transaction.
+
+| Param     | Description                                 |
+| --------- | ------------------------------------------- |
+| tx        | Array of interested contract addresses      |
+| optionals | Object with webhookUrl, secret and metadata |
+
+Example:
+
+```js
+type MetaTransaction = {
+  contractAddress: string;
+  userAddress: string;
+  functionSignature: string;
+  r: string;
+  s: string;
+  v: any;
+};
+
+type Optionals = {
+  webhookUrl: string | null;
+  metadata: { [key: string]: any } | null;
+  secret: string | null;
+};
+
+async executeTransaction(tx: MetaTransaction, optionals: Optionals | null)
+```
+
+---
+
+### [mintPablockNFT(amount, uri, contractAddress, webhookUrl)](#mintPablockNFT)
 
 Function for request mint of an NFT.
 
@@ -164,7 +210,7 @@ Function for request mint of an NFT.
 
 ---
 
-#### `sendPablockNFT(to, tokenId, deadline, contractAddress)`
+### [sendPablockNFT(to, tokenId, deadline, contractAddress)](#sendPablockNFT)
 
 Function for send NFT. It has a built-in permit request to allow Pablock to transfer NFT for user wallet.
 
@@ -176,7 +222,7 @@ Function for send NFT. It has a built-in permit request to allow Pablock to tran
 
 ---
 
-#### `getOwnedNFT(contractAddresses, ownerAddress)`
+### [getOwnedNFT(contractAddresses, ownerAddress)](#getOwnedNFT)
 
 Function that returns all NFT for the passes contract addresses for the given owner address.
 
@@ -187,13 +233,13 @@ Function that returns all NFT for the passes contract addresses for the given ow
 
 ---
 
-#### `checkJWTValidity()`
+### [checkJWTValidity()](#checkJWTValidity)
 
 Function that check if fetched JWT is still valid
 
 ---
 
-#### `getAPIVersion()`
+### [getAPIVersion()](#getAPIVersion)
 
 Returns Pablock API service version, just to check if the service is available
 

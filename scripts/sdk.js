@@ -8,14 +8,14 @@ const { abi, testMetaTxAbi, metaTxAbi } = require("./abi");
 // NodeMonkey();
 
 const sdk = new PablockSDK({
-  apiKey: "api_test",
+  apiKey: "api-test",
   privateKey:
     "0xf6a01b0dea644d7a82fc4ee90e4f5259a7bb67a62befe2d22cad609d5bfc5588",
-  config: { env: "MUMBAI", debugMode: true },
+  config: { env: "LOCAL", debugMode: true },
 });
 
 (async () => {
-  // await sdk.init();
+  await sdk.init();
 
   console.log(sdk.getWalletAddress());
   // await sdk.generateSubJWT();
@@ -26,17 +26,26 @@ const sdk = new PablockSDK({
   // console.log("PTK QUANTITY ==>", await sdk.getPablockTokenBalance());
   // console.log("TOKEN QUANTITY ==>", await sdk.getTokenBalance());
 
-  // const res = await sdk.prepareTransaction(
-  //   {
-  //     address: "0xdD879Cc25870424530080e64C7156C5cACF74408",
-  //     abi: testMetaTxAbi,
-  //     name: "TestMetaTransaction",
-  //     version: "0.0.1",
-  //   },
-  //   "increment"
-  // );
-  // console.log(res);
-  // console.log(await sdk.executeTransaction(res));
+  const res = await sdk.prepareTransaction(
+    {
+      address: config[`TEST_META_TX_LOCAL`],
+      abi: testMetaTxAbi,
+      name: "TestMetaTransaction",
+      version: "0.0.1",
+    },
+    "increment",
+    []
+  );
+
+  console.log(res);
+
+  const data = await sdk.executeAsyncTransaction(res, {
+    webhookUrl: "https://prova.it/hook",
+    secret: "banana",
+    metadata: {},
+  });
+
+  console.log(data);
 
   // const provider = new ethers.providers.JsonRpcProvider(
   //   "https://polygon-mumbai.infura.io/v3/98084ec8ac4d49e181f0ffc83562f6f6"

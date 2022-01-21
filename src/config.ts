@@ -3,7 +3,7 @@ export default {
   ENDPOINT_MUMBAI: "https://pablock-api-dev.bcode.cloud",
   ENDPOINT_POLYGON: "http://pablock-api.bcode.cloud",
 
-  CHAIN_ID_LOCAL: 1,
+  CHAIN_ID_LOCAL: 1337,
   CHAIN_ID_MUMBAI: 80001,
   CHAIN_ID_POLYGON: 137,
 
