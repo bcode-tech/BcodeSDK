@@ -409,7 +409,7 @@ export class PablockSDK {
     }
   }
 
-  checkBundledNotarization(hash: string, transactionHash: string) {}
+  // checkBundledNotarization(hash: string, transactionHash: string) {}
 
   getContract(address: string, abi: any[]) {
     return new ethers.Contract(
