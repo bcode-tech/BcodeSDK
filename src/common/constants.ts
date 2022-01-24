@@ -2,6 +2,8 @@ import config from "../config";
 import PablockNFT from "./abis/PablockNFT";
 import PablockNotarization from "./abis/PablockNotarization";
 
+export const IPFS_GATEWAY = "https://gateway.pinata.cloud/ipfs";
+
 export const ERROR_TYPE = {
   NOT_INITIALIZE: "SDK not initialized",
   API_KEY_NOT_AUTHENTICATED: "API Key not authenticated",

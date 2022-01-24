@@ -75,6 +75,8 @@ For running test you need to create privateKeys.json, with an array of at least 
 - [requestToken()](#requestToken)
 - [prepareTransaction()](#prepareTransaction)
 - [executeTransaction()](#executeTransaction)
+- [executeAsyncTransaction()](#executeAsyncTransaction)
+- [notarizeHash()](#notarizeHash)
 - [mintPablockNFT()](#mintPablockNFT)
 - [sendPablockNFT()](#sendPablockNFT)
 - [getOwnedNFT()](#getOwnedNFT)
@@ -197,6 +199,64 @@ async executeTransaction(tx: MetaTransaction, optionals: Optionals | null)
 
 ---
 
+### [executeAsyncTransaction(tx, optionals)](#executeAsyncTransaction)
+
+Prepare transaction that need to be executed through meta transaction in async mode. API return a requestId
+needed to refetch transaction status later.
+
+| Param     | Description                                 |
+| --------- | ------------------------------------------- |
+| tx        | Array of interested contract addresses      |
+| optionals | Object with webhookUrl, secret and metadata |
+
+Example:
+
+```js
+type MetaTransaction = {
+  contractAddress: string;
+  userAddress: string;
+  functionSignature: string;
+  r: string;
+  s: string;
+  v: any;
+};
+
+type Optionals = {
+  webhookUrl: string | null;
+  metadata: { [key: string]: any } | null;
+  secret: string | null;
+};
+
+async executeAsyncTransaction(tx: MetaTransaction, optionals: Optionals | null)
+```
+
+---
+
+### [notarizeHash(hash, uri, appId, optionals)](#executeAsyncTransaction)
+
+Request meta transaction notarization, return notarization receipt.
+
+| Param     | Description                                 |
+| --------- | ------------------------------------------- |
+| hash      | Hash of document to notarize                |
+| uri       | Optional uri of document                    |
+| appId     | Optional identifier for your notarization   |
+| optionals | Object with webhookUrl, secret and metadata |
+
+Example:
+
+````js
+type Optionals = {
+  webhookUrl: string | null;
+  metadata: { [key: string]: any } | null;
+  secret: string | null;
+};
+
+async notarizeHash(hash: string, uri: string, appId: string, optionals: Optionals | null)
+```
+
+---
+
 ### [mintPablockNFT(amount, uri, contractAddress, webhookUrl)](#mintPablockNFT)
 
 Function for request mint of an NFT.
@@ -244,3 +304,4 @@ Function that check if fetched JWT is still valid
 Returns Pablock API service version, just to check if the service is available
 
 Made with ❤️ by BCode
+````

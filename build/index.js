@@ -6,6 +6,7 @@ var axios = require('axios');
 var ethers = require('ethers');
 var lodash = require('lodash');
 var w3Abi = require('web3-eth-abi');
+var merkletreejs = require('merkletreejs');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -671,412 +672,7 @@ var PablockNFT = {
   ]
 };
 
-var PablockNotarization = {
-  abi: [
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_pablockTokenAddress",
-          type: "address"
-        },
-        {
-          internalType: "address",
-          name: "_metaTxAddress",
-          type: "address"
-        },
-        {
-          internalType: "address",
-          name: "_payer",
-          type: "address"
-        }
-      ],
-      stateMutability: "nonpayable",
-      type: "constructor"
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: false,
-          internalType: "bytes32",
-          name: "hash",
-          type: "bytes32"
-        },
-        {
-          indexed: false,
-          internalType: "string",
-          name: "uri",
-          type: "string"
-        },
-        {
-          indexed: false,
-          internalType: "address",
-          name: "applicant",
-          type: "address"
-        },
-        {
-          indexed: false,
-          internalType: "string",
-          name: "appId",
-          type: "string"
-        }
-      ],
-      name: "Notarize",
-      type: "event"
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: false,
-          internalType: "address",
-          name: "account",
-          type: "address"
-        }
-      ],
-      name: "Paused",
-      type: "event"
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "bytes32",
-          name: "role",
-          type: "bytes32"
-        },
-        {
-          indexed: true,
-          internalType: "bytes32",
-          name: "previousAdminRole",
-          type: "bytes32"
-        },
-        {
-          indexed: true,
-          internalType: "bytes32",
-          name: "newAdminRole",
-          type: "bytes32"
-        }
-      ],
-      name: "RoleAdminChanged",
-      type: "event"
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "bytes32",
-          name: "role",
-          type: "bytes32"
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "account",
-          type: "address"
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "sender",
-          type: "address"
-        }
-      ],
-      name: "RoleGranted",
-      type: "event"
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "bytes32",
-          name: "role",
-          type: "bytes32"
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "account",
-          type: "address"
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "sender",
-          type: "address"
-        }
-      ],
-      name: "RoleRevoked",
-      type: "event"
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: false,
-          internalType: "address",
-          name: "account",
-          type: "address"
-        }
-      ],
-      name: "Unpaused",
-      type: "event"
-    },
-    {
-      inputs: [],
-      name: "DEFAULT_ADMIN_ROLE",
-      outputs: [
-        {
-          internalType: "bytes32",
-          name: "",
-          type: "bytes32"
-        }
-      ],
-      stateMutability: "view",
-      type: "function"
-    },
-    {
-      inputs: [],
-      name: "PAYER_ROLE",
-      outputs: [
-        {
-          internalType: "bytes32",
-          name: "",
-          type: "bytes32"
-        }
-      ],
-      stateMutability: "view",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "bytes32",
-          name: "role",
-          type: "bytes32"
-        }
-      ],
-      name: "getRoleAdmin",
-      outputs: [
-        {
-          internalType: "bytes32",
-          name: "",
-          type: "bytes32"
-        }
-      ],
-      stateMutability: "view",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "bytes32",
-          name: "role",
-          type: "bytes32"
-        },
-        {
-          internalType: "address",
-          name: "account",
-          type: "address"
-        }
-      ],
-      name: "grantRole",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "bytes32",
-          name: "role",
-          type: "bytes32"
-        },
-        {
-          internalType: "address",
-          name: "account",
-          type: "address"
-        }
-      ],
-      name: "hasRole",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool"
-        }
-      ],
-      stateMutability: "view",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "contractAddr",
-          type: "address"
-        }
-      ],
-      name: "initialize",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [],
-      name: "metaTxName",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string"
-        }
-      ],
-      stateMutability: "view",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "bytes32",
-          name: "hash",
-          type: "bytes32"
-        },
-        {
-          internalType: "string",
-          name: "uri",
-          type: "string"
-        },
-        {
-          internalType: "address",
-          name: "applicant",
-          type: "address"
-        },
-        {
-          internalType: "string",
-          name: "appId",
-          type: "string"
-        }
-      ],
-      name: "notarize",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [],
-      name: "paused",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool"
-        }
-      ],
-      stateMutability: "view",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "bytes32",
-          name: "role",
-          type: "bytes32"
-        },
-        {
-          internalType: "address",
-          name: "account",
-          type: "address"
-        }
-      ],
-      name: "renounceRole",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "bytes32",
-          name: "role",
-          type: "bytes32"
-        },
-        {
-          internalType: "address",
-          name: "account",
-          type: "address"
-        }
-      ],
-      name: "revokeRole",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "bool",
-          name: "status",
-          type: "bool"
-        }
-      ],
-      name: "setPauseStatus",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_payer",
-          type: "address"
-        }
-      ],
-      name: "setPayer",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "bytes4",
-          name: "interfaceId",
-          type: "bytes4"
-        }
-      ],
-      name: "supportsInterface",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool"
-        }
-      ],
-      stateMutability: "view",
-      type: "function"
-    },
-    {
-      inputs: [],
-      name: "version",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string"
-        }
-      ],
-      stateMutability: "view",
-      type: "function"
-    }
-  ]
-};
-
+const IPFS_GATEWAY = "https://gateway.pinata.cloud/ipfs";
 const ERROR_TYPE = {
   NOT_INITIALIZE: "SDK not initialized",
   API_KEY_NOT_AUTHENTICATED: "API Key not authenticated",
@@ -1088,11 +684,6 @@ const PABLOCK_NFT_OBJ = {
   abi: PablockNFT.abi,
   name: "PablockNFT",
   version: "0.2.1"
-};
-const PABLOCK_NOTARIZATION_OBJ = {
-  abi: PablockNotarization.abi,
-  name: "PablockNotarization",
-  version: "0.1.1"
 };
 
 var CustomERC20 = {
@@ -2179,7 +1770,7 @@ var config = {
   ENDPOINT_LOCAL: "http://127.0.0.1:8082",
   ENDPOINT_MUMBAI: "https://pablock-api-dev.bcode.cloud",
   ENDPOINT_POLYGON: "http://pablock-api.bcode.cloud",
-  CHAIN_ID_LOCAL: 1337,
+  CHAIN_ID_LOCAL: 1,
   CHAIN_ID_MUMBAI: 80001,
   CHAIN_ID_POLYGON: 137,
   RPC_PROVIDER_LOCAL: "http://127.0.0.1:7545",
@@ -2190,7 +1781,7 @@ var config = {
   PABLOCK_NOTARIZATION_LOCAL: "0x4aC8ED5D389755b48992C2A3850727f8D878ed26",
   PABLOCK_NFT_LOCAL: "0x272B411731CDF59a87250bEEB0A8F7031E98b86D",
   PABLOCK_MULTISIGN_FACTORY_LOCAL: "0xc36E2D4a155066423bD6f51A53CAe753353aFd5d",
-  TEST_META_TX_LOCAL: "0x29b93cF5d9B3Eb2811da49157d2aF75CE2F5ccA7",
+  TEST_META_TX_LOCAL: "0xbFa175f1930833dE77bcE8a185b48Cc60bDb81a4",
   PABLOCK_TOKEN_ADDRESS_MUMBAI: "0x70b2b8c820d62e7bd95e296dcb8de6a18ad2bca5",
   PABLOCK_META_TRANSACTION_MUMBAI: "0x4884fd12bd652412648f3452148260c30e6cb08a",
   PABLOCK_NOTARIZATION_MUMBAI: "0xb2c82046c2cf26a247b4467ab95cba4398c8b9a0",
@@ -2424,19 +2015,51 @@ class PablockSDK {
       return data.requestId;
     });
   }
-  notarizeHash(hash, uri, appId, optionals) {
+  notarizeHash(hash) {
     return __async(this, null, function* () {
       try {
-        const tx = yield this.prepareTransaction(__spreadProps(__spreadValues({}, PABLOCK_NOTARIZATION_OBJ), {
-          address: config[`PABLOCK_NOTARIZATION_${this.env}`]
-        }), "notarize", [hash, uri, this.wallet.address, appId]);
-        console.log("TX ==>", tx);
-        const receipt = yield this.executeTransaction(tx, optionals);
-        return receipt;
+        const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/notarize`, {
+          hash
+        }, { headers: { Authorization: `Bearer ${this.authToken}` } });
+        if (status === 200) {
+          return data.requestId;
+        } else {
+          logger.error(`Notarization error, status code ${status} `);
+        }
       } catch (err) {
         logger.error(`Notarization error: ${err} `);
         return null;
       }
+    });
+  }
+  checkBundledNotarization(requestId, returnParams) {
+    return __async(this, null, function* () {
+      let {
+        status,
+        data: { hash, ipfsMerkleTree }
+      } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/checkNotarizationTree/${requestId}`, {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`
+        }
+      });
+      let { data: leaves } = yield axios__default['default'].get(`${IPFS_GATEWAY}/${ipfsMerkleTree}`);
+      let merkleTree = new merkletreejs.MerkleTree(leaves.map((leaf) => leaf));
+      const merkleRoot = merkleTree.getHexRoot();
+      const merkleProof = merkleTree.getProof(hash);
+      const inclusion = merkleTree.verify(merkleProof, hash, merkleRoot);
+      return returnParams.length ? lodash.pick({
+        leaves,
+        merkleRoot,
+        hash,
+        merkleProof,
+        inclusion
+      }, returnParams) : {
+        leaves,
+        merkleRoot,
+        hash,
+        merkleProof,
+        inclusion
+      };
     });
   }
   getContract(address, abi) {

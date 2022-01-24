@@ -31,11 +31,9 @@ describe("Pablock SDK Test", () => {
     await sdk2.init();
     expect(sdk.getApiKey()).toBe("api-test");
   });
-
   it("should be authenticated", async () => {
     expect(await sdk.checkJWTValidity()).toBe(true);
   });
-
   it("should have PTK", async () => {
     let balance = BigNumber.from(await sdk.getPablockTokenBalance());
     if (balance.lt(10)) {
@@ -86,14 +84,9 @@ describe("Execute meta transaction", () => {
   });
   it("should request metatx async execution", async () => {
     jest.setTimeout(15000);
-    let res = await sdk.executeTransaction(txData);
+    let { data } = await sdk.executeTransaction(txData);
 
-    expect(res).toMatchObject({
-      from: expect.any(String),
-      to: expect.any(String),
-      transactionHash: expect.any(String),
-      blockHash: expect.any(String),
-    });
+    expect({ data }).toMatchObject({ data: expect.any(String) });
   });
 });
 
@@ -109,7 +102,6 @@ describe("Pablock SDK NFT Test", () => {
       blockHash: expect.any(String),
     });
   });
-
   it("should have PablockNFTs", async () => {
     jest.setTimeout(15000);
     const contractAddress = config[`PABLOCK_NFT_${env}`];
@@ -119,7 +111,6 @@ describe("Pablock SDK NFT Test", () => {
     expect(tokens[contractAddress].length).toBeGreaterThan(0);
     tokenId = tokens[contractAddress][0].tokenId;
   });
-
   it("should send PablockNFT", async () => {
     jest.setTimeout(15000);
     const res = await sdk.sendPablockNFT(sdk2.getWalletAddress(), tokenId);
@@ -131,7 +122,6 @@ describe("Pablock SDK NFT Test", () => {
       blockHash: expect.any(String),
     });
   });
-
   it("receiver address should have NFT", async () => {
     const contractAddress = config[`PABLOCK_NFT_${env}`];
 
@@ -153,11 +143,6 @@ describe("Pablock SDK Notarization Test", () => {
       "PablockSDKTest"
     );
 
-    expect(tx).toMatchObject({
-      from: expect.any(String),
-      to: expect.any(String),
-      transactionHash: expect.any(String),
-      blockHash: expect.any(String),
-    });
+    expect({ tx }).toMatchObject({ tx: expect.any(String) });
   });
 });

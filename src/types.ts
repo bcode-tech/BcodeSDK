@@ -31,3 +31,5 @@ export type Optionals = {
   metadata: { [key: string]: any } | null;
   secret: string | null;
 };
+
+export type ReturnParam = "leaves" | "merkleRoot" | "merkleProof" | "inclusion";

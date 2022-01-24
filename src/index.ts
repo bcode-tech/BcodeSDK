@@ -1,8 +1,9 @@
 //Libraries
 import axios from "axios";
 import { ethers, Transaction, Wallet } from "ethers";
-import { range } from "lodash";
+import { pick, range } from "lodash";
 import w3Abi, { AbiCoder } from "web3-eth-abi";
+import { MerkleTree } from "merkletreejs";
 
 //Utils
 import { sign, getPermitDigest, getTransactionData } from "./common/utils";
@@ -11,6 +12,7 @@ import { logger } from "./common/logger";
 //Constants
 import {
   ERROR_TYPE,
+  IPFS_GATEWAY,
   PABLOCK_NFT_OBJ,
   PABLOCK_NOTARIZATION_OBJ,
 } from "./common/constants";
@@ -30,6 +32,7 @@ import {
   ContractStruct,
   Optionals,
   MetaTransaction,
+  ReturnParam,
 } from "./types";
 
 function getWeb3Abi(w3Abi: unknown): AbiCoder {
@@ -382,34 +385,96 @@ export class PablockSDK {
     return data.requestId;
   }
 
-  async notarizeHash(
-    hash: string,
-    uri: string,
-    appId: string,
-    optionals: Optionals | null
-  ) {
+  // async notarizeHash(
+  //   hash: string,
+  //   uri: string,
+  //   appId: string,
+  //   optionals: Optionals | null
+  // ) {
+  //   try {
+  //     const tx = await this.prepareTransaction(
+  //       {
+  //         ...PABLOCK_NOTARIZATION_OBJ,
+  //         address: config[`PABLOCK_NOTARIZATION_${this.env}`],
+  //       },
+  //       "notarize",
+  //       [hash, uri, this.wallet!.address, appId]
+  //     );
+
+  //     console.log("TX ==>", tx);
+
+  //     const receipt = await this.executeTransaction(tx, optionals);
+
+  //     return receipt;
+  //   } catch (err) {
+  //     logger.error(`Notarization error: ${err} `);
+  //     return null;
+  //   }
+  // }
+
+  async notarizeHash(hash: string) {
     try {
-      const tx = await this.prepareTransaction(
+      const { status, data } = await axios.post(
+        `${config[`ENDPOINT_${this.env}`]}/notarize`,
         {
-          ...PABLOCK_NOTARIZATION_OBJ,
-          address: config[`PABLOCK_NOTARIZATION_${this.env}`],
+          hash,
         },
-        "notarize",
-        [hash, uri, this.wallet!.address, appId]
+        { headers: { Authorization: `Bearer ${this.authToken}` } }
       );
-
-      console.log("TX ==>", tx);
-
-      const receipt = await this.executeTransaction(tx, optionals);
-
-      return receipt;
+      if (status === 200) {
+        return data.requestId;
+      } else {
+        logger.error(`Notarization error, status code ${status} `);
+      }
     } catch (err) {
       logger.error(`Notarization error: ${err} `);
       return null;
     }
   }
 
-  // checkBundledNotarization(hash: string, transactionHash: string) {}
+  async checkBundledNotarization(
+    requestId: string,
+    returnParams: ReturnParam[]
+  ) {
+    let {
+      status,
+      data: { hash, ipfsMerkleTree },
+    } = await axios.get(
+      `${config[`ENDPOINT_${this.env}`]}/checkNotarizationTree/${requestId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+        },
+      }
+    );
+
+    let { data: leaves } = await axios.get(`${IPFS_GATEWAY}/${ipfsMerkleTree}`);
+
+    let merkleTree = new MerkleTree(leaves.map((leaf: string) => leaf));
+    const merkleRoot = merkleTree.getHexRoot();
+
+    const merkleProof = merkleTree.getProof(hash);
+    const inclusion = merkleTree.verify(merkleProof, hash, merkleRoot);
+
+    return returnParams.length
+      ? pick(
+          {
+            leaves,
+            merkleRoot,
+            hash,
+            merkleProof,
+            inclusion,
+          },
+          returnParams
+        )
+      : {
+          leaves,
+          merkleRoot,
+          hash,
+          merkleProof,
+          inclusion,
+        };
+  }
 
   getContract(address: string, abi: any[]) {
     return new ethers.Contract(
@@ -492,7 +557,6 @@ export class PablockSDK {
         `${config[`ENDPOINT_${this.env}`]}/generateSubJWT/${address}`,
         {
           headers: {
-            // Authorization: `Bearer ${this.authToken}`,
             Authorization: `Bearer ${this.authToken}`,
           },
         }

@@ -26,26 +26,33 @@ const sdk = new PablockSDK({
   // console.log("PTK QUANTITY ==>", await sdk.getPablockTokenBalance());
   // console.log("TOKEN QUANTITY ==>", await sdk.getTokenBalance());
 
-  const res = await sdk.prepareTransaction(
-    {
-      address: config[`TEST_META_TX_LOCAL`],
-      abi: testMetaTxAbi,
-      name: "TestMetaTransaction",
-      version: "0.0.1",
-    },
-    "increment",
-    []
+  let res = await sdk.checkBundledNotarization(
+    "09289d0d-4836-48d8-a7b2-fa9aa632faa9",
+    ["merkleRoot", "inclusion"]
   );
 
   console.log(res);
 
-  const data = await sdk.executeAsyncTransaction(res, {
-    webhookUrl: "https://prova.it/hook",
-    secret: "banana",
-    metadata: {},
-  });
+  // const res = await sdk.prepareTransaction(
+  //   {
+  //     address: config[`TEST_META_TX_LOCAL`],
+  //     abi: testMetaTxAbi,
+  //     name: "TestMetaTransaction",
+  //     version: "0.0.1",
+  //   },
+  //   "increment",
+  //   []
+  // );
 
-  console.log(data);
+  // console.log(res);
+
+  // const data = await sdk.executeAsyncTransaction(res, {
+  //   webhookUrl: "https://prova.it/hook",
+  //   secret: "banana",
+  //   metadata: {},
+  // });
+
+  // console.log(data);
 
   // const provider = new ethers.providers.JsonRpcProvider(
   //   "https://polygon-mumbai.infura.io/v3/98084ec8ac4d49e181f0ffc83562f6f6"
