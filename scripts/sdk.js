@@ -5,13 +5,12 @@ const { ethers } = require("ethers");
 const config = require("../config.json");
 const { abi, testMetaTxAbi, metaTxAbi } = require("./abi");
 
-// NodeMonkey();
+const pirvateKeys = require("../privateKeys.json");
 
 const sdk = new PablockSDK({
   apiKey: "api-test",
-  privateKey:
-    "0xf6a01b0dea644d7a82fc4ee90e4f5259a7bb67a62befe2d22cad609d5bfc5588",
-  config: { env: "LOCAL", debugMode: true },
+  privateKey: privateKeys[0],
+  config: { env: "MUMBAI", debugMode: true },
 });
 
 (async () => {
@@ -26,12 +25,12 @@ const sdk = new PablockSDK({
   // console.log("PTK QUANTITY ==>", await sdk.getPablockTokenBalance());
   // console.log("TOKEN QUANTITY ==>", await sdk.getTokenBalance());
 
-  let res = await sdk.checkBundledNotarization(
-    "09289d0d-4836-48d8-a7b2-fa9aa632faa9",
-    ["merkleRoot", "inclusion"]
-  );
+  // let res = await sdk.checkBundledNotarization(
+  //   "09289d0d-4836-48d8-a7b2-fa9aa632faa9",
+  //   ["merkleRoot", "inclusion"]
+  // );
 
-  console.log(res);
+  await sdk.requestTestPTK();
 
   // const res = await sdk.prepareTransaction(
   //   {
@@ -46,6 +45,8 @@ const sdk = new PablockSDK({
 
   // console.log(res);
 
+  // const data = await sdk.executeTransaction(res);
+
   // const data = await sdk.executeAsyncTransaction(res, {
   //   webhookUrl: "https://prova.it/hook",
   //   secret: "banana",
@@ -54,17 +55,10 @@ const sdk = new PablockSDK({
 
   // console.log(data);
 
+  // console.log(data);
+
   // const provider = new ethers.providers.JsonRpcProvider(
   //   "https://polygon-mumbai.infura.io/v3/98084ec8ac4d49e181f0ffc83562f6f6"
-  // );
-
-  // const wallet = new ethers.Wallet(
-  //   "0xfc0846a4e1d827c9c7a1fd8f255074d01bb019760a2065e0756b578dde00ecf1"
-  // ).connect(provider);
-  // const contract = new ethers.Contract(
-  //   "0x50D3A7B998C90EF96e0021e90027d093A529c67D",
-  //   testMetaTxAbi,
-  //   wallet
   // );
 
   // console.log((await contract.getCounter()).toString());

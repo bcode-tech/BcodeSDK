@@ -11,7 +11,7 @@ let txData = null;
 
 const { testMetaTxAbi } = require("../scripts/abi");
 
-const env = "LOCAL";
+const env = "MUMBAI";
 
 const sdk = new PablockSDK({
   apiKey: "api-test",
@@ -72,7 +72,7 @@ describe("Execute meta transaction", () => {
     });
   });
   it("should send meta transaction", async () => {
-    jest.setTimeout(15000);
+    jest.setTimeout(25000);
     let res = await sdk.executeTransaction(txData);
 
     expect(res).toMatchObject({
@@ -84,7 +84,18 @@ describe("Execute meta transaction", () => {
   });
   it("should request metatx async execution", async () => {
     jest.setTimeout(15000);
-    let { data } = await sdk.executeTransaction(txData);
+    let data = await sdk.executeAsyncTransaction(
+      await sdk.prepareTransaction(
+        {
+          address: config[`TEST_META_TX_LOCAL`],
+          abi: testMetaTxAbi,
+          name: "TestMetaTransaction",
+          version: "0.0.1",
+        },
+        "increment",
+        []
+      )
+    );
 
     expect({ data }).toMatchObject({ data: expect.any(String) });
   });
@@ -93,7 +104,10 @@ describe("Execute meta transaction", () => {
 describe("Pablock SDK NFT Test", () => {
   it("should mint PablockNFT", async () => {
     jest.setTimeout(15000);
-    const tx = await sdk.mintPablockNFT(1, "http://uridiprova.it");
+    const tx = await sdk.mintPablockNFT(
+      1,
+      "https://gateway.pinata.cloud/ipfs/QmcKwHTo6Mc7LaQFR1eGP3u8Qp863MwjfENS2XNQzP14ST"
+    );
 
     expect(tx).toMatchObject({
       from: expect.any(String),
@@ -139,7 +153,7 @@ describe("Pablock SDK Notarization Test", () => {
     jest.setTimeout(15000);
     const tx = await sdk.notarizeHash(
       "0xb133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2",
-      "http://uridiprova.it",
+      "https://gateway.pinata.cloud/ipfs/QmcKwHTo6Mc7LaQFR1eGP3u8Qp863MwjfENS2XNQzP14ST",
       "PablockSDKTest"
     );
 

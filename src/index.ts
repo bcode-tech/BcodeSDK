@@ -98,6 +98,7 @@ export class PablockSDK {
 
           this.authToken = data.authToken;
         } else {
+          logger.error(`[Init] Error: ${status}`);
           throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
         }
       } else if (this.authToken) {
@@ -322,6 +323,12 @@ export class PablockSDK {
     functionName: string,
     params: Array<any>
   ): Promise<MetaTransaction> {
+    logger.info(`[Prepare Tranaction]`);
+    logger.info(
+      `${contractObj.address}\n${contractObj.name}\n${contractObj.version}`
+    );
+    logger.info(` ${functionName}`);
+
     let functionSignature = web3Abi.encodeFunctionCall(
       contractObj.abi.find(
         (el) => el.type === "function" && el.name === functionName
@@ -345,8 +352,9 @@ export class PablockSDK {
         name: contractObj.name,
         version: contractObj.version,
         address: contractObj.address,
-      },
-      this.env
+        // chainId: (await this.provider.getNetwork()).chainId,
+        chainId: config[`CHAIN_ID_${this.env}`],
+      }
     );
 
     return {
@@ -360,16 +368,23 @@ export class PablockSDK {
   }
 
   async executeTransaction(tx: MetaTransaction, optionals: Optionals | null) {
-    const { status, data } = await axios.post(
-      `${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`,
-      {
-        tx,
-        ...optionals,
-      },
-      { headers: { Authorization: `Bearer ${this.authToken}` } }
-    );
-
-    return data.tx;
+    try {
+      const { status, data } = await axios.post(
+        `${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`,
+        {
+          tx,
+          ...optionals,
+        },
+        { headers: { Authorization: `Bearer ${this.authToken}` } }
+      );
+      if (status === 200) {
+        logger.info("[Execute Transaction] Success");
+        return data.tx;
+      }
+    } catch (err) {
+      logger.error(`[Execute Transaction] Error: ${err}`);
+      return null;
+    }
   }
 
   async executeAsyncTransaction(tx: MetaTransaction, optionals: Optionals) {
@@ -573,6 +588,10 @@ export class PablockSDK {
 
   async createContract(contractAddres: string, abi: any[]) {
     return new ethers.Contract(contractAddres, abi, this.wallet);
+  }
+
+  async getChainId() {
+    console.log(await this.provider.getNetwork());
   }
 
   /**

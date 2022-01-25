@@ -43,7 +43,7 @@ const {
   solidityPack
 } = require("ethers/lib/utils");
 const { ecsign } = require("ethereumjs-util");
-const config$1 = require("../config");
+require("../config");
 ({
   token: {
     typehash: keccak256(toUtf8Bytes("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")),
@@ -87,12 +87,12 @@ function getDomainSeparator(name, version, contractAddress, chainId) {
     contractAddress
   ]));
 }
-function getTransactionData(nonce, functionSignature, publicKey, privateKey, contract, env) {
+function getTransactionData(nonce, functionSignature, publicKey, privateKey, contract) {
   return __async$1(this, null, function* () {
     const digest = keccak256(solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [
       "0x19",
       "0x01",
-      getDomainSeparator(contract.name, contract.version, contract.address, config$1[`CHAIN_ID_${env}`]),
+      getDomainSeparator(contract.name, contract.version, contract.address, contract.chainId),
       keccak256(defaultAbiCoder.encode(["uint256", "address", "bytes32"], [
         nonce,
         publicKey,
@@ -1768,7 +1768,7 @@ var PablockToken = {
 
 var config = {
   ENDPOINT_LOCAL: "http://127.0.0.1:8082",
-  ENDPOINT_MUMBAI: "https://pablock-api-dev.bcode.cloud",
+  ENDPOINT_MUMBAI: "http://127.0.0.1:8082",
   ENDPOINT_POLYGON: "http://pablock-api.bcode.cloud",
   CHAIN_ID_LOCAL: 1,
   CHAIN_ID_MUMBAI: 80001,
@@ -1782,12 +1782,12 @@ var config = {
   PABLOCK_NFT_LOCAL: "0x272B411731CDF59a87250bEEB0A8F7031E98b86D",
   PABLOCK_MULTISIGN_FACTORY_LOCAL: "0xc36E2D4a155066423bD6f51A53CAe753353aFd5d",
   TEST_META_TX_LOCAL: "0xbFa175f1930833dE77bcE8a185b48Cc60bDb81a4",
-  PABLOCK_TOKEN_ADDRESS_MUMBAI: "0x70b2b8c820d62e7bd95e296dcb8de6a18ad2bca5",
-  PABLOCK_META_TRANSACTION_MUMBAI: "0x4884fd12bd652412648f3452148260c30e6cb08a",
-  PABLOCK_NOTARIZATION_MUMBAI: "0xb2c82046c2cf26a247b4467ab95cba4398c8b9a0",
-  PABLOCK_NFT_MUMBAI: "0x81e5fed95a6c474416d416a3fa59cf07fd7315f9",
-  PABLOCK_MULTISIGN_FACTORY_MUMBAI: "0x819e458106f40bc7730bd0621b3201b51c05d205",
-  TEST_META_TX_MUMBAI: "0x50D3A7B998C90EF96e0021e90027d093A529c67D",
+  PABLOCK_TOKEN_ADDRESS_MUMBAI: "0x4D47A9694389B1E42403FC5152E68d8D27803b14",
+  PABLOCK_META_TRANSACTION_MUMBAI: "0x4419AF074BC3a6C7D90f242dfdC1a163Bc710091",
+  PABLOCK_NOTARIZATION_MUMBAI: "0x8344F05f33AE80f1c03C8dc8f619719AcDe8cE49",
+  PABLOCK_NFT_MUMBAI: "0x314Caa948A6BD160451e823510C467A8A330C074",
+  PABLOCK_MULTISIGN_FACTORY_MUMBAI: "0x7296EE0F1036eC74eCF111E676e70eE97597A7d1",
+  TEST_META_TX_MUMBAI: "0xE518725c53B4272d72c10b623A8443B62D19Ef1E",
   PABLOCK_ADDRESS_LOCAL: "0xfc8CFa30350f7B195f2b5c6F350f76720bfD89f4"
 };
 
@@ -1869,6 +1869,7 @@ class PablockSDK {
             logger.info("Auth token received ");
             this.authToken = data.authToken;
           } else {
+            logger.error(`[Init] Error: ${status}`);
             throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
           }
         } else if (this.authToken) {
@@ -1980,6 +1981,11 @@ class PablockSDK {
   }
   prepareTransaction(contractObj, functionName, params) {
     return __async(this, null, function* () {
+      logger.info(`[Prepare Tranaction]`);
+      logger.info(`${contractObj.address}
+${contractObj.name}
+${contractObj.version}`);
+      logger.info(` ${functionName}`);
       let functionSignature = web3Abi.encodeFunctionCall(contractObj.abi.find((el) => el.type === "function" && el.name === functionName), params);
       const { data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet.address}`, {
         headers: { Authorization: `Bearer ${this.authToken}` }
@@ -1987,8 +1993,9 @@ class PablockSDK {
       let { r, s, v } = yield getTransactionData(data.nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
         name: contractObj.name,
         version: contractObj.version,
-        address: contractObj.address
-      }, this.env);
+        address: contractObj.address,
+        chainId: config[`CHAIN_ID_${this.env}`]
+      });
       return {
         contractAddress: contractObj.address,
         userAddress: this.wallet.address,
@@ -2001,10 +2008,18 @@ class PablockSDK {
   }
   executeTransaction(tx, optionals) {
     return __async(this, null, function* () {
-      const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`, __spreadValues({
-        tx
-      }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
-      return data.tx;
+      try {
+        const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`, __spreadValues({
+          tx
+        }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
+        if (status === 200) {
+          logger.info("[Execute Transaction] Success");
+          return data.tx;
+        }
+      } catch (err) {
+        logger.error(`[Execute Transaction] Error: ${err}`);
+        return null;
+      }
     });
   }
   executeAsyncTransaction(tx, optionals) {
@@ -2120,6 +2135,11 @@ class PablockSDK {
   createContract(contractAddres, abi) {
     return __async(this, null, function* () {
       return new ethers.ethers.Contract(contractAddres, abi, this.wallet);
+    });
+  }
+  getChainId() {
+    return __async(this, null, function* () {
+      console.log(yield this.provider.getNetwork());
     });
   }
   getAPIVersion() {

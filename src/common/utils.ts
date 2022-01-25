@@ -156,8 +156,7 @@ export async function getTransactionData(
   functionSignature: string,
   publicKey: string,
   privateKey: string,
-  contract: { name: string; version: string; address: string },
-  env: string
+  contract: { name: string; version: string; address: string; chainId: number }
 ) {
   const digest = keccak256(
     solidityPack(
@@ -169,7 +168,7 @@ export async function getTransactionData(
           contract.name,
           contract.version,
           contract.address,
-          config[`CHAIN_ID_${env}`]
+          contract.chainId
         ),
         keccak256(
           defaultAbiCoder.encode(
