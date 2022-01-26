@@ -380,6 +380,9 @@ export class PablockSDK {
       if (status === 200) {
         logger.info("[Execute Transaction] Success");
         return data.tx;
+      } else {
+        logger.info(`[Execute Transaction] Receive status: ${status}`);
+        return null;
       }
     } catch (err) {
       logger.error(`[Execute Transaction] Error: ${err}`);
@@ -388,16 +391,27 @@ export class PablockSDK {
   }
 
   async executeAsyncTransaction(tx: MetaTransaction, optionals: Optionals) {
-    const { status, data } = await axios.post(
-      `${config[`ENDPOINT_${this.env}`]}/sendRawTransactionAsync`,
-      {
-        tx,
-        ...optionals,
-      },
-      { headers: { Authorization: `Bearer ${this.authToken}` } }
-    );
+    try {
+      const { status, data } = await axios.post(
+        `${config[`ENDPOINT_${this.env}`]}/sendRawTransactionAsync`,
+        {
+          tx,
+          ...optionals,
+        },
+        { headers: { Authorization: `Bearer ${this.authToken}` } }
+      );
 
-    return data.requestId;
+      if (status === 200) {
+        logger.info("[Execute Async Transaction] Success");
+        return data.requestId;
+      } else {
+        logger.info(`[Execute Async Transaction] Receive status: ${status}`);
+        return null;
+      }
+    } catch (err) {
+      logger.error(`[Execute Async Transaction] Error: ${err}`);
+      return null;
+    }
   }
 
   // async notarizeHash(

@@ -2015,6 +2015,9 @@ ${contractObj.version}`);
         if (status === 200) {
           logger.info("[Execute Transaction] Success");
           return data.tx;
+        } else {
+          logger.info(`[Execute Transaction] Receive status: ${status}`);
+          return null;
         }
       } catch (err) {
         logger.error(`[Execute Transaction] Error: ${err}`);
@@ -2024,10 +2027,21 @@ ${contractObj.version}`);
   }
   executeAsyncTransaction(tx, optionals) {
     return __async(this, null, function* () {
-      const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransactionAsync`, __spreadValues({
-        tx
-      }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
-      return data.requestId;
+      try {
+        const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransactionAsync`, __spreadValues({
+          tx
+        }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
+        if (status === 200) {
+          logger.info("[Execute Async Transaction] Success");
+          return data.requestId;
+        } else {
+          logger.info(`[Execute Async Transaction] Receive status: ${status}`);
+          return null;
+        }
+      } catch (err) {
+        logger.error(`[Execute Async Transaction] Error: ${err}`);
+        return null;
+      }
     });
   }
   notarizeHash(hash) {
