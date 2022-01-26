@@ -9,8 +9,9 @@ const pirvateKeys = require("../privateKeys.json");
 
 const sdk = new PablockSDK({
   apiKey: "api-test",
-  privateKey: privateKeys[0],
-  config: { env: "MUMBAI", debugMode: true },
+  privateKey:
+    "0x0127cd18debc7d65205fbd28100af14d402f29171837c809c0cedb94a43468bc",
+  config: { env: "LOCAL", debugMode: true },
 });
 
 (async () => {
@@ -30,36 +31,32 @@ const sdk = new PablockSDK({
   //   ["merkleRoot", "inclusion"]
   // );
 
-  await sdk.requestTestPTK();
+  // await sdk.requestTestPTK();
 
-  // const res = await sdk.prepareTransaction(
-  //   {
-  //     address: config[`TEST_META_TX_LOCAL`],
-  //     abi: testMetaTxAbi,
-  //     name: "TestMetaTransaction",
-  //     version: "0.0.1",
-  //   },
-  //   "increment",
-  //   []
-  // );
+  const res = await sdk.prepareTransaction(
+    {
+      address: config[`TEST_META_TX_LOCAL`],
+      abi: testMetaTxAbi,
+      name: "TestMetaTransaction",
+      version: "0.0.1",
+    },
+    "increment",
+    []
+  );
 
-  // console.log(res);
+  console.log(res);
 
   // const data = await sdk.executeTransaction(res);
 
-  // const data = await sdk.executeAsyncTransaction(res, {
-  //   webhookUrl: "https://prova.it/hook",
-  //   secret: "banana",
-  //   metadata: {},
-  // });
+  const data = await sdk.executeAsyncTransaction(res, {
+    webhookUrl: "https://prova.it/hook",
+    secret: "banana",
+    metadata: {},
+  });
+
+  console.log(data);
 
   // console.log(data);
-
-  // console.log(data);
-
-  // const provider = new ethers.providers.JsonRpcProvider(
-  //   "https://polygon-mumbai.infura.io/v3/98084ec8ac4d49e181f0ffc83562f6f6"
-  // );
 
   // console.log((await contract.getCounter()).toString());
 })();

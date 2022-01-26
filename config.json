@@ -1,6 +1,6 @@
 {
   "ENDPOINT_LOCAL": "http://127.0.0.1:8082",
-  "ENDPOINT_MUMBAI": "http://127.0.0.1:8082",
+  "ENDPOINT_MUMBAI": "http://pablock-api-dev.bcode.cloud",
   "ENDPOINT_POLYGON": "http://127.0.0.1:8082",
 
   "CHAIN_ID_LOCAL": 1,
@@ -8,7 +8,7 @@
   "CHAIN_ID_POLYGON": 137,
 
   "RPC_PROVIDER_LOCAL": "http://127.0.0.1:7545",
-  "RPC_PROVIDER_MUMBAI": "https://polygon-mumbai.infura.io/v3/98084ec8ac4d49e181f0ffc83562f6f6",
+  "RPC_PROVIDER_MUMBAI": "https://rpc-mumbai.maticvigil.com/",
 
   "PABLOCK_TOKEN_ADDRESS_LOCAL": "0x9e0296fDfaB97c428507e36f077177EbDC4e5Faf",
   "PABLOCK_META_TRANSACTION_LOCAL": "0x3A2faCBF588DA64Ef94D90049d529f3862b7a6fb",
