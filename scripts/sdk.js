@@ -33,6 +33,31 @@ const sdk = new PablockSDK({
 
   // await sdk.requestTestPTK();
 
+  // const res = await sdk.prepareTransaction(
+  //   {
+  //     address: "0x4E6cebEFa75E1D216C69907f9e5553f92f9b3492",
+  //     abi: [
+  //       {
+  //         inputs: [
+  //           {
+  //             internalType: "string",
+  //             name: "_uri",
+  //             type: "string",
+  //           },
+  //         ],
+  //         name: "mintToken",
+  //         outputs: [],
+  //         stateMutability: "nonpayable",
+  //         type: "function",
+  //       },
+  //     ],
+  //     name: "ReasonedArtArtist",
+  //     version: "0.0.1",
+  //   },
+  //   "mintToken",
+  //   ["ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/100"]
+  // );
+
   const res = await sdk.prepareTransaction(
     {
       address: config[`TEST_META_TX_LOCAL`],
