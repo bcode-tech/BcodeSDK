@@ -1981,7 +1981,7 @@ class PablockSDK {
   }
   prepareTransaction(contractObj, functionName, params) {
     return __async(this, null, function* () {
-      logger.info(`[Prepare Tranaction]`);
+      logger.info(`[Prepare Transaction]`);
       logger.info(`${contractObj.address}
 ${contractObj.name}
 ${contractObj.version}`);
@@ -1996,6 +1996,7 @@ ${contractObj.version}`);
         address: contractObj.address,
         chainId: config[`CHAIN_ID_${this.env}`]
       });
+      logger.info("[Prepare Transaction] Success");
       return {
         contractAddress: contractObj.address,
         userAddress: this.wallet.address,

@@ -323,7 +323,7 @@ export class PablockSDK {
     functionName: string,
     params: Array<any>
   ): Promise<MetaTransaction> {
-    logger.info(`[Prepare Tranaction]`);
+    logger.info(`[Prepare Transaction]`);
     logger.info(
       `${contractObj.address}\n${contractObj.name}\n${contractObj.version}`
     );
@@ -356,6 +356,7 @@ export class PablockSDK {
         chainId: config[`CHAIN_ID_${this.env}`],
       }
     );
+    logger.info("[Prepare Transaction] Success");
 
     return {
       contractAddress: contractObj.address,
