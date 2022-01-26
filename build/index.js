@@ -1839,11 +1839,13 @@ function getWeb3Abi(w3Abi2) {
 const web3Abi = getWeb3Abi(w3Abi__default['default']);
 class PablockSDK {
   constructor(sdkOptions) {
-    var _a, _b;
+    var _a, _b, _c, _d;
     if (!((_a = sdkOptions.config) == null ? void 0 : _a.debugMode)) {
       logger.transports[0].silent = true;
     }
     this.env = ((_b = sdkOptions.config) == null ? void 0 : _b.env) || "MUMBAI";
+    this.endpoint = ((_c = sdkOptions.config) == null ? void 0 : _c.endpoint) || config[`ENDPOINT_${this.env}`];
+    this.rpcProvider = ((_d = sdkOptions.config) == null ? void 0 : _d.rpcProvider) || config[`RPC_PROVIDER_${this.env}`];
     logger.info(`Working environment: ${this.env}`);
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
@@ -1852,7 +1854,7 @@ class PablockSDK {
     } else {
       console.error("[Error] API key or auth token are required, please insert one!");
     }
-    this.provider = new ethers.ethers.providers.JsonRpcProvider(config[`RPC_PROVIDER_${this.env}`]);
+    this.provider = new ethers.ethers.providers.JsonRpcProvider(this.rpcProvider);
     if (sdkOptions.privateKey) {
       this.wallet = new ethers.ethers.Wallet(sdkOptions.privateKey);
     } else {
@@ -1864,7 +1866,7 @@ class PablockSDK {
     return __async(this, null, function* () {
       try {
         if (this.apiKey) {
-          let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}/${this.wallet.address}`);
+          let { status, data } = yield axios__default['default'].get(`${this.endpoint}/generateJWT/${this.apiKey}/${this.wallet.address}`);
           if (status === 200) {
             logger.info("Auth token received ");
             this.authToken = data.authToken;
@@ -1934,7 +1936,7 @@ class PablockSDK {
   requestTestPTK() {
     return __async(this, null, function* () {
       logger.info(`Request 10 PTK for test from ${this.wallet.address}`);
-      let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/faucet/${this.wallet.address}`, {
+      let { status, data } = yield axios__default['default'].get(`${this.endpoint}/faucet/${this.wallet.address}`, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
@@ -1946,7 +1948,7 @@ class PablockSDK {
   requestToken(amount, contractAddress) {
     return __async(this, null, function* () {
       logger.info(`Request ${amount} token from ${this.wallet.address}`);
-      let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/mintToken`, { contractAddress, to: this.wallet.address, amount }, {
+      let { status, data } = yield axios__default['default'].post(`${this.endpoint}/mintToken`, { contractAddress, to: this.wallet.address, amount }, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
@@ -1984,13 +1986,33 @@ class PablockSDK {
       logger.info(`[Prepare Transaction]`);
       logger.info(`${contractObj.address}
 ${contractObj.name}
-${contractObj.version}`);
-      logger.info(` ${functionName}`);
+${contractObj.version}
+${functionName}`);
       let functionSignature = web3Abi.encodeFunctionCall(contractObj.abi.find((el) => el.type === "function" && el.name === functionName), params);
-      const { data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet.address}`, {
-        headers: { Authorization: `Bearer ${this.authToken}` }
-      });
-      let { r, s, v } = yield getTransactionData(data.nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
+      const metaTxContract = this.getContract(config[`PABLOCK_META_TRANSACTION_${this.env}`], [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address"
+            }
+          ],
+          name: "getNonce",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "nonce",
+              type: "uint256"
+            }
+          ],
+          stateMutability: "view",
+          type: "function"
+        }
+      ]);
+      const nonce = yield metaTxContract.getNonce(this.wallet.address);
+      logger.info(`[Prepare Transactin] Nonce: ${nonce}`);
+      let { r, s, v } = yield getTransactionData(nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
         name: contractObj.name,
         version: contractObj.version,
         address: contractObj.address,
@@ -2010,7 +2032,7 @@ ${contractObj.version}`);
   executeTransaction(tx, optionals) {
     return __async(this, null, function* () {
       try {
-        const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`, __spreadValues({
+        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/sendRawTransaction`, __spreadValues({
           tx
         }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
         if (status === 200) {
@@ -2029,7 +2051,7 @@ ${contractObj.version}`);
   executeAsyncTransaction(tx, optionals) {
     return __async(this, null, function* () {
       try {
-        const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransactionAsync`, __spreadValues({
+        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/sendRawTransactionAsync`, __spreadValues({
           tx
         }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
         if (status === 200) {
@@ -2048,7 +2070,7 @@ ${contractObj.version}`);
   notarizeHash(hash) {
     return __async(this, null, function* () {
       try {
-        const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/notarize`, {
+        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/notarize`, {
           hash
         }, { headers: { Authorization: `Bearer ${this.authToken}` } });
         if (status === 200) {
@@ -2067,7 +2089,7 @@ ${contractObj.version}`);
       let {
         status,
         data: { hash, ipfsMerkleTree }
-      } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/checkNotarizationTree/${requestId}`, {
+      } = yield axios__default['default'].get(`${this.endpoint}/checkNotarizationTree/${requestId}`, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
@@ -2119,7 +2141,7 @@ ${contractObj.version}`);
   checkJWTValidity() {
     return __async(this, null, function* () {
       try {
-        let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/checkJWT`, {
+        let { status, data } = yield axios__default['default'].get(`${this.endpoint}/checkJWT`, {
           headers: {
             Authorization: `Bearer ${this.authToken}`
           }
@@ -2134,7 +2156,7 @@ ${contractObj.version}`);
   generateSubJWT(address) {
     return __async(this, null, function* () {
       try {
-        let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/generateSubJWT/${address}`, {
+        let { status, data } = yield axios__default['default'].get(`${this.endpoint}/generateSubJWT/${address}`, {
           headers: {
             Authorization: `Bearer ${this.authToken}`
           }

@@ -47,6 +47,8 @@ export class PablockSDK {
   provider?: any;
   authToken?: string;
   env: string;
+  endpoint: string;
+  rpcProvider: string;
 
   constructor(sdkOptions: SdkOptions) {
     if (!sdkOptions.config?.debugMode) {
@@ -54,9 +56,13 @@ export class PablockSDK {
     }
 
     this.env = sdkOptions.config?.env || "MUMBAI";
+    this.endpoint =
+      sdkOptions.config?.endpoint || config[`ENDPOINT_${this.env}`];
+    this.rpcProvider =
+      sdkOptions.config?.rpcProvider || config[`RPC_PROVIDER_${this.env}`];
 
     logger.info(`Working environment: ${this.env}`);
-    // logger.info("RPC Provider ", config[`RPC_PROVIDER_${this.env}`]);
+    // logger.info("RPC Provider ", this.rpcProvider);
 
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
@@ -69,9 +75,7 @@ export class PablockSDK {
     }
 
     // this.network = sdkOptions.config?.network || "MUMBAI";
-    this.provider = new ethers.providers.JsonRpcProvider(
-      config[`RPC_PROVIDER_${this.env}`]
-    );
+    this.provider = new ethers.providers.JsonRpcProvider(this.rpcProvider);
 
     if (sdkOptions.privateKey) {
       this.wallet = new ethers.Wallet(sdkOptions.privateKey);
@@ -89,9 +93,7 @@ export class PablockSDK {
     try {
       if (this.apiKey) {
         let { status, data } = await axios.get(
-          `${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}/${
-            this.wallet!.address
-          }`
+          `${this.endpoint}/generateJWT/${this.apiKey}/${this.wallet!.address}`
         );
         if (status === 200) {
           logger.info("Auth token received ");
@@ -219,7 +221,7 @@ export class PablockSDK {
     logger.info(`Request 10 PTK for test from ${this.wallet!.address}`);
 
     let { status, data } = await axios.get(
-      `${config[`ENDPOINT_${this.env}`]}/faucet/${this.wallet!.address}`,
+      `${this.endpoint}/faucet/${this.wallet!.address}`,
       {
         headers: {
           Authorization: `Bearer ${this.authToken}`,
@@ -243,7 +245,7 @@ export class PablockSDK {
     logger.info(`Request ${amount} token from ${this.wallet!.address}`);
 
     let { status, data } = await axios.post(
-      `${config[`ENDPOINT_${this.env}`]}/mintToken`,
+      `${this.endpoint}/mintToken`,
       { contractAddress, to: this.wallet!.address, amount },
       {
         headers: {
@@ -325,9 +327,8 @@ export class PablockSDK {
   ): Promise<MetaTransaction> {
     logger.info(`[Prepare Transaction]`);
     logger.info(
-      `${contractObj.address}\n${contractObj.name}\n${contractObj.version}`
+      `${contractObj.address}\n${contractObj.name}\n${contractObj.version}\n${functionName}`
     );
-    logger.info(` ${functionName}`);
 
     let functionSignature = web3Abi.encodeFunctionCall(
       contractObj.abi.find(
@@ -336,15 +337,43 @@ export class PablockSDK {
       params
     );
 
-    const { data } = await axios.get(
-      `${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet!.address}`,
-      {
-        headers: { Authorization: `Bearer ${this.authToken}` },
-      }
+    const metaTxContract = this.getContract(
+      config[`PABLOCK_META_TRANSACTION_${this.env}`],
+      [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "getNonce",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "nonce",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ]
     );
 
+    const nonce = await metaTxContract.getNonce(this.wallet!.address);
+    logger.info(`[Prepare Transactin] Nonce: ${nonce}`);
+
+    // const { data } = await axios.get(
+    //   `${this.endpoint}/getNonce/${this.wallet!.address}`,
+    //   {
+    //     headers: { Authorization: `Bearer ${this.authToken}` },
+    //   }
+    // );
+
     let { r, s, v } = await getTransactionData(
-      data.nonce,
+      nonce,
       functionSignature,
       this.wallet!.address,
       this.wallet!.privateKey,
@@ -371,7 +400,7 @@ export class PablockSDK {
   async executeTransaction(tx: MetaTransaction, optionals: Optionals | null) {
     try {
       const { status, data } = await axios.post(
-        `${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`,
+        `${this.endpoint}/sendRawTransaction`,
         {
           tx,
           ...optionals,
@@ -394,7 +423,7 @@ export class PablockSDK {
   async executeAsyncTransaction(tx: MetaTransaction, optionals: Optionals) {
     try {
       const { status, data } = await axios.post(
-        `${config[`ENDPOINT_${this.env}`]}/sendRawTransactionAsync`,
+        `${this.endpoint}/sendRawTransactionAsync`,
         {
           tx,
           ...optionals,
@@ -445,7 +474,7 @@ export class PablockSDK {
   async notarizeHash(hash: string) {
     try {
       const { status, data } = await axios.post(
-        `${config[`ENDPOINT_${this.env}`]}/notarize`,
+        `${this.endpoint}/notarize`,
         {
           hash,
         },
@@ -469,14 +498,11 @@ export class PablockSDK {
     let {
       status,
       data: { hash, ipfsMerkleTree },
-    } = await axios.get(
-      `${config[`ENDPOINT_${this.env}`]}/checkNotarizationTree/${requestId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${this.authToken}`,
-        },
-      }
-    );
+    } = await axios.get(`${this.endpoint}/checkNotarizationTree/${requestId}`, {
+      headers: {
+        Authorization: `Bearer ${this.authToken}`,
+      },
+    });
 
     let { data: leaves } = await axios.get(`${IPFS_GATEWAY}/${ipfsMerkleTree}`);
 
@@ -564,14 +590,11 @@ export class PablockSDK {
    */
   async checkJWTValidity() {
     try {
-      let { status, data } = await axios.get(
-        `${config[`ENDPOINT_${this.env}`]}/checkJWT`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.authToken}`,
-          },
-        }
-      );
+      let { status, data } = await axios.get(`${this.endpoint}/checkJWT`, {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+        },
+      });
 
       logger.info(status, data);
 
@@ -584,7 +607,7 @@ export class PablockSDK {
   async generateSubJWT(address: string) {
     try {
       let { status, data } = await axios.get(
-        `${config[`ENDPOINT_${this.env}`]}/generateSubJWT/${address}`,
+        `${this.endpoint}/generateSubJWT/${address}`,
         {
           headers: {
             Authorization: `Bearer ${this.authToken}`,

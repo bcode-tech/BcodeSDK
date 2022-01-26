@@ -1,6 +1,10 @@
+import { StringNullableChain } from "lodash";
+
 type Configuration = {
   env: "LOCAL" | "MUMBAI" | "POLYGON";
   debugMode: boolean | false;
+  endpoint?: string;
+  rpcProvider?: string;
 };
 
 export type SdkOptions = {

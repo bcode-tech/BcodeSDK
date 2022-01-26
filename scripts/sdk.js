@@ -11,7 +11,7 @@ const sdk = new PablockSDK({
   apiKey: "api-test",
   privateKey:
     "0x0127cd18debc7d65205fbd28100af14d402f29171837c809c0cedb94a43468bc",
-  config: { env: "LOCAL", debugMode: true },
+  config: { env: "MUMBAI", debugMode: true, endpoint: "http://127.0.0.1:8082" },
 });
 
 (async () => {
@@ -60,8 +60,16 @@ const sdk = new PablockSDK({
 
   const res = await sdk.prepareTransaction(
     {
-      address: config[`TEST_META_TX_LOCAL`],
-      abi: testMetaTxAbi,
+      address: config[`TEST_META_TX_MUMBAI`],
+      abi: [
+        {
+          inputs: [],
+          name: "increment",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
       name: "TestMetaTransaction",
       version: "0.0.1",
     },
@@ -73,13 +81,13 @@ const sdk = new PablockSDK({
 
   // const data = await sdk.executeTransaction(res);
 
-  const data = await sdk.executeAsyncTransaction(res, {
-    webhookUrl: "https://prova.it/hook",
-    secret: "banana",
-    metadata: {},
-  });
+  // const data = await sdk.executeAsyncTransaction(res, {
+  //   webhookUrl: "https://prova.it/hook",
+  //   secret: "banana",
+  //   metadata: {},
+  // });
 
-  console.log(data);
+  // console.log(data);
 
   // console.log(data);
 
