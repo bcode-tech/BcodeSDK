@@ -1768,7 +1768,7 @@ var PablockToken = {
 
 var config = {
   ENDPOINT_LOCAL: "http://127.0.0.1:8082",
-  ENDPOINT_MUMBAI: "http://pablock-api-dev.bcode.cloud",
+  ENDPOINT_MUMBAI: "https://pablock-api-dev.bcode.cloud",
   ENDPOINT_POLYGON: "http://pablock-api.bcode.cloud",
   CHAIN_ID_LOCAL: 1,
   CHAIN_ID_MUMBAI: 80001,
