@@ -8,7 +8,7 @@ const { abi, testMetaTxAbi, metaTxAbi } = require("./abi");
 const pirvateKeys = require("../privateKeys.json");
 
 const sdk = new PablockSDK({
-  apiKey: "api-test",
+  apiKey: "rart-api",
   privateKey:
     "0x0127cd18debc7d65205fbd28100af14d402f29171837c809c0cedb94a43468bc",
   config: { env: "MUMBAI", debugMode: true, endpoint: "http://127.0.0.1:8082" },
@@ -81,11 +81,18 @@ const sdk = new PablockSDK({
 
   // const data = await sdk.executeTransaction(res);
 
-  // const data = await sdk.executeAsyncTransaction(res, {
-  //   webhookUrl: "https://prova.it/hook",
-  //   secret: "banana",
-  //   metadata: {},
-  // });
+  await sdk.executeAsyncTransaction(res, {
+    webhookUrl:
+      "https://226a-2001-b07-6464-bdd1-fbce-1500-f5e2-56b5.ngrok.io/webhook",
+    secret: "banana2",
+    metadata: { test: "prova" },
+  });
+  await sdk.executeAsyncTransaction(res, {
+    webhookUrl:
+      "https://226a-2001-b07-6464-bdd1-fbce-1500-f5e2-56b5.ngrok.io/webhook",
+    secret: "banana",
+    metadata: { test: "prova" },
+  });
 
   // console.log(data);
 
