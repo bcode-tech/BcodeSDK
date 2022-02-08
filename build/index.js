@@ -7,11 +7,13 @@ var ethers = require('ethers');
 var lodash = require('lodash');
 var w3Abi = require('web3-eth-abi');
 var merkletreejs = require('merkletreejs');
+var CryptoJS = require('crypto-js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 var axios__default = /*#__PURE__*/_interopDefaultLegacy(axios);
 var w3Abi__default = /*#__PURE__*/_interopDefaultLegacy(w3Abi);
+var CryptoJS__default = /*#__PURE__*/_interopDefaultLegacy(CryptoJS);
 
 typeof require !== "undefined" ? require : (x) => {
   throw new Error('Dynamic require of "' + x + '" is not supported');
@@ -1796,6 +1798,15 @@ var config = {
   PABLOCK_ADDRESS_LOCAL: "0xfc8CFa30350f7B195f2b5c6F350f76720bfD89f4"
 };
 
+function fromString(input) {
+  return CryptoJS__default['default'].SHA256(input).toString(CryptoJS__default['default'].enc.Hex);
+}
+
+var hash = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  fromString: fromString
+});
+
 var __defProp = Object.defineProperty;
 var __defProps = Object.defineProperties;
 var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
@@ -2137,16 +2148,6 @@ ${contractObj.version}`);
       }
     });
   }
-  createContract(contractAddres, abi) {
-    return __async(this, null, function* () {
-      return new ethers.ethers.Contract(contractAddres, abi, this.wallet);
-    });
-  }
-  getChainId() {
-    return __async(this, null, function* () {
-      console.log(yield this.provider.getNetwork());
-    });
-  }
   getAPIVersion() {
     return __async(this, null, function* () {
       let { data } = yield axios__default['default'].get(`/getVersion`);
@@ -2155,5 +2156,6 @@ ${contractObj.version}`);
   }
 }
 
+exports.Hash = hash;
 exports.PablockSDK = PablockSDK;
 //# sourceMappingURL=index.js.map

@@ -1,6 +1,4 @@
-const { PablockSDK } = require("../build");
-
-const { ethers } = require("ethers");
+const { PablockSDK, Hash } = require("../build");
 
 const config = require("../config.json");
 const { abi, testMetaTxAbi, metaTxAbi } = require("./abi");
@@ -8,14 +6,9 @@ const { abi, testMetaTxAbi, metaTxAbi } = require("./abi");
 const pirvateKeys = require("../privateKeys.json");
 
 const sdk = new PablockSDK({
-<<<<<<< Updated upstream
-  apiKey: "api-test",
-  privateKey: privateKeys[0],
-=======
   apiKey: "pablock-sdk",
   privateKey:
     "0x2187109768f00bcf7d34a0c03879036d6e0410625762b85a124a382091498ebc",
->>>>>>> Stashed changes
   config: { env: "MUMBAI", debugMode: true },
 });
 
@@ -49,14 +42,6 @@ const sdk = new PablockSDK({
   //   []
   // );
 
-<<<<<<< Updated upstream
-  // console.log(res);
-
-  // const data = await sdk.executeTransaction(res);
-
-  // const data = await sdk.executeAsyncTransaction(res, {
-  //   webhookUrl: "https://prova.it/hook",
-=======
   // const res = await sdk.prepareTransaction(
   //   {
   //     // address: config[`TEST_META_TX_MUMBAI`],
@@ -112,36 +97,26 @@ const sdk = new PablockSDK({
 
   // console.log(res);
 
-  for (let i = 0; i < 8; i++) {
-    console.log(
-      await sdk.notarizeHash(
-        "0xb133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2"
-      )
-    );
-  }
-
-  // const data = await sdk.executeTransaction(res);
+  // for (let i = 0; i < 8; i++) {
+  //   console.log(
+  //     await sdk.notarizeHash(
+  //       "0xb133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2"
+  //     )
+  //   );
+  // }
 
   // const data = await sdk.executeAsyncTransaction(res);
   // console.log(data);
   // await sdk.executeAsyncTransaction(res, {
   //   webhookUrl:
   //     "https://226a-2001-b07-6464-bdd1-fbce-1500-f5e2-56b5.ngrok.io/webhook",
->>>>>>> Stashed changes
   //   secret: "banana",
   //   metadata: {},
   // });
 
   // console.log(data);
 
-<<<<<<< Updated upstream
-  // console.log(data);
-
-  // const provider = new ethers.providers.JsonRpcProvider(
-  //   "https://polygon-mumbai.infura.io/v3/98084ec8ac4d49e181f0ffc83562f6f6"
-  // );
-
-=======
->>>>>>> Stashed changes
   // console.log((await contract.getCounter()).toString());
+
+  console.log(Hash.generateHash("ciao"));
 })();

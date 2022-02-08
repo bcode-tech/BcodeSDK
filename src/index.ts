@@ -1,12 +1,12 @@
 //Libraries
 import axios from "axios";
-import { ethers, Transaction, Wallet } from "ethers";
+import { ethers, Wallet } from "ethers";
 import { pick, range } from "lodash";
 import w3Abi, { AbiCoder } from "web3-eth-abi";
 import { MerkleTree } from "merkletreejs";
 
 //Utils
-import { sign, getPermitDigest, getTransactionData } from "./common/utils";
+import { getTransactionData } from "./common/utils";
 import { logger } from "./common/logger";
 
 //Constants
@@ -566,6 +566,11 @@ export class PablockSDK {
     }
   }
 
+  /**
+   * @description Generate a sub JWT thatt can interact with Pablock API
+   * @param address
+   * @returns
+   */
   async generateSubJWT(address: string) {
     try {
       let { status, data } = await axios.get(
@@ -586,14 +591,6 @@ export class PablockSDK {
     }
   }
 
-  async createContract(contractAddres: string, abi: any[]) {
-    return new ethers.Contract(contractAddres, abi, this.wallet);
-  }
-
-  async getChainId() {
-    console.log(await this.provider.getNetwork());
-  }
-
   /**
    * Return API version
    *
@@ -604,3 +601,5 @@ export class PablockSDK {
     return data;
   }
 }
+
+export * as Hash from "./modules/hash"
