@@ -8,17 +8,19 @@ var lodash = require('lodash');
 var w3Abi = require('web3-eth-abi');
 var merkletreejs = require('merkletreejs');
 var CryptoJS = require('crypto-js');
+var QRCode = require('qrcode');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 var axios__default = /*#__PURE__*/_interopDefaultLegacy(axios);
 var w3Abi__default = /*#__PURE__*/_interopDefaultLegacy(w3Abi);
 var CryptoJS__default = /*#__PURE__*/_interopDefaultLegacy(CryptoJS);
+var QRCode__default = /*#__PURE__*/_interopDefaultLegacy(QRCode);
 
 typeof require !== "undefined" ? require : (x) => {
   throw new Error('Dynamic require of "' + x + '" is not supported');
 };
-var __async$1 = (__this, __arguments, generator) => {
+var __async$2 = (__this, __arguments, generator) => {
   return new Promise((resolve, reject) => {
     var fulfilled = (value) => {
       try {
@@ -90,7 +92,7 @@ function getDomainSeparator(name, version, contractAddress, chainId) {
   ]));
 }
 function getTransactionData(nonce, functionSignature, publicKey, privateKey, contract) {
-  return __async$1(this, null, function* () {
+  return __async$2(this, null, function* () {
     const digest = keccak256(solidityPack(["bytes1", "bytes1", "bytes32", "bytes32"], [
       "0x19",
       "0x01",
@@ -1770,8 +1772,8 @@ var PablockToken = {
 
 var config = {
   ENDPOINT_LOCAL: "http://127.0.0.1:8082",
-  ENDPOINT_MUMBAI: "http://127.0.0.1:8082",
-  ENDPOINT_POLYGON: "http://pablock-api.bcode.cloud",
+  ENDPOINT_MUMBAI: "https://pablock-api-dev.bcode.cloud",
+  ENDPOINT_POLYGON: "https://pablock-api.bcode.cloud",
   CHAIN_ID_LOCAL: 1,
   CHAIN_ID_MUMBAI: 80001,
   CHAIN_ID_POLYGON: 137,
@@ -1798,11 +1800,55 @@ var config = {
   PABLOCK_ADDRESS_LOCAL: "0xfc8CFa30350f7B195f2b5c6F350f76720bfD89f4"
 };
 
-function fromString(input) {
-  return CryptoJS__default['default'].SHA256(input).toString(CryptoJS__default['default'].enc.Hex);
+function fromString$1(input) {
+  return `0x${CryptoJS__default['default'].SHA256(input).toString(CryptoJS__default['default'].enc.Hex)}`;
+}
+function fromBuffer(file) {
+  const wordArray = CryptoJS__default['default'].lib.WordArray.create(file);
+  return `0x${CryptoJS__default['default'].SHA256(wordArray).toString(CryptoJS__default['default'].enc.Hex)}`;
 }
 
 var hash = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  fromString: fromString$1,
+  fromBuffer: fromBuffer
+});
+
+typeof require !== "undefined" ? require : (x) => {
+  throw new Error('Dynamic require of "' + x + '" is not supported');
+};
+var __async$1 = (__this, __arguments, generator) => {
+  return new Promise((resolve, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
+};
+function fromString(input) {
+  const buffer = () => __async$1(this, null, function* () {
+    let enc = new TextEncoder();
+    return enc.encode(yield QRCode__default['default'].toString(input)).buffer;
+  });
+  const print = () => __async$1(this, null, function* () {
+    return console.log(yield QRCode__default['default'].toString(input));
+  });
+  return { buffer, print };
+}
+
+var qrcode = /*#__PURE__*/Object.freeze({
   __proto__: null,
   fromString: fromString
 });
@@ -1855,11 +1901,13 @@ function getWeb3Abi(w3Abi2) {
 const web3Abi = getWeb3Abi(w3Abi__default['default']);
 class PablockSDK {
   constructor(sdkOptions) {
-    var _a, _b;
+    var _a, _b, _c, _d;
     if (!((_a = sdkOptions.config) == null ? void 0 : _a.debugMode)) {
       logger.transports[0].silent = true;
     }
     this.env = ((_b = sdkOptions.config) == null ? void 0 : _b.env) || "MUMBAI";
+    this.endpoint = ((_c = sdkOptions.config) == null ? void 0 : _c.endpoint) || config[`ENDPOINT_${this.env}`];
+    this.rpcProvider = ((_d = sdkOptions.config) == null ? void 0 : _d.rpcProvider) || config[`RPC_PROVIDER_${this.env}`];
     logger.info(`Working environment: ${this.env}`);
     if (sdkOptions.apiKey) {
       this.apiKey = sdkOptions.apiKey;
@@ -1868,7 +1916,7 @@ class PablockSDK {
     } else {
       console.error("[Error] API key or auth token are required, please insert one!");
     }
-    this.provider = new ethers.ethers.providers.JsonRpcProvider(config[`RPC_PROVIDER_${this.env}`]);
+    this.provider = new ethers.ethers.providers.JsonRpcProvider(this.rpcProvider);
     if (sdkOptions.privateKey) {
       this.wallet = new ethers.ethers.Wallet(sdkOptions.privateKey);
     } else {
@@ -1880,7 +1928,7 @@ class PablockSDK {
     return __async(this, null, function* () {
       try {
         if (this.apiKey) {
-          let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/generateJWT/${this.apiKey}/${this.wallet.address}`);
+          let { status, data } = yield axios__default['default'].get(`${this.endpoint}/generateJWT/${this.apiKey}/${this.wallet.address}`);
           if (status === 200) {
             logger.info("Auth token received ");
             this.authToken = data.authToken;
@@ -1950,7 +1998,7 @@ class PablockSDK {
   requestTestPTK() {
     return __async(this, null, function* () {
       logger.info(`Request 10 PTK for test from ${this.wallet.address}`);
-      let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/faucet/${this.wallet.address}`, {
+      let { status, data } = yield axios__default['default'].get(`${this.endpoint}/faucet/${this.wallet.address}`, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
@@ -1962,7 +2010,7 @@ class PablockSDK {
   requestToken(amount, contractAddress) {
     return __async(this, null, function* () {
       logger.info(`Request ${amount} token from ${this.wallet.address}`);
-      let { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/mintToken`, { contractAddress, to: this.wallet.address, amount }, {
+      let { status, data } = yield axios__default['default'].post(`${this.endpoint}/mintToken`, { contractAddress, to: this.wallet.address, amount }, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
@@ -1997,21 +2045,42 @@ class PablockSDK {
   }
   prepareTransaction(contractObj, functionName, params) {
     return __async(this, null, function* () {
-      logger.info(`[Prepare Tranaction]`);
+      logger.info(`[Prepare Transaction]`);
       logger.info(`${contractObj.address}
 ${contractObj.name}
-${contractObj.version}`);
-      logger.info(` ${functionName}`);
+${contractObj.version}
+${functionName}`);
       let functionSignature = web3Abi.encodeFunctionCall(contractObj.abi.find((el) => el.type === "function" && el.name === functionName), params);
-      const { data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/getNonce/${this.wallet.address}`, {
-        headers: { Authorization: `Bearer ${this.authToken}` }
-      });
-      let { r, s, v } = yield getTransactionData(data.nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
+      const metaTxContract = this.getContract(config[`PABLOCK_META_TRANSACTION_${this.env}`], [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address"
+            }
+          ],
+          name: "getNonce",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "nonce",
+              type: "uint256"
+            }
+          ],
+          stateMutability: "view",
+          type: "function"
+        }
+      ]);
+      const nonce = yield metaTxContract.getNonce(this.wallet.address);
+      logger.info(`[Prepare Transactin] Nonce: ${nonce}`);
+      let { r, s, v } = yield getTransactionData(nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
         name: contractObj.name,
         version: contractObj.version,
         address: contractObj.address,
         chainId: config[`CHAIN_ID_${this.env}`]
       });
+      logger.info("[Prepare Transaction] Success");
       return {
         contractAddress: contractObj.address,
         userAddress: this.wallet.address,
@@ -2025,12 +2094,15 @@ ${contractObj.version}`);
   executeTransaction(tx, optionals) {
     return __async(this, null, function* () {
       try {
-        const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransaction`, __spreadValues({
+        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/sendRawTransaction`, __spreadValues({
           tx
         }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
         if (status === 200) {
           logger.info("[Execute Transaction] Success");
           return data.tx;
+        } else {
+          logger.info(`[Execute Transaction] Receive status: ${status}`);
+          return null;
         }
       } catch (err) {
         logger.error(`[Execute Transaction] Error: ${err}`);
@@ -2040,16 +2112,27 @@ ${contractObj.version}`);
   }
   executeAsyncTransaction(tx, optionals) {
     return __async(this, null, function* () {
-      const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/sendRawTransactionAsync`, __spreadValues({
-        tx
-      }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
-      return data.requestId;
+      try {
+        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/sendRawTransactionAsync`, __spreadValues({
+          tx
+        }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
+        if (status === 200) {
+          logger.info("[Execute Async Transaction] Success");
+          return data.requestId;
+        } else {
+          logger.info(`[Execute Async Transaction] Receive status: ${status}`);
+          return null;
+        }
+      } catch (err) {
+        logger.error(`[Execute Async Transaction] Error: ${err}`);
+        return null;
+      }
     });
   }
   notarizeHash(hash) {
     return __async(this, null, function* () {
       try {
-        const { status, data } = yield axios__default['default'].post(`${config[`ENDPOINT_${this.env}`]}/notarize`, {
+        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/notarize`, {
           hash
         }, { headers: { Authorization: `Bearer ${this.authToken}` } });
         if (status === 200) {
@@ -2068,7 +2151,7 @@ ${contractObj.version}`);
       let {
         status,
         data: { hash, ipfsMerkleTree }
-      } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/checkNotarizationTree/${requestId}`, {
+      } = yield axios__default['default'].get(`${this.endpoint}/checkNotarizationTree/${requestId}`, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
@@ -2120,7 +2203,7 @@ ${contractObj.version}`);
   checkJWTValidity() {
     return __async(this, null, function* () {
       try {
-        let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/checkJWT`, {
+        let { status, data } = yield axios__default['default'].get(`${this.endpoint}/checkJWT`, {
           headers: {
             Authorization: `Bearer ${this.authToken}`
           }
@@ -2135,7 +2218,7 @@ ${contractObj.version}`);
   generateSubJWT(address) {
     return __async(this, null, function* () {
       try {
-        let { status, data } = yield axios__default['default'].get(`${config[`ENDPOINT_${this.env}`]}/generateSubJWT/${address}`, {
+        let { status, data } = yield axios__default['default'].get(`${this.endpoint}/generateSubJWT/${address}`, {
           headers: {
             Authorization: `Bearer ${this.authToken}`
           }
@@ -2158,4 +2241,5 @@ ${contractObj.version}`);
 
 exports.Hash = hash;
 exports.PablockSDK = PablockSDK;
+exports.QRCode = qrcode;
 //# sourceMappingURL=index.js.map
