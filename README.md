@@ -33,7 +33,7 @@ const { PablockSDK } = require("pablock-sdk")
     });
 
     await sdk.init()
-})
+})()
 ```
 
 Otherwise if you already have a private key that you want to use you can use:
@@ -50,7 +50,7 @@ const { PablockSDK } = require("pablock-sdk")
     });
 
     await sdk.init()
-})
+})()
 ```
 
 Constructor config object parameters:
@@ -60,13 +60,14 @@ Constructor config object parameters:
 | env       | MUMBAI        | MUMBAI, POLYGON |
 | debugMode | false         | true, false     |
 
-### Test
+## Test
 
 For running test you need to create privateKeys.json, with an array of at least 3 privateKeys to submit to test script.
 
 ## Functions
 
 - [init()](#init)
+- [setPrivateKey()](#setPrivateKey)
 - [getAuthToken()](#getAuthToken)
 - [getApiKey()](#getApiKey)
 - [getWalletAddress()](#getWalletAddress)
@@ -88,6 +89,16 @@ For running test you need to create privateKeys.json, with an array of at least 
 Initilize user wallet and configure
 
 ---
+
+### [setPrivateKey()](#setPrivateKey)
+
+Set private key after creation, to enable auth logic
+
+#### Params
+
+| Param      | Default value      |
+| ---------- | ------------------ |
+| privateKey | Wallet private key |
 
 ### [getAuthToken()](#getAuthToken)
 
@@ -245,7 +256,7 @@ Request meta transaction notarization, return notarization receipt.
 
 Example:
 
-````js
+```js
 type Optionals = {
   webhookUrl: string | null;
   metadata: { [key: string]: any } | null;
@@ -254,8 +265,6 @@ type Optionals = {
 
 async notarizeHash(hash: string, uri: string, appId: string, optionals: Optionals | null)
 ```
-
----
 
 ### [mintPablockNFT(amount, uri, contractAddress, webhookUrl)](#mintPablockNFT)
 
@@ -304,4 +313,3 @@ Function that check if fetched JWT is still valid
 Returns Pablock API service version, just to check if the service is available
 
 Made with ❤️ by BCode
-````

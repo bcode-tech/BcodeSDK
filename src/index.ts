@@ -49,8 +49,10 @@ export class PablockSDK {
   env: string;
   endpoint: string;
   rpcProvider: string;
+  initialized: boolean
 
   constructor(sdkOptions: SdkOptions) {
+    this.initialized = false;
     if (!sdkOptions.config?.debugMode) {
       logger.transports[0].silent = true;
     }
@@ -106,10 +108,20 @@ export class PablockSDK {
       } else if (this.authToken) {
         this.checkJWTValidity();
       }
+      this.initialized = true;
     } catch (error) {
       logger.info("[Error] ", error);
       throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
     }
+  }
+
+  setPrivateKey(privateKey: string){
+    this.wallet = new ethers.Wallet(privateKey);
+    logger.info("New wallet setted!")
+  }
+
+  isInitialized(){
+    return this.initialized;
   }
 
   /**

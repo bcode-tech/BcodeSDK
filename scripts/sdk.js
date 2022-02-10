@@ -13,7 +13,9 @@ const sdk = new PablockSDK({
 });
 
 (async () => {
+  console.log(sdk.isInitialized());
   await sdk.init();
+  console.log(sdk.isInitialized());
 
   console.log(sdk.getWalletAddress());
   // await sdk.generateSubJWT();

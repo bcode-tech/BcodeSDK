@@ -1902,6 +1902,7 @@ const web3Abi = getWeb3Abi(w3Abi__default['default']);
 class PablockSDK {
   constructor(sdkOptions) {
     var _a, _b, _c, _d;
+    this.initialized = false;
     if (!((_a = sdkOptions.config) == null ? void 0 : _a.debugMode)) {
       logger.transports[0].silent = true;
     }
@@ -1939,11 +1940,19 @@ class PablockSDK {
         } else if (this.authToken) {
           this.checkJWTValidity();
         }
+        this.initialized = true;
       } catch (error) {
         logger.info("[Error] ", error);
         throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
       }
     });
+  }
+  setPrivateKey(privateKey) {
+    this.wallet = new ethers.ethers.Wallet(privateKey);
+    logger.info("New wallet setted!");
+  }
+  isInitialized() {
+    return this.initialized;
   }
   getAuthToken() {
     logger.info(`Your auth token is: ${this.authToken}`);
