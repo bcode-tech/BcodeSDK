@@ -53,6 +53,25 @@ const { PablockSDK } = require("pablock-sdk")
 })()
 ```
 
+It's possible to change private key later:
+
+```
+const { PablockSDK } = require("pablock-sdk")
+
+(async () => {
+
+    const sdk = new PablockSDK({
+        apiKey: <your-api-key>,
+        privateKey: <private-key>,
+        config: { env: <environment>, debugMode: true },
+    });
+
+    await sdk.init()
+
+    sdk.setPrivateKey("private_key")
+})()
+```
+
 Constructor config object parameters:
 
 | Param     | Default value | Options         |
