@@ -1786,7 +1786,7 @@ var config = {
   PABLOCK_NFT_LOCAL: "0x272B411731CDF59a87250bEEB0A8F7031E98b86D",
   PABLOCK_MULTISIGN_FACTORY_LOCAL: "0xc36E2D4a155066423bD6f51A53CAe753353aFd5d",
   TEST_META_TX_LOCAL: "0xbFa175f1930833dE77bcE8a185b48Cc60bDb81a4",
-  PABLOCK_TOKEN_ADDRESS_MUMBAI: "0x4D47A9694389B1E42403FC5152E68d8D27803b14",
+  PABLOCK_TOKEN_ADDRESS_MUMBAI: "0xa2984CfEB9E091ff9b945c527CbDc25609686De3",
   PABLOCK_META_TRANSACTION_MUMBAI: "0x4419AF074BC3a6C7D90f242dfdC1a163Bc710091",
   PABLOCK_NOTARIZATION_MUMBAI: "0x8344F05f33AE80f1c03C8dc8f619719AcDe8cE49",
   PABLOCK_NFT_MUMBAI: "0x314Caa948A6BD160451e823510C467A8A330C074",
@@ -1923,6 +1923,13 @@ class PablockSDK {
     } else {
       this.wallet = ethers.ethers.Wallet.createRandom();
     }
+    this.contracts = __spreadValues({
+      PABLOCK_TOKEN_ADDRESS: config[`PABLOCK_TOKEN_ADDRESS_${this.env}`],
+      PABLOCK_META_TRANSACTION: config[`PABLOCK_META_TRANSACTION_${this.env}`],
+      PABLOCK_NOTARIZATION: config[`PABLOCK_NOTARIZATION_${this.env}`],
+      PABLOCK_NFT: config[`PABLOCK_NFT_${this.env}`],
+      PABLOCK_MULTISIGN_FACTORY: config[`PABLOCK_MULTISIGN_FACTORY_${this.env}`]
+    }, sdkOptions.config.pablockContracts);
     logger.info("Finished initialization");
   }
   init() {
@@ -1978,7 +1985,7 @@ class PablockSDK {
   }
   getPablockTokenBalance() {
     return __async(this, arguments, function* (address = this.wallet.address) {
-      const pablockToken = new ethers.ethers.Contract(config[`PABLOCK_TOKEN_ADDRESS_${this.env}`], PablockToken.abi, this.provider);
+      const pablockToken = new ethers.ethers.Contract(this.contracts[`PABLOCK_TOKEN_ADDRESS`], PablockToken.abi, this.provider);
       const balance = parseInt(ethers.ethers.utils.formatEther(yield pablockToken.balanceOf(address)));
       logger.info(`User has ${balance} PTK`);
       return balance;
@@ -2031,7 +2038,7 @@ class PablockSDK {
   mintPablockNFT(amount, uri, optionals) {
     return __async(this, null, function* () {
       try {
-        const tx = yield this.prepareTransaction(__spreadProps(__spreadValues({}, PABLOCK_NFT_OBJ), { address: config[`PABLOCK_NFT_${this.env}`] }), "mintToken", [this.wallet.address, amount, uri]);
+        const tx = yield this.prepareTransaction(__spreadProps(__spreadValues({}, PABLOCK_NFT_OBJ), { address: this.contracts[`PABLOCK_NFT`] }), "mintToken", [this.wallet.address, amount, uri]);
         const receipt = yield this.executeTransaction(tx, optionals);
         return receipt;
       } catch (err) {
@@ -2043,7 +2050,7 @@ class PablockSDK {
   sendPablockNFT(to, tokenId, optionals) {
     return __async(this, null, function* () {
       try {
-        const tx = yield this.prepareTransaction(__spreadProps(__spreadValues({}, PABLOCK_NFT_OBJ), { address: config[`PABLOCK_NFT_${this.env}`] }), "transferFrom", [this.wallet.address, to, tokenId]);
+        const tx = yield this.prepareTransaction(__spreadProps(__spreadValues({}, PABLOCK_NFT_OBJ), { address: this.contracts[`PABLOCK_NFT`] }), "transferFrom", [this.wallet.address, to, tokenId]);
         const receipt = yield this.executeTransaction(tx, optionals);
         return receipt;
       } catch (err) {
@@ -2060,7 +2067,7 @@ ${contractObj.name}
 ${contractObj.version}
 ${functionName}`);
       let functionSignature = web3Abi.encodeFunctionCall(contractObj.abi.find((el) => el.type === "function" && el.name === functionName), params);
-      const metaTxContract = this.getContract(config[`PABLOCK_META_TRANSACTION_${this.env}`], [
+      const metaTxContract = this.getContract(this.contracts[`PABLOCK_META_TRANSACTION`], [
         {
           inputs: [
             {

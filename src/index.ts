@@ -33,6 +33,7 @@ import {
   Optionals,
   MetaTransaction,
   ReturnParam,
+  PablockContractsObj,
 } from "./types";
 
 function getWeb3Abi(w3Abi: unknown): AbiCoder {
@@ -49,7 +50,8 @@ export class PablockSDK {
   env: string;
   endpoint: string;
   rpcProvider: string;
-  initialized: boolean
+  initialized: boolean;
+  contracts: PablockContractsObj;
 
   constructor(sdkOptions: SdkOptions) {
     this.initialized = false;
@@ -85,6 +87,19 @@ export class PablockSDK {
       this.wallet = ethers.Wallet.createRandom();
     }
 
+    this.contracts = {
+      PABLOCK_TOKEN_ADDRESS: config[`PABLOCK_TOKEN_ADDRESS_${this.env}`]!,
+      PABLOCK_META_TRANSACTION: config[
+        `PABLOCK_META_TRANSACTION_${this.env}`
+      ]!,
+      PABLOCK_NOTARIZATION: config[`PABLOCK_NOTARIZATION_${this.env}`]!,
+      PABLOCK_NFT: config[`PABLOCK_NFT_${this.env}`]!,
+      PABLOCK_MULTISIGN_FACTORY: config[
+        `PABLOCK_MULTISIGN_FACTORY_${this.env}`
+      ]!,
+      ...sdkOptions.config.pablockContracts,
+    };
+
     logger.info("Finished initialization");
   }
 
@@ -115,12 +130,12 @@ export class PablockSDK {
     }
   }
 
-  setPrivateKey(privateKey: string){
+  setPrivateKey(privateKey: string) {
     this.wallet = new ethers.Wallet(privateKey);
-    logger.info("New wallet setted!")
+    logger.info("New wallet setted!");
   }
 
-  isInitialized(){
+  isInitialized() {
     return this.initialized;
   }
 
@@ -177,7 +192,7 @@ export class PablockSDK {
    */
   async getPablockTokenBalance(address = this.wallet!.address) {
     const pablockToken = new ethers.Contract(
-      config[`PABLOCK_TOKEN_ADDRESS_${this.env}`],
+      this.contracts[`PABLOCK_TOKEN_ADDRESS`],
       PablockToken.abi,
       this.provider
     );
@@ -288,7 +303,7 @@ export class PablockSDK {
   ) {
     try {
       const tx: MetaTransaction = await this.prepareTransaction(
-        { ...PABLOCK_NFT_OBJ, address: config[`PABLOCK_NFT_${this.env}`] },
+        { ...PABLOCK_NFT_OBJ, address: this.contracts[`PABLOCK_NFT`] },
         "mintToken",
         [this.wallet!.address, amount, uri]
       );
@@ -318,7 +333,7 @@ export class PablockSDK {
   ) {
     try {
       const tx: MetaTransaction = await this.prepareTransaction(
-        { ...PABLOCK_NFT_OBJ, address: config[`PABLOCK_NFT_${this.env}`] },
+        { ...PABLOCK_NFT_OBJ, address: this.contracts[`PABLOCK_NFT`]! },
         "transferFrom",
         [this.wallet!.address, to, tokenId]
       );
@@ -350,7 +365,7 @@ export class PablockSDK {
     );
 
     const metaTxContract = this.getContract(
-      config[`PABLOCK_META_TRANSACTION_${this.env}`],
+      this.contracts[`PABLOCK_META_TRANSACTION`],
       [
         {
           inputs: [
@@ -466,7 +481,7 @@ export class PablockSDK {
   //     const tx = await this.prepareTransaction(
   //       {
   //         ...PABLOCK_NOTARIZATION_OBJ,
-  //         address: config[`PABLOCK_NOTARIZATION_${this.env}`],
+  //         address: this.contracts[`PABLOCK_NOTARIZATION`],
   //       },
   //       "notarize",
   //       [hash, uri, this.wallet!.address, appId]

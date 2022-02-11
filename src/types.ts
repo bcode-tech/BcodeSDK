@@ -5,6 +5,7 @@ type Configuration = {
   debugMode: boolean | false;
   endpoint?: string;
   rpcProvider?: string;
+  pablockContracts?: PablockContractsObj;
 };
 
 export type SdkOptions = {
@@ -37,3 +38,12 @@ export type Optionals = {
 };
 
 export type ReturnParam = "leaves" | "merkleRoot" | "merkleProof" | "inclusion";
+
+type PablockContracts =
+  | "PABLOCK_TOKEN_ADDRESS"
+  | "PABLOCK_META_TRANSACTION"
+  | "PABLOCK_NOTARIZATION"
+  | "PABLOCK_NFT"
+  | "PABLOCK_MULTISIGN_FACTORY";
+
+export type PablockContractsObj = { [key in PablockContracts]: string };
