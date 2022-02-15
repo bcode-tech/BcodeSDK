@@ -8,7 +8,7 @@ const pirvateKeys = require("../privateKeys.json");
 const sdk = new PablockSDK({
   apiKey: "pablock-sdk",
   config: {
-    env: "MUMBAI",
+    env: "LOCAL",
     debugMode: true,
     endpoint: "http://127.0.0.1:8082",
   },
@@ -31,34 +31,9 @@ const sdk = new PablockSDK({
 
   // await sdk.requestTestPTK();
 
-  // const res = await sdk.prepareTransaction(
-  //   {
-  //     address: "0x4E6cebEFa75E1D216C69907f9e5553f92f9b3492",
-  //     abi: [
-  //       {
-  //         inputs: [
-  //           {
-  //             internalType: "string",
-  //             name: "_uri",
-  //             type: "string",
-  //           },
-  //         ],
-  //         name: "mintToken",
-  //         outputs: [],
-  //         stateMutability: "nonpayable",
-  //         type: "function",
-  //       },
-  //     ],
-  //     name: "ReasonedArtArtist",
-  //     version: "0.0.1",
-  //   },
-  //   "mintToken",
-  //   ["ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/100"]
-  // );
-
   const res = await sdk.prepareTransaction(
     {
-      address: "0x4E7c4A8ab47fD926dF1086843bC5355f45E79c5a",
+      address: "0xbFa175f1930833dE77bcE8a185b48Cc60bDb81a4",
       abi: [
         {
           inputs: [],
@@ -103,9 +78,7 @@ const sdk = new PablockSDK({
     []
   );
 
-  await sdk.executeTransaction(res);
-
-  // for (let i = 0; i < 28; i++) {
+  // for (let i = 0; i < 400; i++) {
   //   console.log(
   //     await sdk.notarizeHash(
   //       "0xb133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2"
@@ -113,12 +86,12 @@ const sdk = new PablockSDK({
   //   );
   // }
 
-  // await sdk.executeAsyncTransaction(res, {
-  //   webhookUrl:
-  //     "https://226a-2001-b07-6464-bdd1-fbce-1500-f5e2-56b5.ngrok.io/webhook",
-  //   secret: "banana",
-  //   metadata: { test: "prova" },
-  // });
+  await sdk.executeAsyncTransaction(res, {
+    webhookUrl: "http://127.0.0.1:8082/webhook",
+    secret: "banana",
+    metadata: { test: "prova" },
+    verbose: true,
+  });
 
   // console.log(data);
 })();

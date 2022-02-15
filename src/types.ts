@@ -35,6 +35,7 @@ export type Optionals = {
   webhookUrl: string | null;
   metadata: { [key: string]: any } | null;
   secret: string | null;
+  verbose: boolean | null;
 };
 
 export type ReturnParam = "leaves" | "merkleRoot" | "merkleProof" | "inclusion";
