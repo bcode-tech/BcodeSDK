@@ -19,7 +19,7 @@ const sdk = new PablockSDK({
 
   // console.log(sdk.getWalletAddress());
 
-  await sdk.getPablockTokenBalance();
+  console.log(sdk.getPablockContracts());
 
   // console.log("PTK QUANTITY ==>", await sdk.getPablockTokenBalance());
   // console.log("TOKEN QUANTITY ==>", await sdk.getTokenBalance());
@@ -31,52 +31,52 @@ const sdk = new PablockSDK({
 
   // await sdk.requestTestPTK();
 
-  const res = await sdk.prepareTransaction(
-    {
-      address: "0xbFa175f1930833dE77bcE8a185b48Cc60bDb81a4",
-      abi: [
-        {
-          inputs: [],
-          name: "decrement",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "hash",
-              type: "bytes32",
-            },
-            {
-              internalType: "string",
-              name: "uri",
-              type: "string",
-            },
-            {
-              internalType: "address",
-              name: "applicant",
-              type: "address",
-            },
-            {
-              internalType: "string",
-              name: "appId",
-              type: "string",
-            },
-          ],
-          name: "notarize",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ],
-      name: "TestMetaTransaction",
-      version: "0.1.0",
-    },
-    "decrement",
-    []
-  );
+  // const res = await sdk.prepareTransaction(
+  //   {
+  //     address: "0xbFa175f1930833dE77bcE8a185b48Cc60bDb81a4",
+  //     abi: [
+  //       {
+  //         inputs: [],
+  //         name: "decrement",
+  //         outputs: [],
+  //         stateMutability: "nonpayable",
+  //         type: "function",
+  //       },
+  //       {
+  //         inputs: [
+  //           {
+  //             internalType: "bytes32",
+  //             name: "hash",
+  //             type: "bytes32",
+  //           },
+  //           {
+  //             internalType: "string",
+  //             name: "uri",
+  //             type: "string",
+  //           },
+  //           {
+  //             internalType: "address",
+  //             name: "applicant",
+  //             type: "address",
+  //           },
+  //           {
+  //             internalType: "string",
+  //             name: "appId",
+  //             type: "string",
+  //           },
+  //         ],
+  //         name: "notarize",
+  //         outputs: [],
+  //         stateMutability: "nonpayable",
+  //         type: "function",
+  //       },
+  //     ],
+  //     name: "TestMetaTransaction",
+  //     version: "0.1.0",
+  //   },
+  //   "decrement",
+  //   []
+  // );
 
   // for (let i = 0; i < 400; i++) {
   //   console.log(
@@ -86,12 +86,12 @@ const sdk = new PablockSDK({
   //   );
   // }
 
-  await sdk.executeAsyncTransaction(res, {
-    webhookUrl: "http://127.0.0.1:8082/webhook",
-    secret: "banana",
-    metadata: { test: "prova" },
-    verbose: true,
-  });
+  // await sdk.executeAsyncTransaction(res, {
+  //   webhookUrl: "http://127.0.0.1:8082/webhook",
+  //   secret: "banana",
+  //   metadata: { test: "prova" },
+  //   verbose: true,
+  // });
 
   // console.log(data);
 })();

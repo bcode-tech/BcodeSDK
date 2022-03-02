@@ -5,7 +5,7 @@ type Configuration = {
   debugMode: boolean | false;
   endpoint?: string;
   rpcProvider?: string;
-  pablockContracts?: PablockContractsObj;
+  pablockContracts?: PablockContractsObj | {};
 };
 
 export type SdkOptions = {

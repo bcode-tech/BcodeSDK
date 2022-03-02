@@ -51,7 +51,7 @@ export class PablockSDK {
   endpoint: string;
   rpcProvider: string;
   initialized: boolean;
-  contracts: PablockContractsObj;
+  contracts: PablockContractsObj | {};
 
   constructor(sdkOptions: SdkOptions) {
     this.initialized = false;
@@ -88,15 +88,6 @@ export class PablockSDK {
     }
 
     this.contracts = {
-      PABLOCK_TOKEN_ADDRESS: config[`PABLOCK_TOKEN_ADDRESS_${this.env}`]!,
-      PABLOCK_META_TRANSACTION: config[
-        `PABLOCK_META_TRANSACTION_${this.env}`
-      ]!,
-      PABLOCK_NOTARIZATION: config[`PABLOCK_NOTARIZATION_${this.env}`]!,
-      PABLOCK_NFT: config[`PABLOCK_NFT_${this.env}`]!,
-      PABLOCK_MULTISIGN_FACTORY: config[
-        `PABLOCK_MULTISIGN_FACTORY_${this.env}`
-      ]!,
       ...sdkOptions.config.pablockContracts,
     };
 
@@ -116,6 +107,11 @@ export class PablockSDK {
           logger.info("Auth token received ");
 
           this.authToken = data.authToken;
+
+          this.contracts = {
+            ...(await axios.get(`${this.endpoint}/contracts`)).data,
+            ...this.contracts,
+          };
         } else {
           logger.error(`[Init] Error: ${status}`);
           throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
@@ -137,6 +133,10 @@ export class PablockSDK {
 
   isInitialized() {
     return this.initialized;
+  }
+
+  getPablockContracts(): PablockContractsObj | {} {
+    return this.contracts;
   }
 
   /**
@@ -498,12 +498,13 @@ export class PablockSDK {
   //   }
   // }
 
-  async notarizeHash(hash: string) {
+  async notarizeHash(hash: string, optionals: Optionals) {
     try {
       const { status, data } = await axios.post(
         `${this.endpoint}/notarize`,
         {
           hash,
+          ...optionals,
         },
         { headers: { Authorization: `Bearer ${this.authToken}` } }
       );

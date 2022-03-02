@@ -687,7 +687,7 @@ const ERROR_TYPE = {
 const PABLOCK_NFT_OBJ = {
   abi: PablockNFT.abi,
   name: "PablockNFT",
-  version: "0.2.1"
+  version: "0.2.2"
 };
 
 var CustomERC20 = {
@@ -1923,13 +1923,7 @@ class PablockSDK {
     } else {
       this.wallet = ethers.ethers.Wallet.createRandom();
     }
-    this.contracts = __spreadValues({
-      PABLOCK_TOKEN_ADDRESS: config[`PABLOCK_TOKEN_ADDRESS_${this.env}`],
-      PABLOCK_META_TRANSACTION: config[`PABLOCK_META_TRANSACTION_${this.env}`],
-      PABLOCK_NOTARIZATION: config[`PABLOCK_NOTARIZATION_${this.env}`],
-      PABLOCK_NFT: config[`PABLOCK_NFT_${this.env}`],
-      PABLOCK_MULTISIGN_FACTORY: config[`PABLOCK_MULTISIGN_FACTORY_${this.env}`]
-    }, sdkOptions.config.pablockContracts);
+    this.contracts = __spreadValues({}, sdkOptions.config.pablockContracts);
     logger.info("Finished initialization");
   }
   init() {
@@ -1940,6 +1934,7 @@ class PablockSDK {
           if (status === 200) {
             logger.info("Auth token received ");
             this.authToken = data.authToken;
+            this.contracts = __spreadValues(__spreadValues({}, (yield axios__default['default'].get(`${this.endpoint}/contracts`)).data), this.contracts);
           } else {
             logger.error(`[Init] Error: ${status}`);
             throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
@@ -1960,6 +1955,9 @@ class PablockSDK {
   }
   isInitialized() {
     return this.initialized;
+  }
+  getPablockContracts() {
+    return this.contracts;
   }
   getAuthToken() {
     logger.info(`Your auth token is: ${this.authToken}`);
@@ -2145,12 +2143,12 @@ ${functionName}`);
       }
     });
   }
-  notarizeHash(hash) {
+  notarizeHash(hash, optionals) {
     return __async(this, null, function* () {
       try {
-        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/notarize`, {
+        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/notarize`, __spreadValues({
           hash
-        }, { headers: { Authorization: `Bearer ${this.authToken}` } });
+        }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
         if (status === 200) {
           return data.requestId;
         } else {

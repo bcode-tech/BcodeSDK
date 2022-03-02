@@ -13,154 +13,200 @@ let txData = null;
 const { testMetaTxAbi } = require("../scripts/abi");
 
 const env = "LOCAL";
+const apiKey = "pablock-sdk";
+const TEST_META_TX = "0x794E318E01d21e8462B1Bf5Ce729B6759Ef06dEe";
 
 const sdk = new PablockSDK({
-  apiKey: "api-test",
+  apiKey: apiKey,
   privateKey: privateKeys[0],
-  config: { env, debugMode: true },
+  config: { env, debugMode: true, endpoint: "http://127.0.0.1:8083" },
 });
 
 const sdk2 = new PablockSDK({
-  apiKey: "api-test",
+  apiKey: apiKey,
   privateKey: privateKeys[1],
-  config: { env, debugMode: true },
+  config: { env, debugMode: true, endpoint: "http://127.0.0.1:8083" },
 });
 
-// describe("Pablock SDK Test", () => {
-//   it("should create Library", async () => {
-//     await sdk.init();
-//     await sdk2.init();
-//     expect(sdk.getApiKey()).toBe("api-test");
-//   });
-//   it("should be authenticated", async () => {
-//     expect(await sdk.checkJWTValidity()).toBe(true);
-//   });
-//   it("should have PTK", async () => {
-//     let balance = BigNumber.from(await sdk.getPablockTokenBalance());
-//     if (balance.lt(10)) {
-//       await sdk.requestTestPTK();
-//     }
+describe("Pablock SDK Test", () => {
+  it("should create Library", async () => {
+    await sdk.init();
+    await sdk2.init();
+    expect(sdk.getApiKey()).toBe(apiKey);
+  });
+  it("should be authenticated", async () => {
+    expect(await sdk.checkJWTValidity()).toBe(true);
+  });
+  it("should have PTK", async () => {
+    let balance = BigNumber.from(await sdk.getPablockTokenBalance());
+    if (balance.lt(10)) {
+      await sdk.requestTestPTK();
+    }
 
-//     balance = await sdk.getPablockTokenBalance();
-//     expect(balance).toBeGreaterThan(0);
-//   });
-//   // it("should not have MATIC", async () => {
-//   //   const matic = await sdk.getMaticBalance();
-//   //   expect(matic).toEqual(0);
-//   // });
-// });
+    balance = await sdk.getPablockTokenBalance();
+    expect(balance).toBeGreaterThan(0);
+  });
+  // it("should not have MATIC", async () => {
+  //   const matic = await sdk.getMaticBalance();
+  //   expect(matic).toEqual(0);
+  // });
+  it("should return contracts addresses", async () => {
+    expect(sdk.getPablockContracts()).toMatchObject({
+      PABLOCK_TOKEN_ADDRESS: "0x73a5fE45a65D93DE887e7Ef38F71f54dD8b4EB82",
+      PABLOCK_META_TRANSACTION: "0xbAbF27C3c595927005b35daB96b8b8a0238321f7",
+      PABLOCK_NOTARIZATION: "0x622e4AF18066c7b2008417805Cf300aCE14C5452",
+      PABLOCK_NFT: "0xE8fd2F6d2B3346bA64E94B8c0D50e9Ec3368a119",
+      PABLOCK_MULTISIGN_FACTORY: "0x4CdB237cb7D715a422D700A156EAB7FB09945054",
+    });
+  });
+});
 
-// describe("Execute meta transaction", () => {
-//   it("should prepare transaction", async () => {
-//     txData = await sdk.prepareTransaction(
-//       {
-//         address: config[`TEST_META_TX_${env}`],
-//         abi: testMetaTxAbi,
-//         name: "TestMetaTransaction",
-//         version: "0.0.1",
-//       },
-//       "increment",
-//       []
-//     );
+describe("Execute meta transaction", () => {
+  it("should prepare transaction", async () => {
+    txData = await sdk.prepareTransaction(
+      {
+        address: TEST_META_TX,
+        abi: testMetaTxAbi,
+        name: "TestMetaTransaction",
+        version: "0.1.0",
+      },
+      "decrement",
+      []
+    );
 
-//     expect(txData).toMatchObject({
-//       contractAddress: expect.any(String),
-//       userAddress: expect.any(String),
-//       functionSignature: expect.any(String),
-//       r: expect.any(String),
-//       s: expect.any(String),
-//       v: expect.any(Number),
-//     });
-//   });
-//   it("should send meta transaction", async () => {
-//     jest.setTimeout(25000);
-//     let res = await sdk.executeTransaction(txData);
+    expect(txData).toMatchObject({
+      contractAddress: expect.any(String),
+      userAddress: expect.any(String),
+      functionSignature: expect.any(String),
+      r: expect.any(String),
+      s: expect.any(String),
+      v: expect.any(Number),
+    });
+  });
+  it("should send meta transaction", async () => {
+    jest.setTimeout(25000);
+    let res = await sdk.executeTransaction(txData);
 
-//     expect(res).toMatchObject({
-//       from: expect.any(String),
-//       to: expect.any(String),
-//       transactionHash: expect.any(String),
-//       blockHash: expect.any(String),
-//     });
-//   });
-//   it("should request metatx async execution", async () => {
-//     jest.setTimeout(15000);
-//     let data = await sdk.executeAsyncTransaction(
-//       await sdk.prepareTransaction(
-//         {
-//           address: config[`TEST_META_TX_LOCAL`],
-//           abi: testMetaTxAbi,
-//           name: "TestMetaTransaction",
-//           version: "0.0.1",
-//         },
-//         "increment",
-//         []
-//       )
-//     );
+    expect(res).toMatchObject({
+      from: expect.any(String),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      blockHash: expect.any(String),
+    });
+  });
+  it("should request metatx async execution", async () => {
+    jest.setTimeout(15000);
+    let data = await sdk.executeAsyncTransaction(
+      await sdk.prepareTransaction(
+        {
+          address: TEST_META_TX,
+          abi: testMetaTxAbi,
+          name: "TestMetaTransaction",
+          version: "0.1.0",
+        },
+        "decrement",
+        []
+      )
+    );
 
-//     expect({ data }).toMatchObject({ data: expect.any(String) });
-//   });
-// });
+    expect({ data }).toMatchObject({ data: expect.any(String) });
+  });
+});
 
-// describe("Pablock SDK NFT Test", () => {
-//   it("should mint PablockNFT", async () => {
-//     jest.setTimeout(15000);
-//     const tx = await sdk.mintPablockNFT(
-//       1,
-//       "https://gateway.pinata.cloud/ipfs/QmcKwHTo6Mc7LaQFR1eGP3u8Qp863MwjfENS2XNQzP14ST"
-//     );
+describe("Pablock SDK NFT Test", () => {
+  it("should mint PablockNFT", async () => {
+    jest.setTimeout(15000);
 
-//     expect(tx).toMatchObject({
-//       from: expect.any(String),
-//       to: expect.any(String),
-//       transactionHash: expect.any(String),
-//       blockHash: expect.any(String),
-//     });
-//   });
-//   it("should have PablockNFTs", async () => {
-//     jest.setTimeout(15000);
-//     const contractAddress = config[`PABLOCK_NFT_${env}`];
+    let tx = await sdk.executeTransaction(
+      await sdk.prepareTransaction(
+        {
+          address: sdk.getPablockContracts().PABLOCK_NFT,
+          abi: [
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "to",
+                  type: "address",
+                },
+                {
+                  internalType: "string",
+                  name: "_uri",
+                  type: "string",
+                },
+              ],
+              name: "mintToken",
+              outputs: [
+                {
+                  internalType: "uint256[]",
+                  name: "indexes",
+                  type: "uint256[]",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+          ],
+          name: "PablockNFT",
+          version: "0.2.2",
+        },
+        "mintToken",
+        [
+          sdk.getWalletAddress(),
+          "https://gateway.pinata.cloud/ipfs/QmcKwHTo6Mc7LaQFR1eGP3u8Qp863MwjfENS2XNQzP14ST",
+        ]
+      )
+    );
 
-//     const tokens = await sdk.getOwnedNFT([contractAddress]);
+    expect(tx).toMatchObject({
+      from: expect.any(String),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      blockHash: expect.any(String),
+    });
+  });
+  it("should have PablockNFTs", async () => {
+    jest.setTimeout(15000);
+    const contractAddress = sdk.getPablockContracts().PABLOCK_NFT;
 
-//     expect(tokens[contractAddress].length).toBeGreaterThan(0);
-//     tokenId = tokens[contractAddress][0].tokenId;
-//   });
-//   it("should send PablockNFT", async () => {
-//     jest.setTimeout(15000);
-//     const res = await sdk.sendPablockNFT(sdk2.getWalletAddress(), tokenId);
+    const tokens = await sdk.getOwnedNFT([contractAddress]);
 
-//     expect(res).toMatchObject({
-//       from: expect.any(String),
-//       to: expect.any(String),
-//       transactionHash: expect.any(String),
-//       blockHash: expect.any(String),
-//     });
-//   });
-//   it("receiver address should have NFT", async () => {
-//     const contractAddress = config[`PABLOCK_NFT_${env}`];
+    expect(tokens[contractAddress].length).toBeGreaterThan(0);
+    tokenId = tokens[contractAddress][0].tokenId;
+  });
+  it("should send PablockNFT", async () => {
+    jest.setTimeout(15000);
+    const res = await sdk.sendPablockNFT(sdk2.getWalletAddress(), tokenId);
 
-//     const tokens = await sdk2.getOwnedNFT([contractAddress]);
-//     // console.log("HIS TOKENS ==>", tokens);
+    expect(res).toMatchObject({
+      from: expect.any(String),
+      to: expect.any(String),
+      transactionHash: expect.any(String),
+      blockHash: expect.any(String),
+    });
+  });
+  it("receiver address should have NFT", async () => {
+    const contractAddress = sdk.getPablockContracts().PABLOCK_NFT;
 
-//     expect(!!tokens[contractAddress].find((el) => el.tokenId === tokenId)).toBe(
-//       true
-//     );
-//   });
-// });
+    const tokens = await sdk2.getOwnedNFT([contractAddress]);
+    // console.log("HIS TOKENS ==>", tokens);
 
-// describe("Pablock SDK Notarization Test", () => {
-//   it("should notarize hash", async () => {
-//     jest.setTimeout(15000);
-//     const tx = await sdk.notarizeHash(
-//       "0xb133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2",
-//       "https://gateway.pinata.cloud/ipfs/QmcKwHTo6Mc7LaQFR1eGP3u8Qp863MwjfENS2XNQzP14ST",
-//       "PablockSDKTest"
-//     );
+    expect(!!tokens[contractAddress].find((el) => el.tokenId === tokenId)).toBe(
+      true
+    );
+  });
+});
 
-//     expect({ tx }).toMatchObject({ tx: expect.any(String) });
-//   });
-// });
+describe("Pablock SDK Notarization Test", () => {
+  it("should notarize hash (bundle)", async () => {
+    jest.setTimeout(15000);
+    const tx = await sdk.notarizeHash(
+      "0xb133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2"
+    );
+
+    expect({ tx }).toMatchObject({ tx: expect.any(String) });
+  });
+});
 
 describe("Pablock Hash module", () => {
   it("String hash", () => {
@@ -171,7 +217,7 @@ describe("Pablock Hash module", () => {
   it("Buffer hash", () => {
     const file = fs.readFileSync("./README.md");
     expect(Hash.fromBuffer(file.buffer)).toBe(
-      "0xf3f75d9d6852f20c073345bf4c8cb1d03a6cd821aaf8ec6c1c66f41587d1ba42"
+      "0x8db73d440e8e3365692ffeaef0fb6a3c1cb8694a987ccd11382da30978bb2a69"
     );
   });
 });

@@ -262,15 +262,13 @@ async executeAsyncTransaction(tx: MetaTransaction, optionals: Optionals | null)
 
 ---
 
-### [notarizeHash(hash, uri, appId, optionals)](#executeAsyncTransaction)
+### [notarizeHash(hash, optionals)](#executeAsyncTransaction)
 
 Request meta transaction notarization, return notarization receipt.
 
 | Param     | Description                                 |
 | --------- | ------------------------------------------- |
 | hash      | Hash of document to notarize                |
-| uri       | Optional uri of document                    |
-| appId     | Optional identifier for your notarization   |
 | optionals | Object with webhookUrl, secret and metadata |
 
 Example:
@@ -282,7 +280,7 @@ type Optionals = {
   secret: string | null;
 };
 
-async notarizeHash(hash: string, uri: string, appId: string, optionals: Optionals | null)
+async notarizeHash(hash: string, optionals: Optionals | null)
 ```
 
 ### [mintPablockNFT(amount, uri, contractAddress, webhookUrl)](#mintPablockNFT)

@@ -15,7 +15,7 @@ export const ERROR_TYPE = {
 export const PABLOCK_NFT_OBJ = {
   abi: PablockNFT.abi,
   name: "PablockNFT",
-  version: "0.2.1",
+  version: "0.2.2",
 };
 
 export const PABLOCK_NOTARIZATION_OBJ = {
