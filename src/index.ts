@@ -560,6 +560,19 @@ export class PablockSDK {
         };
   }
 
+  async getMetaTxStatus(requestId: string) {
+    const { data } = await axios.get(
+      `${this.endpoint}/getMetaTxStatus/${requestId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+        },
+      }
+    );
+
+    return data;
+  }
+
   getContract(address: string, abi: any[]) {
     return new ethers.Contract(
       address,

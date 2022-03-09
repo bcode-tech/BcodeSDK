@@ -2190,6 +2190,16 @@ ${functionName}`);
       };
     });
   }
+  getMetaTxStatus(requestId) {
+    return __async(this, null, function* () {
+      const { data } = yield axios__default['default'].get(`${this.endpoint}/getMetaTxStatus/${requestId}`, {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`
+        }
+      });
+      return data;
+    });
+  }
   getContract(address, abi) {
     var _a;
     return new ethers.ethers.Contract(address, abi, (_a = this.wallet) == null ? void 0 : _a.connect(this.provider));

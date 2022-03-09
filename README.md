@@ -97,6 +97,7 @@ For running test you need to create privateKeys.json, with an array of at least 
 - [executeTransaction()](#executeTransaction)
 - [executeAsyncTransaction()](#executeAsyncTransaction)
 - [notarizeHash()](#notarizeHash)
+- [checkBundleNotarization()](#checkBundleNotarization)
 - [mintPablockNFT()](#mintPablockNFT)
 - [sendPablockNFT()](#sendPablockNFT)
 - [getOwnedNFT()](#getOwnedNFT)
@@ -281,6 +282,38 @@ type Optionals = {
 };
 
 async notarizeHash(hash: string, optionals: Optionals | null)
+```
+
+### [checkBundleNotarization(requestId, returnParams)](#checkBundleNotarization)
+
+Return bundled notarization data.
+
+| Param        | Description                               |
+| ------------ | ----------------------------------------- |
+| requestId    | String id returned from notarizeHash call |
+| returnParams | Array of params                           |
+
+Example:
+
+```js
+type ReturnParam = "leaves" | "merkleRoot" | "merkleProof" | "inclusion";
+
+async checkBundledNotarization(requestId: string, returnParams: ReturnParam[])
+```
+
+### [getMetaTxStatus(requestId)](#getMetaTxStatus)
+
+Return meta transaction status, receipt, ethereum anchor tx.
+
+| Param     | Description                                          |
+| --------- | ---------------------------------------------------- |
+| requestId | String id returned from executeAsyncTransaction call |
+
+Example:
+
+```js
+
+async getMetaTxRequest(requestId: string)
 ```
 
 ### [mintPablockNFT(amount, uri, contractAddress, webhookUrl)](#mintPablockNFT)
