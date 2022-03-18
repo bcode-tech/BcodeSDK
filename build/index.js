@@ -2057,7 +2057,7 @@ class PablockSDK {
       }
     });
   }
-  prepareTransaction(contractObj, functionName, params) {
+  prepareTransaction(contractObj, functionName, params, optionals) {
     return __async(this, null, function* () {
       logger.info(`[Prepare Transaction]`);
       logger.info(`${contractObj.address}
@@ -2086,8 +2086,11 @@ ${functionName}`);
           type: "function"
         }
       ]);
-      const nonce = yield metaTxContract.getNonce(this.wallet.address);
-      logger.info(`[Prepare Transactin] Nonce: ${nonce}`);
+      let nonce = (optionals == null ? void 0 : optionals.nonce) || 0;
+      if (!(optionals == null ? void 0 : optionals.nonce)) {
+        nonce = yield metaTxContract.getNonce(this.wallet.address);
+      }
+      logger.info(`[Prepare Transaction] Nonce: ${nonce}`);
       let { r, s, v } = yield getTransactionData(nonce, functionSignature, this.wallet.address, this.wallet.privateKey, {
         name: contractObj.name,
         version: contractObj.version,
@@ -2203,6 +2206,32 @@ ${functionName}`);
   getContract(address, abi) {
     var _a;
     return new ethers.ethers.Contract(address, abi, (_a = this.wallet) == null ? void 0 : _a.connect(this.provider));
+  }
+  getNonce(address) {
+    return __async(this, null, function* () {
+      const metaTxContract = this.getContract(this.contracts[`PABLOCK_META_TRANSACTION`], [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address"
+            }
+          ],
+          name: "getNonce",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "nonce",
+              type: "uint256"
+            }
+          ],
+          stateMutability: "view",
+          type: "function"
+        }
+      ]);
+      return yield metaTxContract.getNonce(address);
+    });
   }
   getOwnedNFT(_0) {
     return __async(this, arguments, function* (contractAddresses, ownerAddress = this.wallet.address) {

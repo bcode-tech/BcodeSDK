@@ -350,7 +350,8 @@ export class PablockSDK {
   async prepareTransaction(
     contractObj: ContractStruct,
     functionName: string,
-    params: Array<any>
+    params: Array<any>,
+    optionals?: { nonce: number }
   ): Promise<MetaTransaction> {
     logger.info(`[Prepare Transaction]`);
     logger.info(
@@ -388,9 +389,15 @@ export class PablockSDK {
         },
       ]
     );
+    /**
+     * Allow user to send more transaction at once by specifing future nonce
+     */
+    let nonce = optionals?.nonce || 0;
+    if (!optionals?.nonce) {
+      nonce = await metaTxContract.getNonce(this.wallet!.address);
+    }
 
-    const nonce = await metaTxContract.getNonce(this.wallet!.address);
-    logger.info(`[Prepare Transactin] Nonce: ${nonce}`);
+    logger.info(`[Prepare Transaction] Nonce: ${nonce}`);
 
     // const { data } = await axios.get(
     //   `${this.endpoint}/getNonce/${this.wallet!.address}`,
@@ -579,6 +586,35 @@ export class PablockSDK {
       abi,
       this.wallet?.connect(this.provider)
     );
+  }
+
+  async getNonce(address: string) {
+    const metaTxContract = this.getContract(
+      this.contracts[`PABLOCK_META_TRANSACTION`],
+      [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "getNonce",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "nonce",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ]
+    );
+
+    return await metaTxContract.getNonce(address);
   }
 
   /**
