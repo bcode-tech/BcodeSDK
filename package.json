@@ -1,6 +1,6 @@
 {
   "name": "pablock-sdk",
-  "version": "0.1.12",
+  "version": "0.2.0",
   "description": "SDK to integrate Pablock functionalities in any system",
   "main": "build/index.js",
   "types": "types/index.d.ts",
