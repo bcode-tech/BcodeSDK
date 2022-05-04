@@ -38,7 +38,12 @@ export type Optionals = {
   verbose: boolean | null;
 };
 
-export type ReturnParam = "leaves" | "merkleRoot" | "merkleProof" | "inclusion";
+export type ReturnParam =
+  | "leaves"
+  | "merkleRoot"
+  | "merkleProof"
+  | "inclusion"
+  | "hash";
 
 type PablockContracts =
   | "PABLOCK_TOKEN_ADDRESS"
