@@ -1,4 +1,4 @@
-const { default: axios } = require("axios");
+const axios = require("axios");
 const { BigNumber } = require("ethers");
 const { lt } = require("lodash");
 const fs = require("fs");
@@ -9,6 +9,8 @@ const privateKeys = require("../privateKeys.json");
 
 let tokenId = null;
 let txData = null;
+
+let notarizationRequestId = null;
 
 const { testMetaTxAbi } = require("../scripts/abi");
 
@@ -86,7 +88,7 @@ describe("Execute meta transaction", () => {
   it("should send meta transaction", async () => {
     jest.setTimeout(25000);
     let res = await sdk.executeTransaction(txData);
-
+    console.log("RES ==>", res);
     expect(res).toMatchObject({
       from: expect.any(String),
       to: expect.any(String),
@@ -157,7 +159,7 @@ describe("Pablock SDK NFT Test", () => {
         ]
       )
     );
-
+    console.log("TRANSACTION ==>", tx);
     expect(tx).toMatchObject({
       from: expect.any(String),
       to: expect.any(String),
@@ -200,11 +202,17 @@ describe("Pablock SDK NFT Test", () => {
 describe("Pablock SDK Notarization Test", () => {
   it("should notarize hash (bundle)", async () => {
     jest.setTimeout(15000);
-    const tx = await sdk.notarizeHash(
+    notarizationRequestId = await sdk.notarizeHash(
       "0xb133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2"
     );
 
-    expect({ tx }).toMatchObject({ tx: expect.any(String) });
+    expect(typeof notarizationRequestId).toBe("string");
+  });
+  it("should check status", async () => {
+    jest.setTimeout(15000);
+    const { receipt } = await sdk.checkStatus(notarizationRequestId);
+
+    expect(receipt).toBe(null);
   });
 });
 
@@ -217,7 +225,7 @@ describe("Pablock Hash module", () => {
   it("Buffer hash", () => {
     const file = fs.readFileSync("./README.md");
     expect(Hash.fromBuffer(file.buffer)).toBe(
-      "0x8db73d440e8e3365692ffeaef0fb6a3c1cb8694a987ccd11382da30978bb2a69"
+      "0x4c7b68d42d2135df5e677bcba6cecdb5dd7746de53d5d4cd5a930e19c1795be0"
     );
   });
 });

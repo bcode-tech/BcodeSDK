@@ -567,6 +567,19 @@ export class PablockSDK {
         };
   }
 
+  async checkStatus(requestId: string){
+    const { data } = await axios.get(
+      `${this.endpoint}/checkStatus/${requestId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+        },
+      }
+    );
+
+    return data;
+  }
+
   async getMetaTxStatus(requestId: string) {
     const { data } = await axios.get(
       `${this.endpoint}/getMetaTxStatus/${requestId}`,
@@ -673,7 +686,8 @@ export class PablockSDK {
         },
       });
 
-      logger.info(status, data);
+
+      logger.info(`AUTHENTICATION ==> ${status} ${JSON.stringify(data)}`);
 
       return data.auth;
     } catch (error) {

@@ -2193,6 +2193,16 @@ ${functionName}`);
       };
     });
   }
+  checkStatus(requestId) {
+    return __async(this, null, function* () {
+      const { data } = yield axios__default['default'].get(`${this.endpoint}/checkStatus/${requestId}`, {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`
+        }
+      });
+      return data;
+    });
+  }
   getMetaTxStatus(requestId) {
     return __async(this, null, function* () {
       const { data } = yield axios__default['default'].get(`${this.endpoint}/getMetaTxStatus/${requestId}`, {
@@ -2261,7 +2271,7 @@ ${functionName}`);
             Authorization: `Bearer ${this.authToken}`
           }
         });
-        logger.info(status, data);
+        logger.info(`AUTHENTICATION ==> ${status} ${JSON.stringify(data)}`);
         return data.auth;
       } catch (error) {
         throw ERROR_TYPE.UNABLE_TO_CHECK_TOKEN;
