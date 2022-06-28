@@ -87,6 +87,9 @@ For running test you need to create privateKeys.json, with an array of at least 
 
 - [init()](#init)
 - [setPrivateKey()](#setPrivateKey)
+- [setMnemonicPhrase()](#setMnemonicPhrase)
+- [resetWallet()](#resetWallet)
+- [regenerateWallet()](#regenerateWallet)
 - [getAuthToken()](#getAuthToken)
 - [getApiKey()](#getApiKey)
 - [getWalletAddress()](#getWalletAddress)
@@ -119,6 +122,32 @@ Set private key after creation, to enable auth logic
 | Param      | Default value      |
 | ---------- | ------------------ |
 | privateKey | Wallet private key |
+
+---
+
+### [setMnemonicPhrase()](#setMnemonicPhrase)
+
+Set mnemonic phrase after creation, to enable auth logic
+
+#### Params
+
+| Param    | Default value          |
+| -------- | ---------------------- |
+| mnemonic | Wallet mnemonic phrase |
+
+---
+
+### [resetWallet()](#resetWallet)
+
+Reset wallet to null and delete private key
+
+---
+
+### [regenerateWallet()](#regenerateWallet)
+
+Generate new wallet after creation or after deleting previous one
+
+---
 
 ### [getAuthToken()](#getAuthToken)
 

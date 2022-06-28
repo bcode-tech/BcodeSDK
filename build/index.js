@@ -1951,10 +1951,19 @@ class PablockSDK {
   }
   setPrivateKey(privateKey) {
     this.wallet = new ethers.ethers.Wallet(privateKey);
-    logger.info("New wallet setted!");
+    logger.info("New wallet setted from private key!");
+  }
+  setMnemonicPhrase(mnemonic) {
+    this.wallet = ethers.ethers.Wallet.fromMnemonic(mnemonic);
+    logger.info("New wallet setted from mnemonic!");
   }
   resetWallet() {
     this.wallet = null;
+    logger.info("Wallet resetted!");
+  }
+  regenerateWallet() {
+    this.wallet = ethers.ethers.Wallet.createRandom();
+    logger.info("Wallet regenerated!");
   }
   isInitialized() {
     return this.initialized;

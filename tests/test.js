@@ -18,6 +18,14 @@ const env = "LOCAL";
 const apiKey = "pablock-sdk";
 const TEST_META_TX = "0x794E318E01d21e8462B1Bf5Ce729B6759Ef06dEe";
 
+const TEST_WALLET = {
+  privateKey:
+    "0x60dcbce325a230b77e46b2f697eafb29a5bdf8d2a7eb6b7763d72224e3a624cf",
+  mnemonic:
+    "news transfer speed release slide advance sheriff follow whisper parade view novel",
+  address: "0x67C4C56f9A0FF8cD6d5a798D9Ee07DBa7e0f69cF",
+};
+
 const sdk = new PablockSDK({
   apiKey: apiKey,
   privateKey: privateKeys[0],
@@ -85,17 +93,17 @@ describe("Execute meta transaction", () => {
       v: expect.any(Number),
     });
   });
-  it("should send meta transaction", async () => {
-    jest.setTimeout(25000);
-    let res = await sdk.executeTransaction(txData);
-    console.log("RES ==>", res);
-    expect(res).toMatchObject({
-      from: expect.any(String),
-      to: expect.any(String),
-      transactionHash: expect.any(String),
-      blockHash: expect.any(String),
-    });
-  });
+  // it("should send meta transaction", async () => {
+  //   jest.setTimeout(25000);
+  //   let res = await sdk.executeTransaction(txData);
+  //   console.log("RES ==>", res);
+  //   expect(res).toMatchObject({
+  //     from: expect.any(String),
+  //     to: expect.any(String),
+  //     transactionHash: expect.any(String),
+  //     blockHash: expect.any(String),
+  //   });
+  // });
   it("should request metatx async execution", async () => {
     jest.setTimeout(15000);
     let data = await sdk.executeAsyncTransaction(
@@ -159,7 +167,6 @@ describe("Pablock SDK NFT Test", () => {
         ]
       )
     );
-    console.log("TRANSACTION ==>", tx);
     expect(tx).toMatchObject({
       from: expect.any(String),
       to: expect.any(String),
@@ -225,13 +232,25 @@ describe("Pablock Hash module", () => {
   it("Buffer hash", () => {
     const file = fs.readFileSync("./README.md");
     expect(Hash.fromBuffer(file.buffer)).toBe(
-      "0x4c7b68d42d2135df5e677bcba6cecdb5dd7746de53d5d4cd5a930e19c1795be0"
+      "0x162370c0dbddf647fe99f8c7a58fa626bfeebbc283a87a658aff8be39e15226b"
     );
   });
 });
 
 describe("Pablock Wallet", () => {
   it("Reset wallet", () => {
+    sdk.resetWallet();
+    expect(sdk.getWallet()).toBe(null);
+  });
+  it("Import from privateKey", () => {
+    sdk.setPrivateKey(TEST_WALLET.privateKey);
+    expect(sdk.getWalletAddress()).toBe(TEST_WALLET.address);
+    sdk.resetWallet();
+    expect(sdk.getWallet()).toBe(null);
+  });
+  it("Import from mnemonic", () => {
+    sdk.setMnemonicPhrase(TEST_WALLET.mnemonic);
+    expect(sdk.getWalletAddress()).toBe(TEST_WALLET.address);
     sdk.resetWallet();
     expect(sdk.getWallet()).toBe(null);
   });

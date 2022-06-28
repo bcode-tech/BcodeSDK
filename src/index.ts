@@ -122,11 +122,22 @@ export class PablockSDK {
 
   setPrivateKey(privateKey: string) {
     this.wallet = new ethers.Wallet(privateKey);
-    logger.info("New wallet setted!");
+    logger.info("New wallet setted from private key!");
+  }
+  
+  setMnemonicPhrase(mnemonic: string) {
+    this.wallet =  ethers.Wallet.fromMnemonic(mnemonic);
+    logger.info("New wallet setted from mnemonic!");
   }
 
   resetWallet() {
     this.wallet = null;
+    logger.info("Wallet resetted!");
+  }
+
+  regenerateWallet(){
+    this.wallet = ethers.Wallet.createRandom();
+    logger.info("Wallet regenerated!");
   }
 
   isInitialized() {
@@ -475,33 +486,6 @@ export class PablockSDK {
       return null;
     }
   }
-
-  // async notarizeHash(
-  //   hash: string,
-  //   uri: string,
-  //   appId: string,
-  //   optionals: Optionals | null
-  // ) {
-  //   try {
-  //     const tx = await this.prepareTransaction(
-  //       {
-  //         ...PABLOCK_NOTARIZATION_OBJ,
-  //         address: this.contracts[`PABLOCK_NOTARIZATION`],
-  //       },
-  //       "notarize",
-  //       [hash, uri, this.wallet!.address, appId]
-  //     );
-
-  //     console.log("TX ==>", tx);
-
-  //     const receipt = await this.executeTransaction(tx, optionals);
-
-  //     return receipt;
-  //   } catch (err) {
-  //     logger.error(`Notarization error: ${err} `);
-  //     return null;
-  //   }
-  // }
 
   async notarizeHash(hash: string, optionals: Optionals) {
     try {
