@@ -29,7 +29,7 @@ export default [
   bundle({
     plugins: [dts()],
     output: {
-      file: `types/${name}.d.ts`,
+      file: `${name}.d.ts`,
       format: "es",
     },
   }),
