@@ -11,7 +11,7 @@ type Configuration = {
 export type SdkOptions = {
   apiKey: string;
   authToken?: string;
-  privateKey: string;
+  privateKey?: string;
   config: Configuration;
 };
 

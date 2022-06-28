@@ -1953,6 +1953,9 @@ class PablockSDK {
     this.wallet = new ethers.ethers.Wallet(privateKey);
     logger.info("New wallet setted!");
   }
+  resetWallet() {
+    this.wallet = null;
+  }
   isInitialized() {
     return this.initialized;
   }

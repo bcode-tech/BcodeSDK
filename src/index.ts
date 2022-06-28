@@ -10,18 +10,12 @@ import { getTransactionData } from "./common/utils";
 import { logger } from "./common/logger";
 
 //Constants
-import {
-  ERROR_TYPE,
-  IPFS_GATEWAY,
-  PABLOCK_NFT_OBJ,
-  PABLOCK_NOTARIZATION_OBJ,
-} from "./common/constants";
+import { ERROR_TYPE, IPFS_GATEWAY, PABLOCK_NFT_OBJ } from "./common/constants";
 
 //Abis
 import CustomERC20 from "./common/abis/CustomERC20";
 import PablockToken from "./common/abis/PablockToken";
 import PablockNFT from "./common/abis/PablockNFT";
-import PablockNotarization from "./common/abis/PablockNotarization";
 
 //Config
 import config from "./config";
@@ -44,7 +38,7 @@ const web3Abi = getWeb3Abi(w3Abi);
 
 export class PablockSDK {
   apiKey?: string;
-  wallet?: Wallet;
+  wallet?: Wallet | null;
   provider?: any;
   authToken?: string;
   env: string;
@@ -129,6 +123,10 @@ export class PablockSDK {
   setPrivateKey(privateKey: string) {
     this.wallet = new ethers.Wallet(privateKey);
     logger.info("New wallet setted!");
+  }
+
+  resetWallet() {
+    this.wallet = null;
   }
 
   isInitialized() {
@@ -567,7 +565,7 @@ export class PablockSDK {
         };
   }
 
-  async checkStatus(requestId: string){
+  async checkStatus(requestId: string) {
     const { data } = await axios.get(
       `${this.endpoint}/checkStatus/${requestId}`,
       {
@@ -685,7 +683,6 @@ export class PablockSDK {
           Authorization: `Bearer ${this.authToken}`,
         },
       });
-
 
       logger.info(`AUTHENTICATION ==> ${status} ${JSON.stringify(data)}`);
 

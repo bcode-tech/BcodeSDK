@@ -1,5 +1,5 @@
 {
-  "name": "@bcode-tech/pablock-sdk",
+  "name": "pablock-sdk",
   "version": "0.2.2",
   "description": "SDK to integrate Pablock functionalities in any system",
   "main": "build/index.js",

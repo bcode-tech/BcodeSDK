@@ -229,3 +229,10 @@ describe("Pablock Hash module", () => {
     );
   });
 });
+
+describe("Pablock Wallet", () => {
+  it("Reset wallet", () => {
+    sdk.resetWallet();
+    expect(sdk.getWallet()).toBe(null);
+  });
+});
