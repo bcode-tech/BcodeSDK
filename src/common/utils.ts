@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 const {
   keccak256,
   defaultAbiCoder,
@@ -185,6 +187,7 @@ export async function getTransactionData(
       ]
     )
   );
+  logger.info(`Digest: ${digest}`);
 
   const signature = sign(
     digest,
@@ -193,3 +196,45 @@ export async function getTransactionData(
 
   return signature;
 }
+
+// export async function getTransactionData(
+//   nonce: number,
+//   functionSignature: string,
+//   publicKey: string,
+//   privateKey: string,
+//   contract: { name: string; version: string; address: string; chainId: number }
+// ) {
+//   const messagePrefix = "\x19Ethereum Signed Message:\n";
+//   const message = keccak256(
+//     defaultAbiCoder.encode(
+//       ["uint256", "address", "bytes32"],
+//       [
+//         nonce,
+//         publicKey,
+//         keccak256(Buffer.from(functionSignature.replace("0x", ""), "hex")),
+//       ]
+//     )
+//   );
+//   const digest = keccak256(
+//     solidityPack(
+//       ["string", "bytes", "bytes32"],
+//       [
+//         messagePrefix,
+//         Buffer.from("132"),
+//         message,
+//       ]
+//     )
+//   );
+
+//   logger.info(
+//     `Message length: ${toUtf8Bytes(String(message.length)).toString()}`
+//   );
+//   logger.info(`Digest: ${digest}`);
+
+//   const signature = sign(
+//     digest,
+//     Buffer.from(privateKey.replace("0x", ""), "hex")
+//   );
+
+//   return signature;
+// }

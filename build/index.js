@@ -17,9 +17,18 @@ var w3Abi__default = /*#__PURE__*/_interopDefaultLegacy(w3Abi);
 var CryptoJS__default = /*#__PURE__*/_interopDefaultLegacy(CryptoJS);
 var QRCode__default = /*#__PURE__*/_interopDefaultLegacy(QRCode);
 
-typeof require !== "undefined" ? require : (x) => {
-  throw new Error('Dynamic require of "' + x + '" is not supported');
-};
+const { createLogger, format, transports } = require("winston");
+const logFormat = format.combine(format.timestamp(), format.printf(({ level, message, timestamp }) => {
+  return `[${level}] - ${message}`;
+}));
+const logger = createLogger({
+  level: "debug",
+  format: logFormat,
+  transports: [
+    new transports.Console()
+  ]
+});
+
 var __async$2 = (__this, __arguments, generator) => {
   return new Promise((resolve, reject) => {
     var fulfilled = (value) => {
@@ -103,22 +112,11 @@ function getTransactionData(nonce, functionSignature, publicKey, privateKey, con
         keccak256(Buffer.from(functionSignature.replace("0x", ""), "hex"))
       ]))
     ]));
+    logger.info(`Digest: ${digest}`);
     const signature = sign(digest, Buffer.from(privateKey.replace("0x", ""), "hex"));
     return signature;
   });
 }
-
-const { createLogger, format, transports } = require("winston");
-const logFormat = format.combine(format.timestamp(), format.printf(({ level, message, timestamp }) => {
-  return `[${level}] - ${message}`;
-}));
-const logger = createLogger({
-  level: "debug",
-  format: logFormat,
-  transports: [
-    new transports.Console()
-  ]
-});
 
 var PablockNFT = {
   abi: [
@@ -1801,11 +1799,11 @@ var config = {
 };
 
 function fromString$1(input) {
-  return `0x${CryptoJS__default['default'].SHA256(input).toString(CryptoJS__default['default'].enc.Hex)}`;
+  return `0x${CryptoJS__default["default"].SHA256(input).toString(CryptoJS__default["default"].enc.Hex)}`;
 }
 function fromBuffer(file) {
-  const wordArray = CryptoJS__default['default'].lib.WordArray.create(file);
-  return `0x${CryptoJS__default['default'].SHA256(wordArray).toString(CryptoJS__default['default'].enc.Hex)}`;
+  const wordArray = CryptoJS__default["default"].lib.WordArray.create(file);
+  return `0x${CryptoJS__default["default"].SHA256(wordArray).toString(CryptoJS__default["default"].enc.Hex)}`;
 }
 
 var hash = /*#__PURE__*/Object.freeze({
@@ -1814,9 +1812,6 @@ var hash = /*#__PURE__*/Object.freeze({
   fromBuffer: fromBuffer
 });
 
-typeof require !== "undefined" ? require : (x) => {
-  throw new Error('Dynamic require of "' + x + '" is not supported');
-};
 var __async$1 = (__this, __arguments, generator) => {
   return new Promise((resolve, reject) => {
     var fulfilled = (value) => {
@@ -1840,10 +1835,10 @@ var __async$1 = (__this, __arguments, generator) => {
 function fromString(input) {
   const buffer = () => __async$1(this, null, function* () {
     let enc = new TextEncoder();
-    return enc.encode(yield QRCode__default['default'].toString(input)).buffer;
+    return enc.encode(yield QRCode__default["default"].toString(input)).buffer;
   });
   const print = () => __async$1(this, null, function* () {
-    return console.log(yield QRCode__default['default'].toString(input));
+    return console.log(yield QRCode__default["default"].toString(input));
   });
   return { buffer, print };
 }
@@ -1872,9 +1867,6 @@ var __spreadValues = (a, b) => {
   return a;
 };
 var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
-typeof require !== "undefined" ? require : (x) => {
-  throw new Error('Dynamic require of "' + x + '" is not supported');
-};
 var __async = (__this, __arguments, generator) => {
   return new Promise((resolve, reject) => {
     var fulfilled = (value) => {
@@ -1898,7 +1890,7 @@ var __async = (__this, __arguments, generator) => {
 function getWeb3Abi(w3Abi2) {
   return w3Abi2;
 }
-const web3Abi = getWeb3Abi(w3Abi__default['default']);
+const web3Abi = getWeb3Abi(w3Abi__default["default"]);
 class PablockSDK {
   constructor(sdkOptions) {
     var _a, _b, _c, _d;
@@ -1930,11 +1922,11 @@ class PablockSDK {
     return __async(this, null, function* () {
       try {
         if (this.apiKey) {
-          let { status, data } = yield axios__default['default'].get(`${this.endpoint}/generateJWT/${this.apiKey}/${this.wallet.address}`);
+          let { status, data } = yield axios__default["default"].get(`${this.endpoint}/generateJWT/${this.apiKey}/${this.wallet.address}`);
           if (status === 200) {
             logger.info("Auth token received ");
             this.authToken = data.authToken;
-            this.contracts = __spreadValues(__spreadValues({}, (yield axios__default['default'].get(`${this.endpoint}/contracts`)).data), this.contracts);
+            this.contracts = __spreadValues(__spreadValues({}, (yield axios__default["default"].get(`${this.endpoint}/contracts`)).data), this.contracts);
           } else {
             logger.error(`[Init] Error: ${status}`);
             throw ERROR_TYPE.API_KEY_NOT_AUTHENTICATED;
@@ -2024,7 +2016,7 @@ class PablockSDK {
   requestTestPTK() {
     return __async(this, null, function* () {
       logger.info(`Request 10 PTK for test from ${this.wallet.address}`);
-      let { status, data } = yield axios__default['default'].get(`${this.endpoint}/faucet/${this.wallet.address}`, {
+      let { status, data } = yield axios__default["default"].get(`${this.endpoint}/faucet/${this.wallet.address}`, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
@@ -2036,7 +2028,7 @@ class PablockSDK {
   requestToken(amount, contractAddress) {
     return __async(this, null, function* () {
       logger.info(`Request ${amount} token from ${this.wallet.address}`);
-      let { status, data } = yield axios__default['default'].post(`${this.endpoint}/mintToken`, { contractAddress, to: this.wallet.address, amount }, {
+      let { status, data } = yield axios__default["default"].post(`${this.endpoint}/mintToken`, { contractAddress, to: this.wallet.address, amount }, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
@@ -2123,7 +2115,7 @@ ${functionName}`);
   executeTransaction(tx, optionals) {
     return __async(this, null, function* () {
       try {
-        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/sendRawTransaction`, __spreadValues({
+        const { status, data } = yield axios__default["default"].post(`${this.endpoint}/sendRawTransaction`, __spreadValues({
           tx
         }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
         if (status === 200) {
@@ -2142,7 +2134,7 @@ ${functionName}`);
   executeAsyncTransaction(tx, optionals) {
     return __async(this, null, function* () {
       try {
-        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/sendRawTransactionAsync`, __spreadValues({
+        const { status, data } = yield axios__default["default"].post(`${this.endpoint}/sendRawTransactionAsync`, __spreadValues({
           tx
         }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
         if (status === 200) {
@@ -2161,7 +2153,7 @@ ${functionName}`);
   notarizeHash(hash, optionals) {
     return __async(this, null, function* () {
       try {
-        const { status, data } = yield axios__default['default'].post(`${this.endpoint}/notarize`, __spreadValues({
+        const { status, data } = yield axios__default["default"].post(`${this.endpoint}/notarize`, __spreadValues({
           hash
         }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
         if (status === 200) {
@@ -2180,12 +2172,12 @@ ${functionName}`);
       let {
         status,
         data: { hash, ipfsMerkleTree }
-      } = yield axios__default['default'].get(`${this.endpoint}/checkNotarizationTree/${requestId}`, {
+      } = yield axios__default["default"].get(`${this.endpoint}/checkNotarizationTree/${requestId}`, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
       });
-      let { data: leaves } = yield axios__default['default'].get(`${IPFS_GATEWAY}/${ipfsMerkleTree}`);
+      let { data: leaves } = yield axios__default["default"].get(`${IPFS_GATEWAY}/${ipfsMerkleTree}`);
       let merkleTree = new merkletreejs.MerkleTree(leaves.map((leaf) => leaf));
       const merkleRoot = merkleTree.getHexRoot();
       const merkleProof = merkleTree.getProof(hash);
@@ -2207,7 +2199,7 @@ ${functionName}`);
   }
   checkStatus(requestId) {
     return __async(this, null, function* () {
-      const { data } = yield axios__default['default'].get(`${this.endpoint}/checkStatus/${requestId}`, {
+      const { data } = yield axios__default["default"].get(`${this.endpoint}/checkStatus/${requestId}`, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
@@ -2217,7 +2209,7 @@ ${functionName}`);
   }
   getMetaTxStatus(requestId) {
     return __async(this, null, function* () {
-      const { data } = yield axios__default['default'].get(`${this.endpoint}/getMetaTxStatus/${requestId}`, {
+      const { data } = yield axios__default["default"].get(`${this.endpoint}/getMetaTxStatus/${requestId}`, {
         headers: {
           Authorization: `Bearer ${this.authToken}`
         }
@@ -2278,7 +2270,7 @@ ${functionName}`);
   checkJWTValidity() {
     return __async(this, null, function* () {
       try {
-        let { status, data } = yield axios__default['default'].get(`${this.endpoint}/checkJWT`, {
+        let { status, data } = yield axios__default["default"].get(`${this.endpoint}/checkJWT`, {
           headers: {
             Authorization: `Bearer ${this.authToken}`
           }
@@ -2293,7 +2285,7 @@ ${functionName}`);
   generateSubJWT(address) {
     return __async(this, null, function* () {
       try {
-        let { status, data } = yield axios__default['default'].get(`${this.endpoint}/generateSubJWT/${address}`, {
+        let { status, data } = yield axios__default["default"].get(`${this.endpoint}/generateSubJWT/${address}`, {
           headers: {
             Authorization: `Bearer ${this.authToken}`
           }
@@ -2308,7 +2300,7 @@ ${functionName}`);
   }
   getAPIVersion() {
     return __async(this, null, function* () {
-      let { data } = yield axios__default['default'].get(`/getVersion`);
+      let { data } = yield axios__default["default"].get(`/getVersion`);
       return data;
     });
   }

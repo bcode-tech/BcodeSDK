@@ -1,5 +1,5 @@
 {
-  "name": "@bcode-tech/pablock-sdk",
+  "name": "pablock-sdk",
   "version": "0.2.4",
   "description": "SDK to integrate Pablock functionalities in any system",
   "main": "build/index.js",
@@ -41,6 +41,7 @@
     "@types/qrcode": "^1.4.2",
     "@types/typescript": "^2.0.0",
     "@types/web3-eth-abi": "^1.2.2",
+    "eth-crypto": "^2.3.0",
     "jest": "^26.2.2",
     "jest-config": "^26.2.2",
     "jsdoc-to-markdown": "^7.0.1",
@@ -71,8 +72,8 @@
     "ethers": "^5.4.0",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.2.27",
+    "qrcode": "^1.5.0",
     "web3-eth-abi": "^1.6.0",
-    "winston": "^3.3.3",
-    "qrcode": "^1.5.0"
+    "winston": "^3.3.3"
   }
 }
