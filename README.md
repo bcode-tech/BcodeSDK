@@ -15,7 +15,7 @@ npm install git+https://github.com/bcode-tech/bcode-sdk.git
 From npm:
 
 ```
-npm install --save bcode-sdk
+npm install --save @bcode-tech/bcode-sdk
 ```
 
 ## Usage
@@ -313,7 +313,7 @@ type Optionals = {
 async notarizeHash(hash: string, optionals: Optionals | null)
 ```
 
-### [mintPablockNFT(amount, uri, contractAddress, webhookUrl)](#mintPablockNFT)
+### [mintBcodeNFT(amount, uri, contractAddress, webhookUrl)](#mintBcodeNFT)
 
 Function for request mint of an NFT.
 
@@ -361,14 +361,14 @@ Returns Bcode API service version, just to check if the service is available
 
 ## Utility
 
-Inside the PablockSDK we had embed a set of tools to handle critic logic easily.
+Inside the BcodeSDK we had embed a set of tools to handle critic logic easily.
 
 ### Hash
 
-Hash allow the devloper to generate PablockAPI compatible hash with SHA256 algorithm.
+Hash allow the devloper to generate BcodeAPI compatible hash with SHA256 algorithm.
 
 ```js
-import { Hash } from "pablock-sdk";
+import { Hash } from "bcode-sdk";
 
 const hash = Hash.fromString("try-me");
 
@@ -377,10 +377,10 @@ const imageHash = Hash.fromBuffer(Buffer.from("try-me"));
 
 ### QRCode
 
-PablockSDK has integrate [QRCode](https://github.com/soldair/node-qrcode) library, to easy generate QRCode of string.
+BcodeSDK has integrate [QRCode](https://github.com/soldair/node-qrcode) library, to easy generate QRCode of string.
 
 ```js
-import { QRCode } from "pablock-sdk";
+import { QRCode } from "bcode-sdk";
 
 QRCode.fromString("try-me").print();
 
