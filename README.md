@@ -313,39 +313,7 @@ type Optionals = {
 async notarizeHash(hash: string, optionals: Optionals | null)
 ```
 
-### [checkBundleNotarization(requestId, returnParams)](#checkBundleNotarization)
-
-Return bundled notarization data.
-
-| Param        | Description                               |
-| ------------ | ----------------------------------------- |
-| requestId    | String id returned from notarizeHash call |
-| returnParams | Array of params                           |
-
-Example:
-
-```js
-type ReturnParam = "leaves" | "merkleRoot" | "merkleProof" | "inclusion";
-
-async checkBundledNotarization(requestId: string, returnParams: ReturnParam[])
-```
-
-### [getMetaTxStatus(requestId)](#getMetaTxStatus)
-
-Return meta transaction status, receipt, ethereum anchor tx.
-
-| Param     | Description                                          |
-| --------- | ---------------------------------------------------- |
-| requestId | String id returned from executeAsyncTransaction call |
-
-Example:
-
-```js
-
-async getMetaTxRequest(requestId: string)
-```
-
-### [mintBcodeNFT(amount, uri, contractAddress, webhookUrl)](#mintBcodeNFT)
+### [mintPablockNFT(amount, uri, contractAddress, webhookUrl)](#mintPablockNFT)
 
 Function for request mint of an NFT.
 
@@ -390,5 +358,33 @@ Function that check if fetched JWT is still valid
 ### [getAPIVersion()](#getAPIVersion)
 
 Returns Bcode API service version, just to check if the service is available
+
+## Utility
+
+Inside the PablockSDK we had embed a set of tools to handle critic logic easily.
+
+### Hash
+
+Hash allow the devloper to generate PablockAPI compatible hash with SHA256 algorithm.
+
+```js
+import { Hash } from "pablock-sdk";
+
+const hash = Hash.fromString("try-me");
+
+const imageHash = Hash.fromBuffer(Buffer.from("try-me"));
+```
+
+### QRCode
+
+PablockSDK has integrate [QRCode](https://github.com/soldair/node-qrcode) library, to easy generate QRCode of string.
+
+```js
+import { QRCode } from "pablock-sdk";
+
+QRCode.fromString("try-me").print();
+
+QRCode.fromString("try-me").buffer();
+```
 
 Made with ❤️ by BCode
