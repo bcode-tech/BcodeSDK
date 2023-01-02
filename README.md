@@ -1,6 +1,6 @@
-# Pablock SDK
+# Bcode SDK
 
-Pablock SDK is a set of tool to help developer interact with Pablock API.
+Bcode SDK is a set of tool to help developer interact with Bcode API.
 
 Written in Typescript and tested with Jest
 
@@ -9,13 +9,13 @@ Written in Typescript and tested with Jest
 From source code:
 
 ```
-npm install git+https://github.com/bcode-tech/pablock-sdk.git
+npm install git+https://github.com/bcode-tech/bcode-sdk.git
 ```
 
 From npm:
 
 ```
-npm install --save pablock-sdk
+npm install --save bcode-sdk
 ```
 
 ## Usage
@@ -23,11 +23,11 @@ npm install --save pablock-sdk
 First you need to call the constructor, if you want to generate a new Wallet every time you can implemented like this:
 
 ```
-const { PablockSDK } = require("pablock-sdk")
+const { BcodeSDK } = require("bcode-sdk")
 
 (async () => {
 
-    const sdk = new PablockSDK({
+    const sdk = new BcodeSDK({
         apiKey: <your-api-key>,
         config: { env: <environment>, debugMode: true },
     });
@@ -39,11 +39,11 @@ const { PablockSDK } = require("pablock-sdk")
 Otherwise if you already have a private key that you want to use you can use:
 
 ```
-const { PablockSDK } = require("pablock-sdk")
+const { BcodeSDK } = require("bcode-sdk")
 
 (async () => {
 
-    const sdk = new PablockSDK({
+    const sdk = new BcodeSDK({
         apiKey: <your-api-key>,
         privateKey: <private-key>,
         config: { env: <environment>, debugMode: true },
@@ -56,11 +56,11 @@ const { PablockSDK } = require("pablock-sdk")
 It's possible to change private key later:
 
 ```
-const { PablockSDK } = require("pablock-sdk")
+const { BcodeSDK } = require("bcode-sdk")
 
 (async () => {
 
-    const sdk = new PablockSDK({
+    const sdk = new BcodeSDK({
         apiKey: <your-api-key>,
         privateKey: <private-key>,
         config: { env: <environment>, debugMode: true },
@@ -93,7 +93,7 @@ For running test you need to create privateKeys.json, with an array of at least 
 - [getAuthToken()](#getAuthToken)
 - [getApiKey()](#getApiKey)
 - [getWalletAddress()](#getWalletAddress)
-- [getPablockTokenBalance()](#getPablockTokenBalance)
+- [getBcodeTokenBalance()](#getBcodeTokenBalance)
 - [getMaticBalance()](#getMaticBalance)
 - [requestToken()](#requestToken)
 - [prepareTransaction()](#prepareTransaction)
@@ -101,8 +101,8 @@ For running test you need to create privateKeys.json, with an array of at least 
 - [executeAsyncTransaction()](#executeAsyncTransaction)
 - [notarizeHash()](#notarizeHash)
 - [checkBundleNotarization()](#checkBundleNotarization)
-- [mintPablockNFT()](#mintPablockNFT)
-- [sendPablockNFT()](#sendPablockNFT)
+- [mintBcodeNFT()](#mintBcodeNFT)
+- [sendBcodeNFT()](#sendBcodeNFT)
 - [getOwnedNFT()](#getOwnedNFT)
 - [checkJWTValidity()](#checkJWTValidity)
 - [getAPIVersion()](#getAPIVersion)
@@ -151,7 +151,7 @@ Generate new wallet after creation or after deleting previous one
 
 ### [getAuthToken()](#getAuthToken)
 
-Returns authToken received from Pablock API to authenticate call, it depends on API Key used.
+Returns authToken received from Bcode API to authenticate call, it depends on API Key used.
 
 ---
 
@@ -165,9 +165,9 @@ Returns apiKey used in contructor, just for reference.
 
 Returns address for generated wallet.
 
-### [getPablockTokenBalance(address)](#getPablockTokenBalance)
+### [getBcodeTokenBalance(address)](#getBcodeTokenBalance)
 
-Return Pablock Token (PTK) balance of current wallet or the specified address.
+Return Bcode Token (PTK) balance of current wallet or the specified address.
 
 #### Params
 
@@ -204,11 +204,11 @@ Function for request minting of CustomERC20 token.
 
 Prepare transaction that need to be executed through meta transaction.
 
-| Param        | Default value                   | Description                                   |
-| ------------ | ------------------------------- | --------------------------------------------- |
-| contractObj  | Array with Pablock NFT Contract | Array of interested contract addresses        |
-| functionName | Current user address            | Wallet address of NFT owner                   |
-| params       | Array                           | Array of original prams for contract function |
+| Param        | Default value                 | Description                                   |
+| ------------ | ----------------------------- | --------------------------------------------- |
+| contractObj  | Array with Bcode NFT Contract | Array of interested contract addresses        |
+| functionName | Current user address          | Wallet address of NFT owner                   |
+| params       | Array                         | Array of original prams for contract function |
 
 Example:
 
@@ -345,28 +345,28 @@ Example:
 async getMetaTxRequest(requestId: string)
 ```
 
-### [mintPablockNFT(amount, uri, contractAddress, webhookUrl)](#mintPablockNFT)
+### [mintBcodeNFT(amount, uri, contractAddress, webhookUrl)](#mintBcodeNFT)
 
 Function for request mint of an NFT.
 
-| Param          | Default value        | Description                                         |
-| -------------- | -------------------- | --------------------------------------------------- |
-| amount         | none                 | Amount of NFT to mint                               |
-| uri            | none                 | URI of NFT resources                                |
-| contractAddres | Pablock NFT Contract | Address of CustomNFT contract                       |
-| webhookUrl     | null                 | URL of webhook endpoint on which receive a response |
+| Param          | Default value      | Description                                         |
+| -------------- | ------------------ | --------------------------------------------------- |
+| amount         | none               | Amount of NFT to mint                               |
+| uri            | none               | URI of NFT resources                                |
+| contractAddres | Bcode NFT Contract | Address of CustomNFT contract                       |
+| webhookUrl     | null               | URL of webhook endpoint on which receive a response |
 
 ---
 
-### [sendPablockNFT(to, tokenId, deadline, contractAddress)](#sendPablockNFT)
+### [sendBcodeNFT(to, tokenId, deadline, contractAddress)](#sendBcodeNFT)
 
-Function for send NFT. It has a built-in permit request to allow Pablock to transfer NFT for user wallet.
+Function for send NFT. It has a built-in permit request to allow Bcode to transfer NFT for user wallet.
 
-| Param           | Default value        | Description                   |
-| --------------- | -------------------- | ----------------------------- |
-| to              | none                 | Receiver of NFT               |
-| tokenId         | none                 | TokenID of NFT to transfer    |
-| contractAddress | Pablock NFT Contract | Address of CustomNFT contract |
+| Param           | Default value      | Description                   |
+| --------------- | ------------------ | ----------------------------- |
+| to              | none               | Receiver of NFT               |
+| tokenId         | none               | TokenID of NFT to transfer    |
+| contractAddress | Bcode NFT Contract | Address of CustomNFT contract |
 
 ---
 
@@ -374,10 +374,10 @@ Function for send NFT. It has a built-in permit request to allow Pablock to tran
 
 Function that returns all NFT for the passes contract addresses for the given owner address.
 
-| Param             | Default value                   | Description                            |
-| ----------------- | ------------------------------- | -------------------------------------- |
-| contractAddresses | Array with Pablock NFT Contract | Array of interested contract addresses |
-| ownerAddress      | Current user address            | Wallet address of NFT owner            |
+| Param             | Default value                 | Description                            |
+| ----------------- | ----------------------------- | -------------------------------------- |
+| contractAddresses | Array with Bcode NFT Contract | Array of interested contract addresses |
+| ownerAddress      | Current user address          | Wallet address of NFT owner            |
 
 ---
 
@@ -389,6 +389,6 @@ Function that check if fetched JWT is still valid
 
 ### [getAPIVersion()](#getAPIVersion)
 
-Returns Pablock API service version, just to check if the service is available
+Returns Bcode API service version, just to check if the service is available
 
 Made with ❤️ by BCode

@@ -1,6 +1,6 @@
 import config from "../config";
-import PablockNFT from "./abis/PablockNFT";
-import PablockNotarization from "./abis/PablockNotarization";
+import BcodeNFT from "./abis/BcodeNFT";
+import BcodeNotarization from "./abis/BcodeNotarization";
 
 export const IPFS_GATEWAY = "https://gateway.pinata.cloud/ipfs";
 
@@ -12,14 +12,14 @@ export const ERROR_TYPE = {
   UNABLE_TO_CHECK_TOKEN: "Unable to check token",
 };
 
-export const PABLOCK_NFT_OBJ = {
-  abi: PablockNFT.abi,
+export const BCODE_NFT_OBJ = {
+  abi: BcodeNFT.abi,
   name: "PablockNFT",
   version: "0.2.2",
 };
 
-export const PABLOCK_NOTARIZATION_OBJ = {
-  abi: PablockNotarization.abi,
+export const BCODE_NOTARIZATION_OBJ = {
+  abi: BcodeNotarization.abi,
   name: "PablockNotarization",
   version: "0.1.1",
 };

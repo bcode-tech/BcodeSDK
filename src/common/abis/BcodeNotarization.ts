@@ -4,7 +4,7 @@ export default {
       inputs: [
         {
           internalType: "address",
-          name: "_pablockTokenAddress",
+          name: "_bcodeTokenAddress",
           type: "address",
         },
         {

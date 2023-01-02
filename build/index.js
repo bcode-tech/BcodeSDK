@@ -118,7 +118,7 @@ function getTransactionData(nonce, functionSignature, publicKey, privateKey, con
   });
 }
 
-var PablockNFT = {
+var BcodeNFT = {
   abi: [
     {
       inputs: [
@@ -134,7 +134,7 @@ var PablockNFT = {
         },
         {
           internalType: "address",
-          name: "_pablockTokenAddress",
+          name: "_bcodeTokenAddress",
           type: "address"
         },
         {
@@ -682,8 +682,8 @@ const ERROR_TYPE = {
   UNABLE_TO_GENERATE_SUB_JWT: "Unable to generate subJWT",
   UNABLE_TO_CHECK_TOKEN: "Unable to check token"
 };
-const PABLOCK_NFT_OBJ = {
-  abi: PablockNFT.abi,
+const BCODE_NFT_OBJ = {
+  abi: BcodeNFT.abi,
   name: "PablockNFT",
   version: "0.2.2"
 };
@@ -714,7 +714,7 @@ var CustomERC20 = {
         },
         {
           internalType: "address",
-          name: "_pablockTokenAddress",
+          name: "_bcodeTokenAddress",
           type: "address"
         }
       ],
@@ -1274,7 +1274,7 @@ var CustomERC20 = {
   ]
 };
 
-var PablockToken = {
+var BcodeToken = {
   abi: [
     {
       inputs: [
@@ -1891,7 +1891,7 @@ function getWeb3Abi(w3Abi2) {
   return w3Abi2;
 }
 const web3Abi = getWeb3Abi(w3Abi__default["default"]);
-class PablockSDK {
+class BcodeSDK {
   constructor(sdkOptions) {
     var _a, _b, _c, _d;
     this.initialized = false;
@@ -1915,7 +1915,7 @@ class PablockSDK {
     } else {
       this.wallet = ethers.ethers.Wallet.createRandom();
     }
-    this.contracts = __spreadValues({}, sdkOptions.config.pablockContracts);
+    this.contracts = __spreadValues({}, sdkOptions.config.bcodeContracts);
     logger.info("Finished initialization");
   }
   init() {
@@ -1960,7 +1960,7 @@ class PablockSDK {
   isInitialized() {
     return this.initialized;
   }
-  getPablockContracts() {
+  getBcodeContracts() {
     return this.contracts;
   }
   getAuthToken() {
@@ -1985,10 +1985,10 @@ class PablockSDK {
   getPrivateKey() {
     return this.wallet.privateKey;
   }
-  getPablockTokenBalance() {
+  getBcodeTokenBalance() {
     return __async(this, arguments, function* (address = this.wallet.address) {
-      const pablockToken = new ethers.ethers.Contract(this.contracts[`PABLOCK_TOKEN_ADDRESS`], PablockToken.abi, this.provider);
-      const balance = parseInt(ethers.ethers.utils.formatEther(yield pablockToken.balanceOf(address)));
+      const bcodeToken = new ethers.ethers.Contract(this.contracts[`PABLOCK_TOKEN_ADDRESS`], BcodeToken.abi, this.provider);
+      const balance = parseInt(ethers.ethers.utils.formatEther(yield bcodeToken.balanceOf(address)));
       logger.info(`User has ${balance} PTK`);
       return balance;
     });
@@ -2001,7 +2001,7 @@ class PablockSDK {
         logger.info(`User has ${balance} ${yield customToken.name()}`);
         return balance;
       } catch (err) {
-        logger.error("[Pablock API] Custom token balance: ", err);
+        logger.error("[Bcode API] Custom token balance: ", err);
         throw ERROR_TYPE.CONTRACT_ERROR;
       }
     });
@@ -2037,24 +2037,12 @@ class PablockSDK {
       return data;
     });
   }
-  mintPablockNFT(amount, uri, optionals) {
+  sendBcodeNFT(to, tokenId, optionals) {
     return __async(this, null, function* () {
       try {
-        const tx = yield this.prepareTransaction(__spreadProps(__spreadValues({}, PABLOCK_NFT_OBJ), { address: this.contracts[`PABLOCK_NFT`] }), "mintToken", [this.wallet.address, amount, uri]);
-        const receipt = yield this.executeTransaction(tx, optionals);
-        return receipt;
-      } catch (err) {
-        logger.error(`NFTMint error: ${err} `);
-        return null;
-      }
-    });
-  }
-  sendPablockNFT(to, tokenId, optionals) {
-    return __async(this, null, function* () {
-      try {
-        const tx = yield this.prepareTransaction(__spreadProps(__spreadValues({}, PABLOCK_NFT_OBJ), { address: this.contracts[`PABLOCK_NFT`] }), "transferFrom", [this.wallet.address, to, tokenId]);
-        const receipt = yield this.executeTransaction(tx, optionals);
-        return receipt;
+        const tx = yield this.prepareTransaction(__spreadProps(__spreadValues({}, BCODE_NFT_OBJ), { address: this.contracts[`PABLOCK_NFT`] }), "transferFrom", [this.wallet.address, to, tokenId]);
+        const requestId = yield this.executeAsyncTransaction(tx, optionals);
+        return requestId;
       } catch (err) {
         logger.error(`NFTTransfer error: ${err} `);
         return null;
@@ -2110,25 +2098,6 @@ ${functionName}`);
         s: `0x${s.toString("hex")}`,
         v
       };
-    });
-  }
-  executeTransaction(tx, optionals) {
-    return __async(this, null, function* () {
-      try {
-        const { status, data } = yield axios__default["default"].post(`${this.endpoint}/sendRawTransaction`, __spreadValues({
-          tx
-        }, optionals), { headers: { Authorization: `Bearer ${this.authToken}` } });
-        if (status === 200) {
-          logger.info("[Execute Transaction] Success");
-          return data.tx;
-        } else {
-          logger.info(`[Execute Transaction] Receive status: ${status}`);
-          return null;
-        }
-      } catch (err) {
-        logger.error(`[Execute Transaction] Error: ${err}`);
-        return null;
-      }
     });
   }
   executeAsyncTransaction(tx, optionals) {
@@ -2251,7 +2220,7 @@ ${functionName}`);
     return __async(this, arguments, function* (contractAddresses, ownerAddress = this.wallet.address) {
       let tokenOfOwner = {};
       for (const addr of contractAddresses) {
-        let contract = new ethers.ethers.Contract(addr, PablockNFT.abi, this.wallet.connect(this.provider));
+        let contract = new ethers.ethers.Contract(addr, BcodeNFT.abi, this.wallet.connect(this.provider));
         let balance = yield contract.balanceOf(ownerAddress);
         logger.info(`User has ${balance} NFTs in ${addr} contract`);
         let tokenIds = [];
@@ -2306,7 +2275,7 @@ ${functionName}`);
   }
 }
 
+exports.BcodeSDK = BcodeSDK;
 exports.Hash = hash;
-exports.PablockSDK = PablockSDK;
 exports.QRCode = qrcode;
 //# sourceMappingURL=index.js.map

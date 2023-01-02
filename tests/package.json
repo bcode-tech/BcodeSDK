@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "pablock-sdk": "file:.."
+    "bcode-sdk": "file:.."
   }
 }

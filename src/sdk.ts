@@ -13,7 +13,6 @@ import { logger } from "./common/logger";
 import { ERROR_TYPE, IPFS_GATEWAY, BCODE_NFT_OBJ } from "./common/constants";
 
 //Abis
-import CustomERC20 from "./common/abis/CustomERC20";
 import BcodeToken from "./common/abis/BcodeToken";
 import BcodeNFT from "./common/abis/BcodeNFT";
 
@@ -36,7 +35,7 @@ function getWeb3Abi(w3Abi: unknown): AbiCoder {
 
 const web3Abi = getWeb3Abi(w3Abi);
 
-export class BcodeSDK {
+export default class BcodeSDK {
   apiKey?: string;
   wallet?: Wallet | null;
   provider?: any;
@@ -124,9 +123,14 @@ export class BcodeSDK {
     this.wallet = new ethers.Wallet(privateKey);
     logger.info("New wallet setted from private key!");
   }
-  
+
+  connect(provider: ethers.providers.Provider) {
+    this.provider = provider;
+    this.wallet?.connect(this.provider);
+  }
+
   setMnemonicPhrase(mnemonic: string) {
-    this.wallet =  ethers.Wallet.fromMnemonic(mnemonic);
+    this.wallet = ethers.Wallet.fromMnemonic(mnemonic);
     logger.info("New wallet setted from mnemonic!");
   }
 
@@ -135,7 +139,7 @@ export class BcodeSDK {
     logger.info("Wallet resetted!");
   }
 
-  regenerateWallet(){
+  regenerateWallet() {
     this.wallet = ethers.Wallet.createRandom();
     logger.info("Wallet regenerated!");
   }
@@ -185,10 +189,11 @@ export class BcodeSDK {
     return this.wallet!.address;
   }
 
-  getWallet() {
-    return this.wallet;
-  }
-
+  /**
+   * Return wallet private key
+   *
+   * @returns privateKey
+   */
   getPrivateKey() {
     return this.wallet!.privateKey;
   }
@@ -212,29 +217,6 @@ export class BcodeSDK {
 
     logger.info(`User has ${balance} PTK`);
     return balance;
-  }
-
-  async getTokenBalance(
-    contractAddress = config[`CUSTOM_TOKEN_ADDRESS_${this.env}`],
-    address = this.wallet!.address
-  ) {
-    try {
-      const customToken = new ethers.Contract(
-        contractAddress,
-        CustomERC20.abi,
-        this.provider
-      );
-
-      const balance = parseInt(
-        ethers.utils.formatEther(await customToken.balanceOf(address))
-      );
-
-      logger.info(`User has ${balance} ${await customToken.name()}`);
-      return balance;
-    } catch (err) {
-      logger.error("[Bcode API] Custom token balance: ", err);
-      throw ERROR_TYPE.CONTRACT_ERROR;
-    }
   }
 
   /**
@@ -278,21 +260,23 @@ export class BcodeSDK {
    * @returns request response
    */
   async requestToken(amount: number, contractAddress: string) {
-    logger.info(`Request ${amount} token from ${this.wallet!.address}`);
+    if (this.env === "MUMBAI") {
+      logger.info(`Request ${amount} token from ${this.wallet!.address}`);
 
-    let { status, data } = await axios.post(
-      `${this.endpoint}/mintToken`,
-      { contractAddress, to: this.wallet!.address, amount },
-      {
-        headers: {
-          Authorization: `Bearer ${this.authToken}`,
-        },
-      }
-    );
+      let { status, data } = await axios.post(
+        `${this.endpoint}/mintToken`,
+        { contractAddress, to: this.wallet!.address, amount },
+        {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`,
+          },
+        }
+      );
 
-    logger.info(`Request token status: ${status}`);
-
-    return data;
+      logger.info(`Request token status: ${status}`);
+    } else {
+      logger.error("[BcodeSDK] Token can only be requested for MUMBAI network");
+    }
   }
 
   /**
@@ -305,26 +289,22 @@ export class BcodeSDK {
    * @param webhookUrl
    * @returns
    */
-  // async mintBcodeNFT(
-  //   amount: number,
-  //   uri: string,
-  //   optionals: Optionals
-  // ) {
-  //   try {
-  //     const tx: MetaTransaction = await this.prepareTransaction(
-  //       { ...BCODE_NFT_OBJ, address: this.contracts[`PABLOCK_NFT`] },
-  //       "mintToken",
-  //       [this.wallet!.address, amount, uri]
-  //     );
+  async mintBcodeNFT(amount: number, uri: string, optionals: Optionals) {
+    try {
+      const tx: MetaTransaction = await this.prepareTransaction(
+        { ...BCODE_NFT_OBJ, address: this.contracts[`PABLOCK_NFT`] },
+        "mintToken",
+        [this.wallet!.address, amount, uri]
+      );
 
-  //     const requestId = await this.executeAsyncTransaction(tx, optionals);
+      const receipt = await this.executeTransaction(tx, optionals);
 
-  //     return requestId;
-  //   } catch (err) {
-  //     logger.error(`NFTMint error: ${err} `);
-  //     return null;
-  //   }
-  // }
+      return receipt;
+    } catch (err) {
+      logger.error(`NFTMint error: ${err} `);
+      return null;
+    }
+  }
 
   /**
    * This function set allowance and permit Bcode Address to transfer the NFT to the set receiver address
@@ -335,11 +315,7 @@ export class BcodeSDK {
    * @param contractAddress
    * @returns
    */
-  async sendBcodeNFT(
-    to: string,
-    tokenId: number,
-    optionals: Optionals 
-  ) {
+  async sendBcodeNFT(to: string, tokenId: number, optionals: Optionals) {
     try {
       const tx: MetaTransaction = await this.prepareTransaction(
         { ...BCODE_NFT_OBJ, address: this.contracts[`PABLOCK_NFT`]! },
@@ -347,15 +323,25 @@ export class BcodeSDK {
         [this.wallet!.address, to, tokenId]
       );
 
-      const requestId = await this.executeAsyncTransaction(tx, optionals);
+      const receipt = await this.executeTransaction(tx, optionals);
 
-      return requestId;
+      return receipt;
     } catch (err) {
       logger.error(`NFTTransfer error: ${err} `);
       return null;
     }
   }
 
+  /**
+   * This function allow the creation of a meta transaction compatible signature.
+   * The result of this function needs to be passed to executeTransaction
+   *
+   * @param contractObj
+   * @param functionName
+   * @param params
+   * @param optionals
+   * @returns Transactin Object
+   */
   async prepareTransaction(
     contractObj: ContractStruct,
     functionName: string,
@@ -440,30 +426,31 @@ export class BcodeSDK {
     };
   }
 
-  // async executeTransaction(tx: MetaTransaction, optionals: Optionals | null) {
-  //   try {
-  //     const { status, data } = await axios.post(
-  //       `${this.endpoint}/sendRawTransaction`,
-  //       {
-  //         tx,
-  //         ...optionals,
-  //       },
-  //       { headers: { Authorization: `Bearer ${this.authToken}` } }
-  //     );
-  //     if (status === 200) {
-  //       logger.info("[Execute Transaction] Success");
-  //       return data.tx;
-  //     } else {
-  //       logger.info(`[Execute Transaction] Receive status: ${status}`);
-  //       return null;
-  //     }
-  //   } catch (err) {
-  //     logger.error(`[Execute Transaction] Error: ${err}`);
-  //     return null;
-  //   }
-  // }
+  /**
+   * Send meta transaction signature to Bcode API to be processed.
+   *
+   * @param tx
+   * @param optionals
+   * @returns Request id
+   */
+  async executeTransaction(
+    tx: MetaTransaction,
+    optionals: Optionals
+  ): Promise<string | null> {
+    return await this.executeAsyncTransaction(tx, optionals);
+  }
 
-  async executeAsyncTransaction(tx: MetaTransaction, optionals: Optionals) {
+  /**
+   * Send meta transaction signature to Bcode API to be processed.
+   *
+   * @param tx
+   * @param optionals
+   * @returns Request id
+   */
+  async executeAsyncTransaction(
+    tx: MetaTransaction,
+    optionals: Optionals
+  ): Promise<string | null> {
     try {
       const { status, data } = await axios.post(
         `${this.endpoint}/sendRawTransactionAsync`,
@@ -487,6 +474,13 @@ export class BcodeSDK {
     }
   }
 
+  /**
+   * Request hash notarization to Bcode API
+   *
+   * @param hash
+   * @param optionals
+   * @returns Request id
+   */
   async notarizeHash(hash: string, optionals: Optionals) {
     try {
       const { status, data } = await axios.post(
@@ -508,6 +502,13 @@ export class BcodeSDK {
     }
   }
 
+  /**
+   * Check status of a notarization merkle tree data based on requested id
+   *
+   * @param requestId
+   * @param returnParams
+   * @returns
+   */
   async checkBundledNotarization(
     requestId: string,
     returnParams: ReturnParam[]
@@ -549,6 +550,12 @@ export class BcodeSDK {
         };
   }
 
+  /**
+   * Check status of a notarization based on requested id
+   *
+   * @param requestId
+   * @returns
+   */
   async checkStatus(requestId: string) {
     const { data } = await axios.get(
       `${this.endpoint}/checkStatus/${requestId}`,
@@ -562,7 +569,13 @@ export class BcodeSDK {
     return data;
   }
 
-  async getMetaTxStatus(requestId: string) {
+  /**
+   * Check status of a meta transaction based on requested id
+   *
+   * @param requestId
+   * @returns
+   */
+  async checkMetaTxStatus(requestId: string) {
     const { data } = await axios.get(
       `${this.endpoint}/getMetaTxStatus/${requestId}`,
       {
@@ -575,6 +588,12 @@ export class BcodeSDK {
     return data;
   }
 
+  /**
+   * Build and return ethers Contract object
+   * @param address
+   * @param abi
+   * @returns ethers.Contract object
+   */
   getContract(address: string, abi: any[]) {
     return new ethers.Contract(
       address,
@@ -583,6 +602,12 @@ export class BcodeSDK {
     );
   }
 
+  /**
+   * Return nonce of meta transaction contract, different from blockchain nonce
+   *
+   * @param address
+   * @returns
+   */
   async getNonce(address: string) {
     const metaTxContract = this.getContract(
       this.contracts[`PABLOCK_META_TRANSACTION`],
@@ -635,7 +660,7 @@ export class BcodeSDK {
       let balance = await contract.balanceOf(ownerAddress);
 
       logger.info(`User has ${balance} NFTs in ${addr} contract`);
-      let tokenIds: {tokenId: string; tokenURI: string}[]= [];
+      let tokenIds: { tokenId: string; tokenURI: string }[] = [];
       for (const i of range(balance)) {
         const tokenId = await contract.tokenOfOwnerByIndex(ownerAddress, i);
 
@@ -711,6 +736,3 @@ export class BcodeSDK {
     return data;
   }
 }
-
-export * as Hash from "./modules/hash"
-export * as QRCode from "./modules/qrcode"

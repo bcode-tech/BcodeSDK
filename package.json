@@ -1,7 +1,7 @@
 {
-  "name": "pablock-sdk",
+  "name": "@bcode-tech/bcode-sdk",
   "version": "0.2.4",
-  "description": "SDK to integrate Pablock functionalities in any system",
+  "description": "SDK to integrate Bcode functionalities in any system",
   "main": "build/index.js",
   "types": "types/index.d.ts",
   "module": "build/index.es.js",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@gitlab.com/bcode-tech/pablock-sdk.git"
+    "url": "git+ssh://git@gitlab.com/bcode-tech/bcode-sdk.git"
   },
   "keywords": [
     "sdk",
@@ -26,9 +26,9 @@
   "author": "BCode srl",
   "license": "ISC",
   "bugs": {
-    "url": "https://gitlab.com/bcode-tech/pablock-sdk/issues"
+    "url": "https://gitlab.com/bcode-tech/bcode-sdk/issues"
   },
-  "homepage": "https://gitlab.com/bcode-tech/pablock-sdk#readme",
+  "homepage": "https://gitlab.com/bcode-tech/bcode-sdk#readme",
   "devDependencies": {
     "@lopatnov/rollup-plugin-uglify": "^2.1.0",
     "@rollup/plugin-json": "^4.1.0",

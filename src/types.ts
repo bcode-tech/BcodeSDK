@@ -5,7 +5,7 @@ type Configuration = {
   debugMode: boolean | false;
   endpoint?: string;
   rpcProvider?: string;
-  pablockContracts?: PablockContractsObj | {};
+  bcodeContracts?: BcodeContractsObj | {};
 };
 
 export type SdkOptions = {
@@ -45,11 +45,11 @@ export type ReturnParam =
   | "inclusion"
   | "hash";
 
-type PablockContracts =
+type BcodeContracts =
   | "PABLOCK_TOKEN_ADDRESS"
   | "PABLOCK_META_TRANSACTION"
   | "PABLOCK_NOTARIZATION"
   | "PABLOCK_NFT"
   | "PABLOCK_MULTISIGN_FACTORY";
 
-export type PablockContractsObj = { [key in PablockContracts]: string };
+export type BcodeContractsObj = { [key in BcodeContracts]: string };
