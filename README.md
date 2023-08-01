@@ -387,4 +387,4 @@ QRCode.fromString("try-me").print();
 QRCode.fromString("try-me").buffer();
 ```
 
-Made with ❤️ by BCode
+Made with ❤️ by Bcode
