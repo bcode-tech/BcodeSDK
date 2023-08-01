@@ -3,7 +3,7 @@
   "version": "0.2.6",
   "description": "SDK to integrate Bcode functionalities in any system",
   "main": "build/index.js",
-  "types": "types/index.d.ts",
+  "types": "types/build/index.d.ts",
   "module": "build/index.es.js",
   "typedocMain": "src/index.ts",
   "scripts": {
