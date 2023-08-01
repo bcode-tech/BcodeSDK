@@ -449,7 +449,7 @@ export default class BcodeSDK {
    */
   async executeAsyncTransaction(
     tx: MetaTransaction,
-    optionals: Optionals
+    optionals?: Optionals
   ): Promise<string | null> {
     try {
       const { status, data } = await axios.post(
@@ -481,7 +481,7 @@ export default class BcodeSDK {
    * @param optionals
    * @returns Request id
    */
-  async notarizeHash(hash: string, optionals: Optionals) {
+  async notarizeHash(hash: string, optionals?: Optionals) {
     try {
       const { status, data } = await axios.post(
         `${this.endpoint}/notarize`,
