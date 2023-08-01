@@ -23,7 +23,7 @@ npm install --save @bcode-tech/bcode-sdk
 First you need to call the constructor, if you want to generate a new Wallet every time you can implemented like this:
 
 ```
-const { BcodeSDK } = require("bcode-sdk")
+const { BcodeSDK } = require("@bcode-tech/bcode-sdk")
 
 (async () => {
 
@@ -39,7 +39,7 @@ const { BcodeSDK } = require("bcode-sdk")
 Otherwise if you already have a private key that you want to use you can use:
 
 ```
-const { BcodeSDK } = require("bcode-sdk")
+const { BcodeSDK } = require("@bcode-tech/bcode-sdk")
 
 (async () => {
 
@@ -56,7 +56,7 @@ const { BcodeSDK } = require("bcode-sdk")
 It's possible to change private key later:
 
 ```
-const { BcodeSDK } = require("bcode-sdk")
+const { BcodeSDK } = require("@bcode-tech/bcode-sdk")
 
 (async () => {
 
@@ -387,4 +387,4 @@ QRCode.fromString("try-me").print();
 QRCode.fromString("try-me").buffer();
 ```
 
-Made with ❤️ by BCode
+Made with ❤️ by Bcode
