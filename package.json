@@ -1,6 +1,6 @@
 {
   "name": "@bcode-tech/bcode-sdk",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "SDK to integrate Bcode functionalities in any system",
   "main": "build/index.js",
   "types": "types/index.d.ts",
